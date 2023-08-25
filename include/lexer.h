@@ -1,33 +1,41 @@
 #ifndef LEXER_H
 #define LEXER_H
-typedef struct lexer {
-	char* source;
-	char* current;
+typedef struct lexer
+{
+	char *source;
+	char *current;
 	size_t size;
 } LEXER;
 
-typedef enum {
+typedef enum
+{
 	BEGIN,
 	END,
+	DECLR,
+	COLON,
 	ASSIGN,
 	LEFT_PAREN,
 	RIGHT_PAREN,
+	LEFT_BRACKET,
+	RIGHT_BRACKET,
+	STATIC_TYPE,
+	RETRUN,
 	LINE_TERM,
 	IDENTIFIER
 } TOKEN_TYPE;
 
-typedef struct {
+typedef struct
+{
 	TOKEN_TYPE type;
-	char* lexeme;
+	char *lexeme;
 } TOKEN;
 
-LEXER* init(char* source);
-LEXER* init_from_file(char* path);
-char advance(LEXER* lexer);
-char peek(LEXER* lexer);
-void free_lexer(LEXER* lexer);
-TOKEN* get_token(LEXER* lexer);
-char* read_file(char* path);
+LEXER *init(char *source);
+LEXER *init_from_file(char *path);
+char advance(LEXER *lexer);
+char peek(LEXER *lexer);
+void free_lexer(LEXER *lexer);
+TOKEN *get_token(LEXER *lexer);
+char *read_file(char *path);
 
 #endif
-

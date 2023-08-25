@@ -1,4 +1,9 @@
-main:
+fun main(argc: int, argv: string[]): int
+DECLR
+	x: int;
+	y: int;
 BEGIN
-	x := 0;
+	x := 69;
+	y := 2;
+	return x + y;
 END
