@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -6,10 +7,16 @@
 LEXER* init(char* source) {
 	LEXER* lexer = malloc(sizeof(LEXER));
 	lexer->size = strlen(source);
-	lexer->source = malloc(lexer->size * sizeof(char));
+	lexer->source = source;
 	lexer->current = lexer->source;
 	strcpy(lexer->source, source);
 	return lexer;
+}
+
+LEXER* init_from_file(char* path) {
+	char* source = read_file(path);
+	return init(source);
+
 }
 
 char advance(LEXER* lexer) {
@@ -61,5 +68,10 @@ void free_lexer(LEXER* lexer) {
 	free(lexer->source);
 	lexer->current = NULL;
 	free(lexer);
+}
+
+char* read_file(char* path) {
+	// TODO: Read file and allocate contents to heap
+	return NULL;
 }
 

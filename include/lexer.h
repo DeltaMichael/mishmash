@@ -22,10 +22,12 @@ typedef struct {
 } TOKEN;
 
 LEXER* init(char* source);
+LEXER* init_from_file(char* path);
 char advance(LEXER* lexer);
 char peek(LEXER* lexer);
 void free_lexer(LEXER* lexer);
 TOKEN* get_token(LEXER* lexer);
+char* read_file(char* path);
 
 #endif
 
