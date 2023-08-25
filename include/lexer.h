@@ -9,19 +9,29 @@ typedef struct lexer
 
 typedef enum
 {
+	// KEYWORDS
+	FUN,
 	BEGIN,
 	END,
 	DECLR,
+	RETRUN,
+	// ONE-CHAR SYMBOLS
 	COLON,
-	ASSIGN,
 	LEFT_PAREN,
 	RIGHT_PAREN,
 	LEFT_BRACKET,
 	RIGHT_BRACKET,
-	STATIC_TYPE,
-	RETRUN,
+	COMMA,
 	LINE_TERM,
-	IDENTIFIER
+	// OPERATORS
+	ASSIGN,
+	EQUALS,
+	PLUS,
+	MINUS,
+	MULT,
+	DIV,
+	STATIC_TYPE,
+	IDENTIFIER,
 } TOKEN_TYPE;
 
 typedef struct
@@ -33,6 +43,7 @@ typedef struct
 LEXER *init(char *source);
 LEXER *init_from_file(char *path);
 char advance(LEXER *lexer);
+size_t advance_word(LEXER *lexer);
 char peek(LEXER *lexer);
 void free_lexer(LEXER *lexer);
 TOKEN *get_token(LEXER *lexer);

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "include/lexer.h"
+#include "lexer.h"
 
 LEXER *init(char *source)
 {
@@ -28,6 +29,18 @@ char advance(LEXER *lexer)
 	return *lexer->current;
 }
 
+size_t advance_word(LEXER *lexer)
+{
+	char *start = lexer->current;
+	char cur = *lexer->current;
+	while (isalnum(cur) && cur != ' ' && cur != '\n' && cur != 11 && cur != 12 && cur != 15 && cur != 9)
+	{
+		cur = advance(lexer);
+	}
+	size_t size = (lexer->current - start) * sizeof(char);
+	return size;
+}
+
 char peek(LEXER *lexer)
 {
 	return *(lexer->current + sizeof(char));
@@ -45,17 +58,35 @@ void skip_whitespace(LEXER *lexer)
 TOKEN *get_token(LEXER *lexer)
 {
 	TOKEN *token = malloc(sizeof(TOKEN));
-	char *start = lexer->current;
-	char cur = *lexer->current;
-	while (isalnum(cur) && cur != ' ' && cur != '\n' && cur != 11 && cur != 12 && cur != 15)
-	{
-		cur = advance(lexer);
-	}
-	size_t size = (lexer->current - start) * sizeof(char);
+	size_t size = advance_word(lexer);
+	char *start = lexer->current - size;
 	if (size > 0)
 	{
-		token->type = IDENTIFIER;
 		token->lexeme = strndup(start, size);
+		if (strcmp(token->lexeme, "fun") == 0)
+		{
+			token->type = FUN;
+		}
+		else if (strcmp(token->lexeme, "DECLR") == 0)
+		{
+			token->type = DECLR;
+		}
+		else if (strcmp(token->lexeme, "BEGIN") == 0)
+		{
+			token->type = BEGIN;
+		}
+		else if (strcmp(token->lexeme, "END") == 0)
+		{
+			token->type = END;
+		}
+		else if (strcmp(token->lexeme, "int") == 0 || strcmp(token->lexeme, "string") == 0)
+		{
+			token->type = STATIC_TYPE;
+		}
+		else
+		{
+			token->type = IDENTIFIER;
+		}
 	}
 	else
 	{
@@ -64,10 +95,52 @@ TOKEN *get_token(LEXER *lexer)
 		{
 		case ')':
 			token->type = RIGHT_PAREN;
+			break;
 		case '(':
 			token->type = LEFT_PAREN;
+			break;
+		case '[':
+			token->type = LEFT_BRACKET;
+			break;
+		case ']':
+			token->type = RIGHT_BRACKET;
+			break;
+		case ';':
+			token->type = LINE_TERM;
+			break;
+		case ',':
+			token->type = COMMA;
+			break;
+		case '=':
+			token->type = EQUALS;
+			break;
+		case '+':
+			token->type = PLUS;
+			break;
+		case '-':
+			token->type = MINUS;
+			break;
+		case '*':
+			token->type = MULT;
+			break;
+		case '/':
+			token->type = DIV;
+			break;
+		case ':':
+			if (peek(lexer) == '=')
+			{
+				token->lexeme = strdup(":=");
+				token->type = ASSIGN;
+				advance(lexer);
+			}
+			else
+			{
+				token->type = COLON;
+			}
+			break;
 		default:
 			token->type = IDENTIFIER;
+			break;
 		}
 		advance(lexer);
 	}
