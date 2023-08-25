@@ -10,7 +10,7 @@ LIBS=-lm
 _DEPS=lexer.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ=main.o
+_OBJ=main.o lexer.o
 OBJ=$(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
