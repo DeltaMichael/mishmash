@@ -7,10 +7,10 @@ LDIR =lib
 
 LIBS=-lm
 
-_DEPS=lexer.h
+_DEPS=lexer.h parser.h list.h
 DEPS=$(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ=main.o lexer.o
+_OBJ=main.o lexer.o parser.o list.o
 OBJ=$(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
