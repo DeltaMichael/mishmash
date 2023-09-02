@@ -65,6 +65,7 @@ TOKEN *get_token(LEXER *lexer)
 		token->lexeme = strndup(start, size);
 		if (strcmp(token->lexeme, "fun") == 0)
 		{
+			printf("Lexeme %s is of type function", token->lexeme);
 			token->type = FUN;
 		}
 		else if (strcmp(token->lexeme, "DECLR") == 0)
@@ -83,9 +84,17 @@ TOKEN *get_token(LEXER *lexer)
 		{
 			token->type = STATIC_TYPE;
 		}
-		else
+		else if(isalpha(*token->lexeme))
 		{
 			token->type = IDENTIFIER;
+
+		}
+		else if(isdigit(*token->lexeme))
+		{
+			token->type = INT_LITERAL;
+		} else {
+			printf("Lexeme %s could not be classified as anything", token->lexeme);
+			exit(1);
 		}
 	}
 	else
@@ -166,3 +175,4 @@ char *read_file(char *path)
 	out[file_size] = 0;
 	return out;
 }
+

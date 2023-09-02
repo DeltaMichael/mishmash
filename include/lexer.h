@@ -32,6 +32,7 @@ typedef enum
 	DIV,
 	STATIC_TYPE,
 	IDENTIFIER,
+	INT_LITERAL
 } TOKEN_TYPE;
 
 typedef struct
@@ -50,3 +51,4 @@ TOKEN *get_token(LEXER *lexer);
 char *read_file(char *path);
 
 #endif
+
