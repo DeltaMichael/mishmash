@@ -39,14 +39,5 @@ int main(int argc, char **argv)
 	AST_EXPR* expr = expression(parser);
 	print_ast(expr);
 	free_lexer(lexer);
-
-	// hashmap working at first glance
-	int* val = malloc(sizeof(int));
-	*val = 24;
-	H_MAP* map = init_hashmap();
-	hashmap_put(map, "something", val);
-	int* outval = hashmap_get(map, "something");
-	printf("%d", *outval);
-
 }
 

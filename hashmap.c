@@ -11,25 +11,7 @@ int hash(char* key) {
 		sum += *key;
 		key += sizeof(char);
 	}
-	// square the sum
-	sum *= sum;
-
-	// get the number of digits in the sum
-	int digits = (int)ceil(log10(sum));
-
-	// get the front half divisor
-	int front = (int)pow(10, digits/2);
-
-	// get the back half divisor
-	int back = (int)pow(10, digits - digits/2);
-
-	// get middle two digits
-	int first = (sum/front) % 10;
-	int second = (sum%front) / (back / 10);
-
-	// return them as a number
-	// this will also work if one of them is 0
-	return first * 10 + second;
+	return hash_int(sum);
 }
 H_MAP* init_hashmap() {
 	H_MAP* map = malloc(sizeof(H_MAP));
@@ -67,5 +49,34 @@ void hashmap_put(H_MAP* map, char* key, void* value) {
 		new_entry->next = entry;
 	}
 	map->entries[index] = new_entry;
+}
+
+int hash_int(int key) {
+	// square the key
+	key *= key;
+
+	// get the number of digits
+	int digits = (int)ceil(log10(key));
+
+	// divide into even halves +-1
+	int upper_digs = digits - digits / 2 - digits % 2;
+	int lower_digs = digits / 2;
+	// get the factors
+	int upper = (int)pow(10, upper_digs);
+	int lower = (int)pow(10, lower_digs);
+
+	// get the upper middle digit
+	int upper_digit = (key / upper) % 10;
+	// get the lower middle digit
+	int lower_digit = (key % upper)/(lower/10);
+	return upper_digit * 10 + lower_digit;
+}
+
+void print_entry(H_ENTRY* entry) {
+	while(entry != NULL) {
+		printf("{ key: %s value: %d }", entry->key, *(int*)entry->value);
+		entry = entry->next;
+	}
+	printf("\n");
 }
 
