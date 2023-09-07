@@ -10,6 +10,8 @@ PARSER* init_parser(LIST* tokens) {
 	parser->index = 0;
 	parser->current = (TOKEN*)tokens->elements[0];
 	parser->size = tokens->size;
+	parser->has_error = 0;
+	parser->errors = init_list(sizeof(char*));
 	return parser;
 }
 
@@ -17,6 +19,13 @@ AST_EXPR* init_ast_expr(TOKEN* op, AST_EXPR_TYPE type, LIST* children) {
 	AST_EXPR* node = malloc(sizeof(AST_EXPR));
 	node->op = op;
 	node->children = children;
+	node->type = type;
+	return node;
+}
+
+AST_STMT* init_ast_stmt(AST_STMT_TYPE type, LIST* values) {
+	AST_STMT* node = malloc(sizeof(AST_STMT));
+	node->values = values;
 	node->type = type;
 	return node;
 }
@@ -34,8 +43,8 @@ TOKEN* parser_peek(PARSER* parser) {
 
 void parser_eat(PARSER* parser, TOKEN_TYPE type, char* message) {
 	if(!parser_match(parser, type)) {
-		printf("%s\n", message);
-		exit(1);
+		fprintf(stderr, "%s\n", message);
+		parser->has_error = 1;
 	}
 }
 
@@ -46,12 +55,28 @@ void parser_advance(PARSER* parser) {
 	}
 }
 
+bool parser_is_at_end(PARSER* parser) {
+	return parser->index == parser->size;
+}
+
 bool parser_match(PARSER* parser, TOKEN_TYPE type) {
 	if (parser->current->type == type) {
 		parser_advance(parser);
 		return true;
 	}
 	return false;
+}
+
+AST_STMT* statement(PARSER* parser) {
+	return expression_statement(parser);
+}
+
+AST_STMT* expression_statement(PARSER* parser) {
+	LIST* values = init_list(sizeof(AST_STMT*));
+	list_push(values, expression(parser));
+	AST_STMT* stmt = init_ast_stmt(EXPRESSION_STATEMENT, values);
+	parser_eat(parser, LINE_TERM, "Expected line terminator at end of line");
+	return stmt;
 }
 
 AST_EXPR* expression(PARSER* parser) {

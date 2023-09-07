@@ -38,3 +38,11 @@ void* list_pop(LIST* list) {
 	return element;
 }
 
+void* list_get(LIST* list, int index) {
+	if (index > list->size - 1 || index < 0) {
+		return NULL;
+	}
+	void* element = list->elements[index];
+	return element;
+}
+

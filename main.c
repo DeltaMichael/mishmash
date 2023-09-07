@@ -24,6 +24,9 @@ int main(int argc, char **argv)
 	const char *token_types[] = {"FUN", "BEGIN", "END", "DECLR", "RETURN", "COLON", "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET",
 								 "RIGHT_BRACKET", "COMMA", "LINE_TERM", "ASSIGN", "EQUALS", "PLUS", "MINUS", "MULT", "DIV",
 								 "STATIC_TYPE", "IDENTIFIER", "INT_LITERAL"};
+
+	const char *statement_types[] = {"ASSIGNMENT", "BLOCK", "PRINT", "EXPRESSION_STATEMENT"};
+
 	LEXER *lexer = init_from_file("expr.msh");
 	LIST* tokens = init_list(sizeof(TOKEN*));
 	while (*lexer->current != '\0')
@@ -35,9 +38,15 @@ int main(int argc, char **argv)
 	for(int i = 0; i < tokens->size; i++) {
 		printf("%s\n", ((TOKEN*)tokens->elements[i])->lexeme);
 	}
+
 	PARSER *parser = init_parser(tokens);
-	AST_EXPR* expr = expression(parser);
-	print_ast(expr);
+	while(!parser_is_at_end(parser)) {
+		AST_STMT* stmt = statement(parser);
+		printf("Statement: type %s\n", statement_types[stmt->type]);
+		print_ast(list_get(stmt->values, 0));
+		printf("\n");
+	}
+
 	free_lexer(lexer);
 }
 

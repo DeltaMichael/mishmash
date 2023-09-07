@@ -9,6 +9,8 @@
 typedef struct {
 	TOKEN* current;
 	LIST* tokens;
+	bool has_error;
+	LIST* errors;
 	size_t size;
 	int index;
 } PARSER;
@@ -27,13 +29,29 @@ typedef struct {
 	LIST* children;
 } AST_EXPR;
 
+typedef enum {
+	ASSIGNMENT,
+	BLOCK,
+	PRINT,
+	EXPRESSION_STATEMENT
+} AST_STMT_TYPE;
+
+typedef struct {
+	AST_STMT_TYPE type;
+	LIST* values;
+} AST_STMT;
+
 PARSER* init_parser(LIST* tokens);
 AST_EXPR* init_ast_expr(TOKEN* op, AST_EXPR_TYPE type, LIST* children);
 TOKEN* parser_peek(PARSER* parser);
 TOKEN* parser_previous(PARSER* parser);
 void parser_eat(PARSER* parser, TOKEN_TYPE type, char* message);
 bool parser_match(PARSER* parser, TOKEN_TYPE type);
+bool parser_is_at_end(PARSER* parser);
+void parser_advance(PARSER* parser);
 
+AST_STMT* statement(PARSER* parser);
+AST_STMT* expression_statement(PARSER* parser);
 AST_EXPR* expression(PARSER* parser);
 AST_EXPR* equality(PARSER* parser);
 AST_EXPR* term(PARSER* parser);
