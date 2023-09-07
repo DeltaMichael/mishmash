@@ -30,7 +30,7 @@ void* hashmap_get(H_MAP* map, char* key) {
 		return NULL;
 	}
 
-	while(strcmp(key, entry->key) != 0) {
+	while(entry != NULL && strcmp(key, entry->key) != 0) {
 		entry = entry->next;
 	}
 	return entry->value;
@@ -78,5 +78,20 @@ void print_entry(H_ENTRY* entry) {
 		entry = entry->next;
 	}
 	printf("\n");
+}
+
+bool contains_key(H_MAP* map, char* key) {
+	int index = hash(key);
+	H_ENTRY* entry = map->entries[index];
+
+	if(entry == NULL) {
+		return false;
+	}
+
+	while(entry != NULL && strcmp(key, entry->key) != 0) {
+		entry = entry->next;
+	}
+
+	return entry != NULL;
 }
 

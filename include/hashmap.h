@@ -1,6 +1,6 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
-
+#include <stdbool.h>
 #define MAP_SIZE 100
 
 typedef struct H_ENTRY {
@@ -19,5 +19,6 @@ H_MAP* init_hashmap();
 void* hashmap_get(H_MAP* map, char* key);
 void hashmap_put(H_MAP* map, char* key, void* value);
 void print_entry(H_ENTRY* entry);
+bool contains_key(H_MAP* map, char* key);
 #endif
 

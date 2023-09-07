@@ -31,6 +31,7 @@ TOKEN* parser_previous(PARSER* parser) {
 TOKEN* parser_peek(PARSER* parser) {
 	return parser->current + sizeof(TOKEN*);
 }
+
 void parser_eat(PARSER* parser, TOKEN_TYPE type, char* message) {
 	if(!parser_match(parser, type)) {
 		printf("%s\n", message);
@@ -89,11 +90,11 @@ AST_EXPR* term(PARSER* parser) {
 }
 
 AST_EXPR* factor(PARSER* parser) {
-	AST_EXPR* left = primary(parser);
+	AST_EXPR* left = unary(parser);
 	AST_EXPR* right;
 	while (parser_match(parser, MULT) || parser_match(parser, DIV)) {
 		TOKEN* op = parser_previous(parser);
-		right = primary(parser);
+		right = unary(parser);
 		LIST* children = init_list(sizeof(AST_EXPR*));
 		list_push(children, left);
 		list_push(children, right);
@@ -103,10 +104,19 @@ AST_EXPR* factor(PARSER* parser) {
 
 }
 
-// TODO: Add unary minus
+AST_EXPR* unary(PARSER* parser) {
+	if (parser_match(parser, MINUS)) {
+		TOKEN* op = parser_previous(parser);
+		AST_EXPR* right = unary(parser);
+		LIST* children = init_list(sizeof(AST_EXPR*));
+		list_push(children, right);
+		return init_ast_expr(op, UNARY, children);
+	}
+	return primary(parser);
+}
 
 AST_EXPR* primary(PARSER* parser) {
-	if(parser_match(parser, INT_LITERAL)) {
+	if(parser_match(parser, INT_LITERAL) || parser_match(parser, IDENTIFIER)) {
 		return init_ast_expr(parser_previous(parser), PRIMARY, NULL);
 	}
 	if(parser_match(parser, LEFT_PAREN)) {
@@ -114,6 +124,9 @@ AST_EXPR* primary(PARSER* parser) {
 		parser_eat(parser, RIGHT_PAREN, "Expected closing ')'");
 		return expr;
 	}
+	// TODO: Error handling and synchronization
+	// Print all errors, not just the first one
+	printf("Unknown primary token %s", parser->current->lexeme);
 	exit(1);
 }
 

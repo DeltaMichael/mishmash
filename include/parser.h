@@ -38,6 +38,7 @@ AST_EXPR* expression(PARSER* parser);
 AST_EXPR* equality(PARSER* parser);
 AST_EXPR* term(PARSER* parser);
 AST_EXPR* factor(PARSER* parser);
+AST_EXPR* unary(PARSER* parser);
 AST_EXPR* primary(PARSER* parser);
 
 #endif
