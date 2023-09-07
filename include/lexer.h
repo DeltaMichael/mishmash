@@ -5,6 +5,7 @@ typedef struct lexer
 	char *source;
 	char *current;
 	size_t size;
+	int line;
 } LEXER;
 
 typedef enum
@@ -41,6 +42,7 @@ typedef struct
 {
 	TOKEN_TYPE type;
 	char *lexeme;
+	int line;
 } TOKEN;
 
 LEXER *init(char *source);

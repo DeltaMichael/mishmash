@@ -9,6 +9,7 @@ LEXER *init(char *source)
 {
 	LEXER *lexer = malloc(sizeof(LEXER));
 	lexer->size = 0;
+	lexer->line = 0;
 	lexer->source = source;
 	lexer->current = lexer->source;
 	return lexer;
@@ -22,6 +23,10 @@ LEXER *init_from_file(char *path)
 
 char advance(LEXER *lexer)
 {
+	if (*lexer->current == '\n') {
+		lexer->line++;
+	}
+
 	if (*lexer->current != '\0')
 	{
 		lexer->current += sizeof(char);
@@ -60,6 +65,7 @@ TOKEN *get_token(LEXER *lexer)
 	TOKEN *token = malloc(sizeof(TOKEN));
 	size_t size = advance_word(lexer);
 	char *start = lexer->current - size;
+	token->line = lexer->line;
 	if (size > 0)
 	{
 		token->lexeme = strndup(start, size);

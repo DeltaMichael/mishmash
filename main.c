@@ -32,11 +32,11 @@ int main(int argc, char **argv)
 	while (*lexer->current != '\0')
 	{
 		TOKEN *token = get_token(lexer);
-		printf("lexeme: %s type: %s\n", token->lexeme, token_types[token->type]);
 		list_push(tokens, token);
 	}
 	for(int i = 0; i < tokens->size; i++) {
-		printf("%s\n", ((TOKEN*)tokens->elements[i])->lexeme);
+		TOKEN* token = tokens->elements[i];
+		printf("line: %d lexeme: %s type: %s\n", token->line, token->lexeme, token_types[token->type]);
 	}
 
 	PARSER *parser = init_parser(tokens);
