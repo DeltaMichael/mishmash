@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "include/parser.h"
 #include "include/list.h"
+#include "include/ast_printer.h"
 
 PARSER* init_parser(LIST* tokens) {
 	PARSER* parser = malloc(sizeof(PARSER));
@@ -100,7 +101,7 @@ AST_STMT* block(PARSER* parser) {
 	}
 	if(parser_match(parser, BEGIN)) {
 		LIST* values = init_list(sizeof(AST_STMT*));
-		while(parser_peek(parser)->type != END) {
+		while(parser->current->type != END && !parser_is_at_end(parser)) {
 			AST_STMT* stmt = statement(parser);
 			list_push(values, stmt);
 		}
@@ -205,7 +206,8 @@ AST_EXPR* primary(PARSER* parser) {
 	}
 	// TODO: Error handling and synchronization
 	// Print all errors, not just the first one
-	fprintf(stderr, "Unknown primary token %s", parser->current->lexeme);
+	parser->has_error = 1;
+	fprintf(stderr, "Unexpected token %s", parser->current->lexeme);
 	exit(1);
 }
 

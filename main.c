@@ -29,13 +29,15 @@ int main(int argc, char **argv)
 	}
 
 	PARSER *parser = init_parser(tokens);
+	// TODO: Add global error flag
 	while(!parser_is_at_end(parser)) {
 		AST_STMT* stmt = statement(parser);
 		if(parser->has_error) {
 			parser->has_error = 0;
 			parser_sync(parser);
+		} else {
+			print_ast_stmt(stmt);
 		}
-		print_ast_stmt(stmt);
 	}
 	free_lexer(lexer);
 }
