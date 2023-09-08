@@ -55,6 +55,7 @@ void parser_sync(PARSER* parser);
 
 // Syntax tree building functions
 AST_STMT* statement(PARSER* parser);
+AST_STMT* block(PARSER* parser);
 AST_STMT* assignment(PARSER* parser);
 AST_STMT* expression_statement(PARSER* parser);
 AST_EXPR* expression(PARSER* parser);

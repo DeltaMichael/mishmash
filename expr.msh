@@ -1,5 +1,7 @@
-x := a * -c + b * -c;
-y := a * -c + b * -c;
-y := a * -c + b * -c;
-y := a * -c + b * -c;
-y := a * -c + b * -c
+BEGIN
+	x := a * -c + b * -c;
+	y := a * -c + b * -c;
+	y := a * -c + b * -c;
+	y := a * -c + b * -c;
+	y := a * -c + b * -c;
+END

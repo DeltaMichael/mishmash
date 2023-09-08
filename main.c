@@ -1,22 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "include/ast_printer.h"
 #include "include/lexer.h"
 #include "include/parser.h"
 #include "include/list.h"
 #include "include/hashmap.h"
 #include "string.h"
-void print_ast(AST_EXPR* root) {
-	if(!root->children) {
-		printf("%s ", root->op->lexeme);
-		return;
-	} else {
-		printf("(");
-		for(int i = 0; i < root->children->size; i++) {
-			print_ast(root->children->elements[i]);
-		}
-	}
-	printf("%s) ", root->op->lexeme);
-}
 
 int main(int argc, char **argv)
 {
@@ -45,21 +34,9 @@ int main(int argc, char **argv)
 		if(parser->has_error) {
 			parser->has_error = 0;
 			parser_sync(parser);
-		} else {
-			if (stmt->type == EXPRESSION_STATEMENT) {
-				print_ast(list_get(stmt->values, 0));
-			}
-			if (stmt->type == ASSIGNMENT) {
-				printf("%s := ", stmt->id->lexeme);
-				AST_STMT* assignee = list_get(stmt->values, 0);
-				if (assignee->type == EXPRESSION_STATEMENT) {
-					print_ast(list_get(assignee->values, 0));
-				}
-			}
-			printf("\n");
 		}
+		print_ast_stmt(stmt);
 	}
-
 	free_lexer(lexer);
 }
 

@@ -91,6 +91,23 @@ bool parser_match(PARSER* parser, TOKEN_TYPE type) {
 }
 
 AST_STMT* statement(PARSER* parser) {
+	return block(parser);
+}
+
+AST_STMT* block(PARSER* parser) {
+	if(parser_match(parser, DECLR)) {
+		// parse declarations
+	}
+	if(parser_match(parser, BEGIN)) {
+		LIST* values = init_list(sizeof(AST_STMT*));
+		while(parser_peek(parser)->type != END) {
+			AST_STMT* stmt = statement(parser);
+			list_push(values, stmt);
+		}
+		AST_STMT* stmt = init_ast_stmt(BLOCK, values, NULL);
+		parser_eat(parser, END, "Expected 'END' at the end of block");
+		return stmt;
+	}
 	return assignment(parser);
 }
 
