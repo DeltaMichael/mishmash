@@ -43,8 +43,27 @@ TOKEN* parser_peek(PARSER* parser) {
 
 void parser_eat(PARSER* parser, TOKEN_TYPE type, char* message) {
 	if(!parser_match(parser, type)) {
+		fprintf(stderr, "error: line %d: ", parser->current->line);
 		fprintf(stderr, "%s\n", message);
 		parser->has_error = 1;
+	}
+}
+
+void parser_sync(PARSER* parser) {
+	parser_advance(parser);
+	while(!parser_is_at_end(parser)) {
+		if(parser_previous(parser)->type == LINE_TERM) {
+			return;
+		}
+		switch(parser_peek(parser)->type) {
+			case FUN:
+			case BEGIN:
+			case END:
+			case DECLR:
+			case RETRUN:
+				return;
+		}
+		parser_advance(parser);
 	}
 }
 
@@ -56,7 +75,7 @@ void parser_advance(PARSER* parser) {
 }
 
 bool parser_is_at_end(PARSER* parser) {
-	return parser->index == parser->size;
+	return parser->index >= parser->size;
 }
 
 bool parser_match(PARSER* parser, TOKEN_TYPE type) {
@@ -154,6 +173,4 @@ AST_EXPR* primary(PARSER* parser) {
 	printf("Unknown primary token %s", parser->current->lexeme);
 	exit(1);
 }
-
-AST_EXPR* comparison(PARSER* parser);
 

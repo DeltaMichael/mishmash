@@ -42,9 +42,14 @@ int main(int argc, char **argv)
 	PARSER *parser = init_parser(tokens);
 	while(!parser_is_at_end(parser)) {
 		AST_STMT* stmt = statement(parser);
-		printf("Statement: type %s\n", statement_types[stmt->type]);
-		print_ast(list_get(stmt->values, 0));
-		printf("\n");
+		if(parser->has_error) {
+			parser->has_error = 0;
+			parser_sync(parser);
+		} else {
+			printf("Statement: type %s\n", statement_types[stmt->type]);
+			print_ast(list_get(stmt->values, 0));
+			printf("\n");
+		}
 	}
 
 	free_lexer(lexer);

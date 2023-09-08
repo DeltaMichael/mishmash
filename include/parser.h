@@ -49,6 +49,7 @@ void parser_eat(PARSER* parser, TOKEN_TYPE type, char* message);
 bool parser_match(PARSER* parser, TOKEN_TYPE type);
 bool parser_is_at_end(PARSER* parser);
 void parser_advance(PARSER* parser);
+void parser_sync(PARSER* parser);
 
 AST_STMT* statement(PARSER* parser);
 AST_STMT* expression_statement(PARSER* parser);
