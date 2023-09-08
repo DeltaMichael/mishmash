@@ -46,8 +46,16 @@ int main(int argc, char **argv)
 			parser->has_error = 0;
 			parser_sync(parser);
 		} else {
-			printf("Statement: type %s\n", statement_types[stmt->type]);
-			print_ast(list_get(stmt->values, 0));
+			if (stmt->type == EXPRESSION_STATEMENT) {
+				print_ast(list_get(stmt->values, 0));
+			}
+			if (stmt->type == ASSIGNMENT) {
+				printf("%s := ", stmt->id->lexeme);
+				AST_STMT* assignee = list_get(stmt->values, 0);
+				if (assignee->type == EXPRESSION_STATEMENT) {
+					print_ast(list_get(assignee->values, 0));
+				}
+			}
 			printf("\n");
 		}
 	}

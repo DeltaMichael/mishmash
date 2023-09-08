@@ -11,7 +11,6 @@ PARSER* init_parser(LIST* tokens) {
 	parser->current = (TOKEN*)tokens->elements[0];
 	parser->size = tokens->size;
 	parser->has_error = 0;
-	parser->errors = init_list(sizeof(char*));
 	return parser;
 }
 
@@ -23,22 +22,27 @@ AST_EXPR* init_ast_expr(TOKEN* op, AST_EXPR_TYPE type, LIST* children) {
 	return node;
 }
 
-AST_STMT* init_ast_stmt(AST_STMT_TYPE type, LIST* values) {
+AST_STMT* init_ast_stmt(AST_STMT_TYPE type, LIST* values, TOKEN* id) {
 	AST_STMT* node = malloc(sizeof(AST_STMT));
+	node->id = id;
 	node->values = values;
 	node->type = type;
 	return node;
 }
 
 TOKEN* parser_previous(PARSER* parser) {
-	if(parser->index < parser->size) {
+	if(parser->index > 0) {
 		return parser->tokens->elements[parser->index - 1];
 	}
 	return parser->current;
 }
 
 TOKEN* parser_peek(PARSER* parser) {
-	return parser->current + sizeof(TOKEN*);
+	if(parser->index < parser->size - 1) {
+		return parser->tokens->elements[parser->index + 1];
+	}
+	return parser->current;
+
 }
 
 void parser_eat(PARSER* parser, TOKEN_TYPE type, char* message) {
@@ -87,13 +91,27 @@ bool parser_match(PARSER* parser, TOKEN_TYPE type) {
 }
 
 AST_STMT* statement(PARSER* parser) {
+	return assignment(parser);
+}
+
+AST_STMT* assignment(PARSER* parser) {
+	if(parser->current->type == IDENTIFIER && parser_peek(parser)->type == ASSIGN) {
+		parser_match(parser, IDENTIFIER);
+		TOKEN* id = parser_previous(parser);
+		parser_match(parser, ASSIGN);
+		AST_STMT* assigned = statement(parser);
+		LIST* values = init_list(sizeof(AST_STMT*));
+		list_push(values, assigned);
+		AST_STMT* stmt = init_ast_stmt(ASSIGNMENT, values, id);
+		return stmt;
+	}
 	return expression_statement(parser);
 }
 
 AST_STMT* expression_statement(PARSER* parser) {
-	LIST* values = init_list(sizeof(AST_STMT*));
+	LIST* values = init_list(sizeof(AST_EXPR*));
 	list_push(values, expression(parser));
-	AST_STMT* stmt = init_ast_stmt(EXPRESSION_STATEMENT, values);
+	AST_STMT* stmt = init_ast_stmt(EXPRESSION_STATEMENT, values, NULL);
 	parser_eat(parser, LINE_TERM, "Expected line terminator at end of line");
 	return stmt;
 }
@@ -170,7 +188,7 @@ AST_EXPR* primary(PARSER* parser) {
 	}
 	// TODO: Error handling and synchronization
 	// Print all errors, not just the first one
-	printf("Unknown primary token %s", parser->current->lexeme);
+	fprintf(stderr, "Unknown primary token %s", parser->current->lexeme);
 	exit(1);
 }
 
