@@ -1,5 +1,5 @@
-#ifndef SEM_ANALYZER_H
-#define SEM_ANALYZER_H
+#ifndef TAC_GENERATOR_H
+#define TAC_GENERATOR_H
 
 #include "list.h"
 #include "parser.h"

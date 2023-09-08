@@ -10,6 +10,7 @@ typedef struct {
 	TOKEN* current;
 	LIST* tokens;
 	bool has_error;
+	bool exited_with_error;
 	size_t size;
 	int index;
 } PARSER;
@@ -45,13 +46,17 @@ AST_EXPR* init_ast_expr(TOKEN* op, AST_EXPR_TYPE type, LIST* children);
 AST_STMT* init_ast_stmt(AST_STMT_TYPE type, LIST* values, TOKEN* id);
 
 // Parser navigation functions
+void parser_advance(PARSER* parser);
 TOKEN* parser_peek(PARSER* parser);
 TOKEN* parser_previous(PARSER* parser);
-void parser_eat(PARSER* parser, TOKEN_TYPE type, char* message);
+void parser_error(PARSER* parser, char* message);
 bool parser_match(PARSER* parser, TOKEN_TYPE type);
+void parser_eat(PARSER* parser, TOKEN_TYPE type, char* message);
 bool parser_is_at_end(PARSER* parser);
-void parser_advance(PARSER* parser);
 void parser_sync(PARSER* parser);
+
+// Entry point
+AST_STMT* parser_parse(PARSER* parser);
 
 // Syntax tree building functions
 AST_STMT* statement(PARSER* parser);

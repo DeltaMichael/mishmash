@@ -12,6 +12,7 @@ PARSER* init_parser(LIST* tokens) {
 	parser->current = (TOKEN*)tokens->elements[0];
 	parser->size = tokens->size;
 	parser->has_error = 0;
+	parser->exited_with_error = 0;
 	return parser;
 }
 
@@ -31,11 +32,11 @@ AST_STMT* init_ast_stmt(AST_STMT_TYPE type, LIST* values, TOKEN* id) {
 	return node;
 }
 
-TOKEN* parser_previous(PARSER* parser) {
-	if(parser->index > 0) {
-		return parser->tokens->elements[parser->index - 1];
+void parser_advance(PARSER* parser) {
+	parser->index++;
+	if(parser->index < parser->size) {
+		parser->current = parser->tokens->elements[parser->index];
 	}
-	return parser->current;
 }
 
 TOKEN* parser_peek(PARSER* parser) {
@@ -43,15 +44,38 @@ TOKEN* parser_peek(PARSER* parser) {
 		return parser->tokens->elements[parser->index + 1];
 	}
 	return parser->current;
+}
 
+TOKEN* parser_previous(PARSER* parser) {
+	if(parser->index > 0) {
+		return parser->tokens->elements[parser->index - 1];
+	}
+	return parser->current;
+}
+
+void parser_error(PARSER* parser, char* message) {
+	fprintf(stderr, "error: line %d: near: '%s': ", parser->current->line, parser->current->lexeme);
+	fprintf(stderr, "%s\n", message);
+	parser->has_error = 1;
+	parser->exited_with_error = 1;
+}
+
+bool parser_match(PARSER* parser, TOKEN_TYPE type) {
+	if (parser->current->type == type) {
+		parser_advance(parser);
+		return true;
+	}
+	return false;
 }
 
 void parser_eat(PARSER* parser, TOKEN_TYPE type, char* message) {
 	if(!parser_match(parser, type)) {
-		fprintf(stderr, "error: line %d: ", parser->current->line);
-		fprintf(stderr, "%s\n", message);
-		parser->has_error = 1;
+		parser_error(parser, message);
 	}
+}
+
+bool parser_is_at_end(PARSER* parser) {
+	return parser->index >= parser->size;
 }
 
 void parser_sync(PARSER* parser) {
@@ -72,23 +96,17 @@ void parser_sync(PARSER* parser) {
 	}
 }
 
-void parser_advance(PARSER* parser) {
-	parser->index++;
-	if(parser->index < parser->size) {
-		parser->current = parser->tokens->elements[parser->index];
+AST_STMT* parser_parse(PARSER* parser) {
+	while(!parser_is_at_end(parser)) {
+		AST_STMT* stmt = statement(parser);
+		if(parser->has_error) {
+			parser->has_error = 0;
+			parser_sync(parser);
+			return NULL;
+		} else {
+			return stmt;
+		}
 	}
-}
-
-bool parser_is_at_end(PARSER* parser) {
-	return parser->index >= parser->size;
-}
-
-bool parser_match(PARSER* parser, TOKEN_TYPE type) {
-	if (parser->current->type == type) {
-		parser_advance(parser);
-		return true;
-	}
-	return false;
 }
 
 AST_STMT* statement(PARSER* parser) {
@@ -96,11 +114,11 @@ AST_STMT* statement(PARSER* parser) {
 }
 
 AST_STMT* block(PARSER* parser) {
+	LIST* values = init_list(sizeof(AST_STMT*));
 	if(parser_match(parser, DECLR)) {
 		// parse declarations
 	}
 	if(parser_match(parser, BEGIN)) {
-		LIST* values = init_list(sizeof(AST_STMT*));
 		while(parser->current->type != END && !parser_is_at_end(parser)) {
 			AST_STMT* stmt = statement(parser);
 			list_push(values, stmt);
@@ -206,8 +224,7 @@ AST_EXPR* primary(PARSER* parser) {
 	}
 	// TODO: Error handling and synchronization
 	// Print all errors, not just the first one
-	parser->has_error = 1;
-	fprintf(stderr, "Unexpected token %s", parser->current->lexeme);
+	parser_error(parser, "Unexpected token");
 	exit(1);
 }
 
