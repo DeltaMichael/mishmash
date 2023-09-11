@@ -42,7 +42,17 @@ int main(int argc, char **argv)
 	quad_from_stmt(stmt, quads, table);
 	for(int i = 0; i < quads->size; i++) {
 		QUAD* q = list_get(quads, i);
-		printf("res: %s (%s, %s, %s)\n", q->result, q->arg1, q->arg2, q->op);
+		if(q->arg2 == NULL) {
+			if(strcmp(q->op, "-") == 0) {
+				printf("%s := %s %s\n", q->result, q->op, q->arg1);
+			}
+			if(strcmp(q->op, ":=") == 0) {
+				printf("%s := %s\n", q->result, q->arg1);
+			}
+
+		} else {
+			printf("%s := %s %s %s\n", q->result, q->arg1, q->op, q->arg2);
+		}
 	}
 	return 0;
 }
