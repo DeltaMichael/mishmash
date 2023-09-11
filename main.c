@@ -5,6 +5,7 @@
 #include "include/parser.h"
 #include "include/list.h"
 #include "include/hashmap.h"
+#include "include/tac_generator.h"
 #include "string.h"
 
 int main(int argc, char **argv)
@@ -36,6 +37,13 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	print_ast_stmt(stmt);
+	LIST* quads = init_list(sizeof(QUAD*));
+	SYM_TABLE* table = init_sym_table(NULL);
+	quad_from_stmt(stmt, quads, table);
+	for(int i = 0; i < quads->size; i++) {
+		QUAD* q = list_get(quads, i);
+		printf("res: %s (%s, %s, %s)\n", q->result, q->arg1, q->arg2, q->op);
+	}
 	return 0;
 }
 

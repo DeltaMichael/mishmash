@@ -136,6 +136,7 @@ AST_STMT* assignment(PARSER* parser) {
 		TOKEN* id = parser_previous(parser);
 		parser_match(parser, ASSIGN);
 		AST_STMT* assigned = statement(parser);
+		// TODO: Add semantic checks for assignment, e.g. can't assign block to variable
 		LIST* values = init_list(sizeof(AST_STMT*));
 		list_push(values, assigned);
 		AST_STMT* stmt = init_ast_stmt(ASSIGNMENT, values, id);
