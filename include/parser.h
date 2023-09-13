@@ -29,6 +29,7 @@ typedef struct {
 
 typedef enum {
 	ASSIGNMENT,
+	DECLARATION,
 	BLOCK,
 	PRINT,
 	EXPRESSION_STATEMENT
@@ -61,6 +62,8 @@ AST_STMT* parser_parse(PARSER* parser);
 // Syntax tree building functions
 AST_STMT* statement(PARSER* parser);
 AST_STMT* block(PARSER* parser);
+AST_STMT* block_body(PARSER* parser, LIST* values);
+AST_STMT* declaration(PARSER* parser);
 AST_STMT* assignment(PARSER* parser);
 AST_STMT* expression_statement(PARSER* parser);
 AST_EXPR* expression(PARSER* parser);

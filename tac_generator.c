@@ -19,7 +19,6 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 	if(expr->type == UNARY) {
 		AST_EXPR* arg = list_get(expr->children, 0);
 		QUAD* argquad = quad_from_expr(arg, quads, table);
-		// TODO: Figure out a way to generate temp variable names
 		char* res_name = get_temp(table);
 		QUAD* uquad = init_quad(expr->op->lexeme, argquad->result, NULL, res_name);
 		list_push(quads, uquad);
@@ -30,7 +29,6 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 		AST_EXPR* right = list_get(expr->children, 1);
 		QUAD* left_quad = quad_from_expr(left, quads, table);
 		QUAD* right_quad = quad_from_expr(right, quads, table);
-		// TODO: Figure out a way to generate temp variable names
 		char* res_name = get_temp(table);
 		QUAD* bquad = init_quad(expr->op->lexeme, left_quad->result, right_quad->result, res_name);
 		list_push(quads, bquad);
@@ -41,6 +39,12 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 QUAD* quad_from_stmt(AST_STMT* stmt, LIST* quads, SYM_TABLE* table) {
 	if(stmt->type == EXPRESSION_STATEMENT) {
 		return quad_from_expr(list_get(stmt->values, 0), quads, table);
+	}
+	if(stmt->type == DECLARATION) {
+		TOKEN* type = list_get(stmt->values, 0);
+		QUAD* aquad = init_quad("declr", "0", type->lexeme, stmt->id->lexeme);
+		list_push(quads, aquad);
+		return aquad;
 	}
 	if(stmt->type == ASSIGNMENT) {
 		QUAD* value = quad_from_stmt(list_get(stmt->values, 0), quads, table);
@@ -55,7 +59,6 @@ QUAD* quad_from_stmt(AST_STMT* stmt, LIST* quads, SYM_TABLE* table) {
 		}
 	}
 }
-
 
 SYM_TABLE* init_sym_table(SYM_TABLE* enclosing) {
 	SYM_TABLE* table = malloc(sizeof(SYM_TABLE));

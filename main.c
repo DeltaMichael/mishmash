@@ -50,7 +50,11 @@ int main(int argc, char **argv)
 				printf("%s := %s\n", q->result, q->arg1);
 			}
 
-		} else {
+		} else if(strcmp(q->op, "declr") == 0) {
+				printf("%s %s := %s\n", q->arg2, q->result, q->arg1);
+		}
+
+		else {
 			printf("%s := %s %s %s\n", q->result, q->arg1, q->op, q->arg2);
 		}
 	}

@@ -1,4 +1,15 @@
+DECLR
+	x: int;
+	y: int;
+	z: int;
+	a: int;
+	b: int;
+	c: int;
 BEGIN
+	a := 2;
+	b := 4;
+	c := 6;
 	x := a * -c + b * -c;
 	y := a * -c + b * -c;
+	z := b + c * d;
 END

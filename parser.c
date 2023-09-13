@@ -116,16 +116,50 @@ AST_STMT* statement(PARSER* parser) {
 AST_STMT* block(PARSER* parser) {
 	LIST* values = init_list(sizeof(AST_STMT*));
 	if(parser_match(parser, DECLR)) {
-		// parse declarations
-	}
-	if(parser_match(parser, BEGIN)) {
-		while(parser->current->type != END && !parser_is_at_end(parser)) {
+		// parse declarations and block
+		while(parser->current->type != BEGIN && !parser_is_at_end(parser)) {
 			AST_STMT* stmt = statement(parser);
+			if(stmt->type != DECLARATION) {
+				parser_error(parser, "Only declarations allowed in block DECLR header");
+			}
 			list_push(values, stmt);
 		}
-		AST_STMT* stmt = init_ast_stmt(BLOCK, values, NULL);
-		parser_eat(parser, END, "Expected 'END' at the end of block");
-		return stmt;
+		parser_eat(parser, BEGIN, "Expected BEGIN after DECLR");
+		return block_body(parser, values);
+	}
+	if(parser_match(parser, BEGIN)) {
+		// just parse block
+		return block_body(parser, values);
+	}
+	return declaration(parser);
+}
+
+AST_STMT* block_body(PARSER* parser, LIST* values) {
+	while(parser->current->type != END && !parser_is_at_end(parser)) {
+		AST_STMT* stmt = statement(parser);
+		list_push(values, stmt);
+	}
+	AST_STMT* stmt = init_ast_stmt(BLOCK, values, NULL);
+	parser_eat(parser, END, "Expected 'END' at the end of block");
+	return stmt;
+}
+
+
+// TODO: Move this down the parse tree
+AST_STMT* declaration(PARSER* parser) {
+	if(parser->current->type == IDENTIFIER && parser_peek(parser)->type == COLON) {
+		parser_match(parser, IDENTIFIER);
+		TOKEN* id = parser_previous(parser);
+		parser_match(parser, COLON);
+		if (parser_match(parser, STATIC_TYPE)) {
+			TOKEN* type = parser_previous(parser);
+			LIST* values = init_list(sizeof(TOKEN*));
+			list_push(values, type);
+			AST_STMT* stmt = init_ast_stmt(DECLARATION, values, id);
+			parser_eat(parser, LINE_TERM, "Expected line terminator at end of line");
+			return stmt;
+		}
+		parser_error(parser, "Invalid static type");
 	}
 	return assignment(parser);
 }

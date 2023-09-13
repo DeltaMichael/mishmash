@@ -31,5 +31,10 @@ void print_ast_stmt(AST_STMT* root) {
 		AST_STMT* assignee = list_get(root->values, 0);
 		print_ast_stmt(assignee);
 	}
+	if (root->type == DECLARATION) {
+		TOKEN* type = list_get(root->values, 0);
+		printf("declare %s of type %s\n", root->id->lexeme, type->lexeme);
+	}
+
 }
 
