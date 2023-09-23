@@ -38,8 +38,29 @@ int main(int argc, char **argv)
 	}
 	print_ast_stmt(stmt);
 	LIST* quads = init_list(sizeof(QUAD*));
-	SYM_TABLE* table = init_sym_table(NULL);
+
+	// H_MAP* registers = init_hash_map();
+	// hashmap_put(H_MAP* registers, "rax", NULL);
+	// hashmap_put(H_MAP* registers, "rbx", NULL);
+	// hashmap_put(H_MAP* registers, "rcx", NULL);
+	// hashmap_put(H_MAP* registers, "rdx", NULL);
+	// hashmap_put(H_MAP* registers, "rdi", NULL);
+	// hashmap_put(H_MAP* registers, "rsi", NULL);
+	// hashmap_put(H_MAP* registers, "rdi", NULL);
+	// hashmap_put(H_MAP* registers, "r8", NULL);
+	// hashmap_put(H_MAP* registers, "r9", NULL);
+	// hashmap_put(H_MAP* registers, "r10", NULL);
+	// hashmap_put(H_MAP* registers, "r11", NULL);
+	// hashmap_put(H_MAP* registers, "r12", NULL);
+	// hashmap_put(H_MAP* registers, "r13", NULL);
+	// hashmap_put(H_MAP* registers, "r14", NULL);
+	// hashmap_put(H_MAP* registers, "r15", NULL);
+
+	SYM_TABLE* table = init_symtable(NULL);
 	quad_from_stmt(stmt, quads, table);
+
+	// print quads
+	// TODO: Move to printer
 	for(int i = 0; i < quads->size; i++) {
 		QUAD* q = list_get(quads, i);
 		if(q->arg2 == NULL) {
