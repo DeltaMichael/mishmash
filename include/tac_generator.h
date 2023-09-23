@@ -32,7 +32,8 @@ typedef struct {
 	char* type;
 	int offset;
 	VAR_LOCATION location;
-	bool is_live;
+	int first_index;
+	int last_index;
 } VAR_DATA;
 
 QUAD* init_quad(char* op, char* arg1, char* arg2, char* result);
