@@ -2,6 +2,7 @@
 #define LIST_H
 
 #include <ctype.h>
+#include <stddef.h>
 
 typedef struct {
 	size_t element_size;
