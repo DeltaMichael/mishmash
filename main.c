@@ -39,6 +39,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	print_ast_stmt(stmt);
+
 	LIST* quads = init_list(sizeof(QUAD*));
 	SYM_TABLE* table = init_symtable(NULL);
 	quad_from_stmt(stmt, quads, table);

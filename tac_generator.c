@@ -81,7 +81,6 @@ SYM_TABLE* init_symtable(SYM_TABLE* enclosing) {
 		table->offset = enclosing->offset;
 	}
 	table->variables = init_hashmap();
-	table->registers = NULL;
 	table->enclosing = enclosing;
 	return table;
 }

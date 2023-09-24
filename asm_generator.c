@@ -52,18 +52,33 @@ void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad) {
 	if(strcmp(op, ":=") == 0) {
 		char* value = quad->arg1;
 		char* var = quad->result;
-		VAR_DATA* data = hashmap_get(table->variables, var);
-		if (data->location == REGISTER) {
-			char* reg_name = ag_alloc_reg(asm_gen, var);
+		VAR_DATA* var_data = hashmap_get(table->variables, var);
+		if(contains_key(table->variables, value)) {
+			VAR_DATA* value_data = hashmap_get(table->variables, value);
+			if (value_data->location == REGISTER) {
+				sb_append(asm_gen->out, "\tmovq %");
+				sb_append(asm_gen->out, value_data->reg_name);
+			} else if (value_data->location == STACK) {
+				char* temp_reg = ag_get_temp_reg(asm_gen);
+				sb_append(asm_gen->out, "\tmovq -");
+				sb_append_int(asm_gen->out, value_data->offset);
+				sb_append(asm_gen->out, "(%rbp), %");
+				sb_append(asm_gen->out, temp_reg);
+				sb_append(asm_gen->out, "\n");
+				sb_append(asm_gen->out, "\tmovq %");
+				sb_append(asm_gen->out, temp_reg);
+			}
+		} else {
 			sb_append(asm_gen->out, "\tmovq $");
 			sb_append(asm_gen->out, value);
+		}
+		if (var_data->location == REGISTER) {
+			char* reg_name = ag_alloc_reg(asm_gen, var);
 			sb_append(asm_gen->out, ", %");
 			sb_append(asm_gen->out, reg_name);
-		} else if (data->location == STACK) {
-			sb_append(asm_gen->out, "\tmovq $");
-			sb_append(asm_gen->out, value);
+		} else if (var_data->location == STACK) {
 			sb_append(asm_gen->out, ", -");
-			sb_append_int(asm_gen->out, data->offset);
+			sb_append_int(asm_gen->out, var_data->offset);
 			sb_append(asm_gen->out, "(%rbp)\n");
 		}
 		// check if value is literal or variable
@@ -89,9 +104,19 @@ char* ag_alloc_reg(ASM_GENERATOR* asm_gen, char* var) {
 		return NULL;
 	}
 	for (int i = 0; i < REGCOUNT; i++) {
-		if(hashmap_get(table->registers, regnames[i]) == NULL) {
-			hashmap_put(table->registers, regnames[i], var);
+		if(hashmap_get(asm_gen->registers, regnames[i]) == NULL) {
+			hashmap_put(asm_gen->registers, regnames[i], var);
 			data->reg_name = regnames[i];
+			return regnames[i];
+		}
+	}
+	// TODO: Allocate on stack if this returns NULL
+	return NULL;
+}
+
+char* ag_get_temp_reg(ASM_GENERATOR* asm_gen) {
+	for (int i = 0; i < REGCOUNT; i++) {
+		if (hashmap_get(asm_gen->registers, regnames[i]) == NULL) {
 			return regnames[i];
 		}
 	}
@@ -99,8 +124,10 @@ char* ag_alloc_reg(ASM_GENERATOR* asm_gen, char* var) {
 }
 
 char* ag_realloc_reg(ASM_GENERATOR* asm_gen, char* reg) {
-	SYM_TABLE* table = asm_gen->sym_table;
-	char* var_name = hashmap_get(table->registers, reg);
+	char* var_name = hashmap_get(asm_gen->registers, reg);
+	if (var_name == NULL) {
+		return reg;
+	}
 	char* reg_name = ag_alloc_reg(asm_gen, var_name);
 	ag_free_reg(asm_gen, reg);
 	return reg_name;
@@ -108,8 +135,8 @@ char* ag_realloc_reg(ASM_GENERATOR* asm_gen, char* reg) {
 
 void ag_free_reg(ASM_GENERATOR* asm_gen, char* reg) {
 	SYM_TABLE* table = asm_gen->sym_table;
-	char* var_name = hashmap_get(table->registers, reg);
-	hashmap_put(table->registers, reg, NULL);
+	char* var_name = hashmap_get(asm_gen->registers, reg);
+	hashmap_put(asm_gen->registers, reg, NULL);
 	VAR_DATA* data = hashmap_get(table->variables, var_name);
 	data->reg_name = NULL;
 }

@@ -10,7 +10,6 @@ typedef struct SYM_TABLE {
 	int depth;
 	int offset;
 	H_MAP* variables;
-	H_MAP* registers;
 	struct SYM_TABLE* enclosing;
 } SYM_TABLE;
 
