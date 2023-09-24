@@ -2,6 +2,7 @@
 #include "include/hashmap.h"
 #include "include/string_builder.h"
 #include <stdio.h>
+#include <string.h>
 
 ASM_GENERATOR* init_asm_generator(LIST* quads, SYM_TABLE* sym_table) {
 	ASM_GENERATOR* gen = malloc(sizeof(ASM_GENERATOR));
@@ -27,6 +28,14 @@ ASM_GENERATOR* init_asm_generator(LIST* quads, SYM_TABLE* sym_table) {
 	sb_append(gen->out, ".globl _start\n");
 	sb_append(gen->out, ".section .text\n");
 	sb_append(gen->out, "_start:\n");
+
+	// Stack allocate non-temp variables
+	sb_append(gen->out, "\tenter ");
+	char buf[20];
+	sprintf(buf, "%d", gen->sym_table->offset);
+	sb_append(gen->out, buf);
+	sb_append(gen->out, ", $0\n");
+
 	return gen;
 }
 
@@ -46,6 +55,21 @@ void ag_index_variables(ASM_GENERATOR* asm_gen) {
 				data->first_index = i;
 			}
 		}
+	}
+}
+
+void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad) {
+	char* op = quad->op;
+	if(strcmp(op, ":=") == 0) {
+
+	} else if (strcmp(op, "+") == 0) {
+
+	} else if (strcmp(op, "-") == 0) {
+
+	} else if (strcmp(op, "*") == 0) {
+
+	} else if (strcmp(op, "/") == 0) {
+
 	}
 }
 

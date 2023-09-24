@@ -21,7 +21,7 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 		AST_EXPR* arg = list_get(expr->children, 0);
 		QUAD* argquad = quad_from_expr(arg, quads, table);
 		char* res_name = symtable_get_temp(table);
-		QUAD* uquad = init_quad(expr->op->lexeme, argquad->result, NULL, res_name);
+		QUAD* uquad = init_quad("uminus", argquad->result, NULL, res_name);
 		list_push(quads, uquad);
 		return uquad;
 	}

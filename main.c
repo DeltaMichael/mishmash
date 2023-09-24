@@ -50,6 +50,9 @@ int main(int argc, char **argv)
 	for(int i = 0; i < quads->size; i++) {
 		QUAD* q = list_get(quads, i);
 		if(q->arg2 == NULL) {
+			if(strcmp(q->op, "uminus") == 0) {
+				printf("%s := %s %s\n", q->result, q->op, q->arg1);
+			}
 			if(strcmp(q->op, "-") == 0) {
 				printf("%s := %s %s\n", q->result, q->op, q->arg1);
 			}
