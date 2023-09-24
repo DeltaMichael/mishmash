@@ -95,7 +95,8 @@ void symtable_init_var(SYM_TABLE* table, char* name, VAR_LOCATION location, char
 		// TODO: add offset based on type
 		offset = 16;
 	}
-	VAR_DATA* data = init_var_data(location, type, offset);
+	table->offset += offset;
+	VAR_DATA* data = init_var_data(location, type, table->offset);
 	hashmap_put(table->variables, name, data);
 }
 

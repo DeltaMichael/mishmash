@@ -4,6 +4,7 @@
 #include "include/lexer.h"
 #include "include/parser.h"
 #include "include/list.h"
+#include "include/string_builder.h"
 #include "include/hashmap.h"
 #include "include/tac_generator.h"
 #include "string.h"
