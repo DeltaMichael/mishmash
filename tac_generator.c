@@ -69,8 +69,8 @@ VAR_DATA* init_var_data(VAR_LOCATION location, char* type, int offset) {
 	data->type = type;
 	data->reg_name = NULL;
 	data->offset = offset;
-	data->first_index = 0;
-	data->last_index = 0;
+	data->first_index = -1;
+	data->last_index = -1;
 }
 
 SYM_TABLE* init_symtable(SYM_TABLE* enclosing) {

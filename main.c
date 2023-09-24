@@ -43,6 +43,7 @@ int main(int argc, char **argv)
 	SYM_TABLE* table = init_symtable(NULL);
 	quad_from_stmt(stmt, quads, table);
 	ASM_GENERATOR* asm_gen = init_asm_generator(quads, table);
+	ag_generate_code(asm_gen);
 	char* out = ag_get_code(asm_gen);
 	// print quads
 	// TODO: Move to printer

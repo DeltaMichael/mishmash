@@ -1,6 +1,7 @@
 #include "include/asm_generator.h"
 #include "include/hashmap.h"
 #include "include/string_builder.h"
+#include <stdio.h>
 
 ASM_GENERATOR* init_asm_generator(LIST* quads, SYM_TABLE* sym_table) {
 	ASM_GENERATOR* gen = malloc(sizeof(ASM_GENERATOR));
@@ -27,6 +28,29 @@ ASM_GENERATOR* init_asm_generator(LIST* quads, SYM_TABLE* sym_table) {
 	sb_append(gen->out, ".section .text\n");
 	sb_append(gen->out, "_start:\n");
 	return gen;
+}
+
+void ag_index_variables(ASM_GENERATOR* asm_gen) {
+	LIST* quads = asm_gen->quads;
+	SYM_TABLE* table = asm_gen->sym_table;
+	for(int i = quads->size - 1; i >= 0; i--) {
+		QUAD* quad = list_get(quads, i);
+		char* vars[3];
+		vars[0] = quad->arg1;
+		vars[1] = quad->arg2;
+		vars[2] = quad->result;
+		for(int j = 0; j < 3; j++) {
+			if(vars[j] != NULL && contains_key(table->variables, vars[j])) {
+				VAR_DATA* data = hashmap_get(table->variables, vars[j]);
+				if (data->last_index == -1) data->last_index = i;
+				data->first_index = i;
+			}
+		}
+	}
+}
+
+void ag_generate_code(ASM_GENERATOR* asm_gen) {
+	ag_index_variables(asm_gen);
 }
 
 char* ag_get_code(ASM_GENERATOR* gen) {
