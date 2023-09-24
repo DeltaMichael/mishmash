@@ -12,8 +12,8 @@ typedef struct {
 STRING_BUILDER* init_sb();
 char sb_pop(STRING_BUILDER* builder);
 char sb_get(STRING_BUILDER* builder, int index);
-void sb_append(STRING_BUILDER* builder, char c);
-void sb_append_many(STRING_BUILDER* builder, char* c);
+void sb_append_char(STRING_BUILDER* builder, char c);
+void sb_append(STRING_BUILDER* builder, char* c);
 char* sb_build(STRING_BUILDER* builder);
 
 #endif

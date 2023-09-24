@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "include/asm_generator.h"
 #include "include/ast_printer.h"
 #include "include/lexer.h"
 #include "include/parser.h"
@@ -39,27 +40,10 @@ int main(int argc, char **argv)
 	}
 	print_ast_stmt(stmt);
 	LIST* quads = init_list(sizeof(QUAD*));
-
-	// H_MAP* registers = init_hash_map();
-	// hashmap_put(H_MAP* registers, "rax", NULL);
-	// hashmap_put(H_MAP* registers, "rbx", NULL);
-	// hashmap_put(H_MAP* registers, "rcx", NULL);
-	// hashmap_put(H_MAP* registers, "rdx", NULL);
-	// hashmap_put(H_MAP* registers, "rdi", NULL);
-	// hashmap_put(H_MAP* registers, "rsi", NULL);
-	// hashmap_put(H_MAP* registers, "rdi", NULL);
-	// hashmap_put(H_MAP* registers, "r8", NULL);
-	// hashmap_put(H_MAP* registers, "r9", NULL);
-	// hashmap_put(H_MAP* registers, "r10", NULL);
-	// hashmap_put(H_MAP* registers, "r11", NULL);
-	// hashmap_put(H_MAP* registers, "r12", NULL);
-	// hashmap_put(H_MAP* registers, "r13", NULL);
-	// hashmap_put(H_MAP* registers, "r14", NULL);
-	// hashmap_put(H_MAP* registers, "r15", NULL);
-
 	SYM_TABLE* table = init_symtable(NULL);
 	quad_from_stmt(stmt, quads, table);
-
+	ASM_GENERATOR* asm_gen = init_asm_generator(quads, table);
+	char* out = ag_get_code(asm_gen);
 	// print quads
 	// TODO: Move to printer
 	for(int i = 0; i < quads->size; i++) {
@@ -80,6 +64,7 @@ int main(int argc, char **argv)
 			printf("%s := %s %s %s\n", q->result, q->arg1, q->op, q->arg2);
 		}
 	}
+	printf("%s", out);
 	return 0;
 }
 

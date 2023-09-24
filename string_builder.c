@@ -30,7 +30,7 @@ char sb_get(STRING_BUILDER* sb, int index) {
 	return c;
 }
 
-void sb_append(STRING_BUILDER* sb, char c) {
+void sb_append_char(STRING_BUILDER* sb, char c) {
 	if(!sb->characters) {
 		sb->characters = malloc(sizeof(char));
 	} else {
@@ -46,15 +46,15 @@ void sb_append(STRING_BUILDER* sb, char c) {
 }
 
 // TODO: optimize this
-void sb_append_many(STRING_BUILDER* sb, char* c) {
+void sb_append(STRING_BUILDER* sb, char* c) {
 	while(*c != '\0') {
-		sb_append(sb, *c);
+		sb_append_char(sb, *c);
 		c += 1;
 	}
 }
 
 char* sb_build(STRING_BUILDER* sb) {
-	sb_append(sb, '\0');
+	sb_append_char(sb, '\0');
 	return sb->characters;
 }
 
