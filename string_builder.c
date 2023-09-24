@@ -45,6 +45,12 @@ void sb_append_char(STRING_BUILDER* sb, char c) {
 	sb->size++;
 }
 
+void sb_append_int(STRING_BUILDER* sb, int number) {
+	char buf[20];
+	sprintf(buf, "%d", number);
+	sb_append(sb, buf);
+}
+
 // TODO: optimize this
 void sb_append(STRING_BUILDER* sb, char* c) {
 	while(*c != '\0') {

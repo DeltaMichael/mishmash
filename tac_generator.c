@@ -43,9 +43,6 @@ QUAD* quad_from_stmt(AST_STMT* stmt, LIST* quads, SYM_TABLE* table) {
 	}
 	if(stmt->type == DECLARATION) {
 		TOKEN* type = list_get(stmt->values, 0);
-		// QUAD* aquad = init_quad("declr", "0", type->lexeme, stmt->id->lexeme);
-		// list_push(quads, aquad);
-		// return aquad;
 		symtable_init_var(table, stmt->id->lexeme, STACK, type->lexeme);
 		return NULL;
 	}
