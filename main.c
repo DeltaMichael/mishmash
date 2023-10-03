@@ -12,6 +12,11 @@
 
 int main(int argc, char **argv)
 {
+	if (argc == 0) {
+		printf("Usage: mishmash <file_path>");
+		exit(1);
+	}
+
 	// For debugging only
 	const char *token_types[] = {"FUN", "BEGIN", "END", "DECLR", "RETURN", "COLON", "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET",
 								 "RIGHT_BRACKET", "COMMA", "LINE_TERM", "ASSIGN", "EQUALS", "PLUS", "MINUS", "MULT", "DIV",
@@ -19,7 +24,7 @@ int main(int argc, char **argv)
 
 	const char *statement_types[] = {"ASSIGNMENT", "BLOCK", "PRINT", "EXPRESSION_STATEMENT"};
 
-	LEXER *lexer = init_from_file("expr.msh");
+	LEXER *lexer = init_from_file(argv[1]);
 	LIST* tokens = init_list(sizeof(TOKEN*));
 	while (*lexer->current != '\0')
 	{
@@ -69,7 +74,24 @@ int main(int argc, char **argv)
 			printf("%s := %s %s %s\n", q->result, q->arg1, q->op, q->arg2);
 		}
 	}
+
+	int file_name_length = strlen(argv[1]);
+	STRING_BUILDER* out_name_builder = init_sb();
+	for (int i = file_name_length - 1; i >= 0; i--) {
+		if(argv[1][i] == '.') {
+			file_name_length = i;
+			break;
+		}
+	}
+	for (int i = 0; i < file_name_length; i++) {
+		sb_append_char(out_name_builder, argv[1][i]);
+	}
+	sb_append(out_name_builder, ".s");
+
+	char* out_file_path = sb_build(out_name_builder);
+	FILE *f = fopen(out_file_path, "w");
 	printf("%s", out);
+	fprintf(f, "%s", out);
 	return 0;
 }
 

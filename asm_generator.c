@@ -46,7 +46,7 @@ void ag_index_variables(ASM_GENERATOR* asm_gen) {
 	}
 }
 
-void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad) {
+void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 	char* op = quad->op;
 	SYM_TABLE* table = asm_gen->sym_table;
 	if(strcmp(op, ":=") == 0) {
@@ -58,6 +58,9 @@ void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad) {
 			if (value_data->location == REGISTER) {
 				sb_append(asm_gen->out, "\tmovq %");
 				sb_append(asm_gen->out, value_data->reg_name);
+				if (value_data->last_index == index) {
+					ag_free_reg(asm_gen, value_data->reg_name);
+				}
 			} else if (value_data->location == STACK) {
 				char* temp_reg = ag_get_temp_reg(asm_gen);
 				sb_append(asm_gen->out, "\tmovq -");
@@ -81,7 +84,6 @@ void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad) {
 			sb_append_int(asm_gen->out, var_data->offset);
 			sb_append(asm_gen->out, "(%rbp)\n");
 		}
-		// check if value is literal or variable
 		// create assignment code
 		// deallocate register variables that can be deallocated
 	} else if (strcmp(op, "+") == 0) {
@@ -144,11 +146,11 @@ void ag_free_reg(ASM_GENERATOR* asm_gen, char* reg) {
 void ag_generate_code(ASM_GENERATOR* asm_gen) {
 	ag_index_variables(asm_gen);
 	QUAD* quad = list_get(asm_gen->quads, 0);
-	ag_quad_to_asm(asm_gen, quad);
+	ag_quad_to_asm(asm_gen, quad, 0);
 	quad = list_get(asm_gen->quads, 1);
-	ag_quad_to_asm(asm_gen, quad);
+	ag_quad_to_asm(asm_gen, quad, 1);
 	quad = list_get(asm_gen->quads, 2);
-	ag_quad_to_asm(asm_gen, quad);
+	ag_quad_to_asm(asm_gen, quad, 2);
 	ag_add_exit(asm_gen);
 }
 

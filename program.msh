@@ -1,9 +1,0 @@
-fun main(argc: int, argv: string[]): int
-DECLR
-	x: int;
-	y: int;
-BEGIN
-	x := 69;
-	y := 2;
-	return x + y;
-END
