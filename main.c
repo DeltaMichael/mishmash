@@ -49,8 +49,6 @@ int main(int argc, char **argv)
 	SYM_TABLE* table = init_symtable(NULL);
 	quad_from_stmt(stmt, quads, table);
 	ASM_GENERATOR* asm_gen = init_asm_generator(quads, table);
-	ag_generate_code(asm_gen);
-	char* out = ag_get_code(asm_gen);
 	// print quads
 	// TODO: Move to printer
 	for(int i = 0; i < quads->size; i++) {
@@ -74,6 +72,8 @@ int main(int argc, char **argv)
 			printf("%s := %s %s %s\n", q->result, q->arg1, q->op, q->arg2);
 		}
 	}
+	ag_generate_code(asm_gen);
+	char* out = ag_get_code(asm_gen);
 
 	int file_name_length = strlen(argv[1]);
 	STRING_BUILDER* out_name_builder = init_sb();

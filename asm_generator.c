@@ -54,9 +54,9 @@ void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 	if(strcmp(op, ":=") == 0) {
 		ag_assign_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "+") == 0) {
-
-	} else if (strcmp(op, "-") == 0) {
 		ag_add_quad(asm_gen, quad, index);
+	} else if (strcmp(op, "-") == 0) {
+
 	} else if (strcmp(op, "*") == 0) {
 		ag_mul_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "/") == 0) {
@@ -328,7 +328,7 @@ void ag_free_reg(ASM_GENERATOR* asm_gen, char* reg) {
 void ag_generate_code(ASM_GENERATOR* asm_gen) {
 	ag_index_variables(asm_gen);
 	LIST* quads = asm_gen->quads;
-	for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < quads->size; i++) {
 		QUAD* quad = list_get(asm_gen->quads, i);
 		ag_quad_to_asm(asm_gen, quad, i);
 	}
