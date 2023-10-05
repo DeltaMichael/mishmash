@@ -1,5 +1,8 @@
 #!/bin/sh
 BARE_PATH="${1%.*}"
-./mishmash "${BARE_PATH}.msh" && as "${BARE_PATH}.s" -o "${BARE_PATH}.o" && ld "${BARE_PATH}.o" -o $BARE_PATH
+MASHLIB_DIR=$2
+MASHLIB_PATH=$MASHLIB_DIR"/mashlib.o"
+./mishmash "${BARE_PATH}.msh" && as "${BARE_PATH}.s" -o "${BARE_PATH}.o"
+ld --dynamic-linker=/lib64/ld-linux-x86-64.so.2 "${BARE_PATH}.o" $MASHLIB_PATH -o $BARE_PATH
+export LD_LIBRARY_PATH=$MASHLIB_PATH
 exec $BARE_PATH
-# LD_LIBRARY_PATH=./mashlib
