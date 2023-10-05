@@ -1,8 +1,10 @@
 #include "include/asm_generator.h"
+#include "include/asm_templates.h"
 #include "include/hashmap.h"
 #include "include/string_builder.h"
 #include <stdio.h>
 #include <string.h>
+
 #define REGCOUNT 14
 char* regnames[REGCOUNT] = { "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"};
 
@@ -53,6 +55,7 @@ void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 		char* input = quad->arg1;
 		char* result = quad->result;
 		VAR_DATA* result_data = hashmap_get(table->variables, result);
+		// allocate register if not allocated already
 		if (result_data->location == REGISTER && result_data->reg_name == NULL) {
 			char* reg_name = ag_alloc_reg(asm_gen, result);
 			result_data->reg_name = reg_name;
@@ -61,54 +64,23 @@ void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 		if(contains_key(table->variables, input)) {
 			VAR_DATA* input_data = hashmap_get(table->variables, input);
 			if (input_data->location == REGISTER && result_data->location == REGISTER) {
-				sb_append(asm_gen->out, "\tmovq %");
-				sb_append(asm_gen->out, input_data->reg_name);
-				sb_append(asm_gen->out, ", %");
-				sb_append(asm_gen->out, result_data->reg_name);
+				mov_reg_reg(asm_gen->out, input_data->reg_name, result_data->reg_name);
 			}
 			if (input_data->location == STACK && result_data->location == REGISTER) {
-				char* temp_reg = ag_get_temp_reg(asm_gen);
-				sb_append(asm_gen->out, "\tmovq -");
-				sb_append_int(asm_gen->out, input_data->offset);
-				sb_append(asm_gen->out, "(%rbp), %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, "\n");
-				sb_append(asm_gen->out, "\tmovq %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, ", %");
-				sb_append(asm_gen->out, result_data->reg_name);
+				mov_stack_reg(asm_gen->out, input_data->offset, result_data->reg_name);
 			}
 			if (input_data->location == REGISTER && result_data->location == STACK) {
-				sb_append(asm_gen->out, "\tmovq %");
-				sb_append(asm_gen->out, input_data->reg_name);
-				sb_append(asm_gen->out, ", -");
-				sb_append_int(asm_gen->out, result_data->offset);
-				sb_append(asm_gen->out, "(%rbp)\n");
-
+				mov_reg_stack(asm_gen->out, input_data->reg_name, result_data->offset);
 			}
 			if (input_data->location == STACK && result_data->location == STACK) {
 				char* temp_reg = ag_get_temp_reg(asm_gen);
-				sb_append(asm_gen->out, "\tmovq -");
-				sb_append_int(asm_gen->out, input_data->offset);
-				sb_append(asm_gen->out, "(%rbp), %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, "\n");
-				sb_append(asm_gen->out, "\tmovq %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, ", -");
-				sb_append_int(asm_gen->out, result_data->offset);
-				sb_append(asm_gen->out, "(%rbp)\n");
+				mov_stack_stack(asm_gen->out, input_data->offset, result_data->offset, temp_reg);
 			}
 		} else {
-			sb_append(asm_gen->out, "\tmovq $");
-			sb_append(asm_gen->out, input);
 			if (result_data->location == REGISTER) {
-				sb_append(asm_gen->out, ", %");
-				sb_append(asm_gen->out, result_data->reg_name);
+				mov_val_reg(asm_gen->out, input, result_data->reg_name);
 			} else if (result_data->location == STACK) {
-				sb_append(asm_gen->out, ", -");
-				sb_append_int(asm_gen->out, result_data->offset);
-				sb_append(asm_gen->out, "(%rbp)\n");
+				mov_val_stack(asm_gen->out, input, result_data->offset);
 			}
 		}
 		// create assignment code
@@ -131,49 +103,23 @@ void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 			result_data->reg_name = reg_name;
 		}
 		if (input_data->location == REGISTER && result_data->location == REGISTER) {
-				sb_append(asm_gen->out, "\tmovq %");
-				sb_append(asm_gen->out, input_data->reg_name);
-				sb_append(asm_gen->out, ", %");
-				sb_append(asm_gen->out, result_data->reg_name);
-				sb_append(asm_gen->out, "\n");
-				sb_append(asm_gen->out, "\tneg %");
-				sb_append(asm_gen->out, result_data->reg_name);
-				sb_append(asm_gen->out, "\n");
+			mov_reg_reg(asm_gen->out, input_data->reg_name, result_data->reg_name);
+			neg_reg(asm_gen->out, result_data->reg_name);
 		}
 		if (input_data->location == STACK && result_data->location == REGISTER) {
-				char* temp_reg = ag_get_temp_reg(asm_gen);
-				sb_append(asm_gen->out, "\tmovq -");
-				sb_append_int(asm_gen->out, input_data->offset);
-				sb_append(asm_gen->out, "(%rbp), %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, "\n");
-				sb_append(asm_gen->out, "\tneg %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, "\n");
-				sb_append(asm_gen->out, "\tmovq %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, ", %");
-				sb_append(asm_gen->out, result_data->reg_name);
-				sb_append(asm_gen->out, "\n");
+			mov_stack_reg(asm_gen->out, input_data->offset, result_data->reg_name);
+			neg_reg(asm_gen->out, result_data->reg_name);
 		}
 		if (input_data->location == REGISTER && result_data->location == STACK) {
-				char* temp_reg = ag_get_temp_reg(asm_gen);
-				sb_append(asm_gen->out, "\tmovq %");
-				sb_append(asm_gen->out, input_data->reg_name);
-				sb_append(asm_gen->out, ", %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, "\n");
-				sb_append(asm_gen->out, "\tneg %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, "\n");
-				sb_append(asm_gen->out, "\tmovq %");
-				sb_append(asm_gen->out, temp_reg);
-				sb_append(asm_gen->out, ", -");
-				sb_append_int(asm_gen->out, result_data->offset);
-				sb_append(asm_gen->out, "(%rbp)\n");
+			mov_reg_stack(asm_gen->out, input_data->reg_name, result_data->offset);
+			char* temp_reg = ag_get_temp_reg(asm_gen);
+			neg_stack(asm_gen->out, result_data->offset, temp_reg);
 		}
 		if (input_data->location == STACK && result_data->location == STACK) {
-				sb_append(asm_gen->out, "IMPLEMENT ME");
+			char* temp_reg = ag_get_temp_reg(asm_gen);
+			mov_stack_reg(asm_gen->out, input_data->offset, temp_reg);
+			neg_reg(asm_gen->out, temp_reg);
+			mov_reg_stack(asm_gen->out, temp_reg, result_data->offset);
 		}
 
 	}
