@@ -258,32 +258,46 @@ void ag_uminus_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 	SYM_TABLE* table = asm_gen->sym_table;
 	char* input = quad->arg1;
 	char* result = quad->result;
-	VAR_DATA* input_data = hashmap_get(table->variables, input);
 	VAR_DATA* result_data = hashmap_get(table->variables, result);
+
+
 	if (result_data->location == REGISTER && result_data->reg_name == NULL) {
 		char* reg_name = ag_alloc_reg(asm_gen, result);
 		result_data->reg_name = reg_name;
 	}
-	if (input_data->location == REGISTER && result_data->location == REGISTER) {
-		mov_reg_reg(asm_gen->out, input_data->reg_name, result_data->reg_name);
-		neg_reg(asm_gen->out, result_data->reg_name);
+
+	if(contains_key(table->variables, input)) {
+		VAR_DATA* input_data = hashmap_get(table->variables, input);
+		if (input_data->location == REGISTER && result_data->location == REGISTER) {
+			mov_reg_reg(asm_gen->out, input_data->reg_name, result_data->reg_name);
+			neg_reg(asm_gen->out, result_data->reg_name);
+		}
+		if (input_data->location == STACK && result_data->location == REGISTER) {
+			mov_stack_reg(asm_gen->out, input_data->offset, result_data->reg_name);
+			neg_reg(asm_gen->out, result_data->reg_name);
+		}
+		if (input_data->location == REGISTER && result_data->location == STACK) {
+			mov_reg_stack(asm_gen->out, input_data->reg_name, result_data->offset);
+			char* temp_reg = ag_get_temp_reg(asm_gen);
+			neg_stack(asm_gen->out, result_data->offset, temp_reg);
+		}
+		if (input_data->location == STACK && result_data->location == STACK) {
+			char* temp_reg = ag_get_temp_reg(asm_gen);
+			mov_stack_reg(asm_gen->out, input_data->offset, temp_reg);
+			neg_reg(asm_gen->out, temp_reg);
+			mov_reg_stack(asm_gen->out, temp_reg, result_data->offset);
+		}
+	} else {
+		if (result_data->location == REGISTER) {
+			mov_val_reg(asm_gen->out, input, result_data->reg_name);
+			neg_reg(asm_gen->out, result_data->reg_name);
+		}
+		if (result_data->location == STACK) {
+			char* temp_reg = ag_get_temp_reg(asm_gen);
+			mov_val_stack(asm_gen->out, input, result_data->offset);
+			neg_stack(asm_gen->out, result_data->offset, temp_reg);
+		}
 	}
-	if (input_data->location == STACK && result_data->location == REGISTER) {
-		mov_stack_reg(asm_gen->out, input_data->offset, result_data->reg_name);
-		neg_reg(asm_gen->out, result_data->reg_name);
-	}
-	if (input_data->location == REGISTER && result_data->location == STACK) {
-		mov_reg_stack(asm_gen->out, input_data->reg_name, result_data->offset);
-		char* temp_reg = ag_get_temp_reg(asm_gen);
-		neg_stack(asm_gen->out, result_data->offset, temp_reg);
-	}
-	if (input_data->location == STACK && result_data->location == STACK) {
-		char* temp_reg = ag_get_temp_reg(asm_gen);
-		mov_stack_reg(asm_gen->out, input_data->offset, temp_reg);
-		neg_reg(asm_gen->out, temp_reg);
-		mov_reg_stack(asm_gen->out, temp_reg, result_data->offset);
-	}
-	// TODO: deallocate register variables that can be deallocated
 	ag_try_free_variable(asm_gen, input, index);
 }
 
