@@ -85,6 +85,45 @@ void mul_val_stack(STRING_BUILDER* out, char* val, int out_offset, char* temp_re
 	mul_val_reg(out, val, temp_reg);
 }
 
+void add_reg_reg(STRING_BUILDER* out, char* in_reg, char* out_reg) {
+	sb_append(out, "\tadd %");
+	sb_append(out, in_reg);
+	sb_append(out, ", %");
+	sb_append(out, out_reg);
+	sb_append(out, "\n");
+}
+
+void add_reg_stack(STRING_BUILDER* out, char* in_reg, int out_offset, char* temp_reg) {
+	mov_stack_reg(out, out_offset, temp_reg);
+	add_reg_reg(out, in_reg, temp_reg);
+}
+
+void add_stack_reg(STRING_BUILDER* out, int in_offset, char* out_reg) {
+	sb_append(out, "\tadd -");
+	sb_append_int(out, in_offset);
+	sb_append(out, "(%rbp), %");
+	sb_append(out, out_reg);
+	sb_append(out, "\n");
+}
+
+void add_stack_stack(STRING_BUILDER* out, int in_offset, int out_offset, char* temp_reg) {
+	mov_stack_reg(out, in_offset, temp_reg);
+	add_stack_reg(out, out_offset, temp_reg);
+}
+
+void add_val_reg(STRING_BUILDER* out, char* val, char* out_reg) {
+	sb_append(out, "\tadd $");
+	sb_append(out, val);
+	sb_append(out, ", %");
+	sb_append(out, out_reg);
+	sb_append(out, "\n");
+}
+
+void add_val_stack(STRING_BUILDER* out, char* val, int out_offset, char* temp_reg) {
+	mov_stack_reg(out, out_offset, temp_reg);
+	add_val_reg(out, val, temp_reg);
+}
+
 void neg_reg(STRING_BUILDER* out, char* reg) {
 	sb_append(out, "\tneg %");
 	sb_append(out, reg);

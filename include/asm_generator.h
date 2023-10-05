@@ -21,6 +21,7 @@ void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad, int index);
 void ag_assign_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index);
 void ag_uminus_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index);
 void ag_mul_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index);
+void ag_add_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index);
 void ag_free_reg(ASM_GENERATOR* asm_gen, char* reg);
 void ag_index_variables(ASM_GENERATOR* asm_gen);
 void ag_add_exit(ASM_GENERATOR* asm_gen);
