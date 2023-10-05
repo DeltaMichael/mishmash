@@ -131,7 +131,7 @@ AST_STMT* block(PARSER* parser) {
 		// just parse block
 		return block_body(parser, values);
 	}
-	return declaration(parser);
+	return print_stmt(parser);
 }
 
 AST_STMT* block_body(PARSER* parser, LIST* values) {
@@ -144,6 +144,14 @@ AST_STMT* block_body(PARSER* parser, LIST* values) {
 	return stmt;
 }
 
+AST_STMT* print_stmt(PARSER* parser) {
+	if(parser_match(parser, PRINT_OP)) {
+		AST_STMT* stmt = expression_statement(parser);
+		stmt->type = PRINT_STATEMENT;
+		return stmt;
+	}
+	return declaration(parser);
+}
 
 // TODO: Move this down the parse tree
 AST_STMT* declaration(PARSER* parser) {

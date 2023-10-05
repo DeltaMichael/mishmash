@@ -21,7 +21,7 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 		AST_EXPR* arg = list_get(expr->children, 0);
 		QUAD* argquad = quad_from_expr(arg, quads, table);
 		char* res_name = symtable_get_temp(table);
-		QUAD* uquad = init_quad("uminus", argquad->result, NULL, res_name);
+       	QUAD* uquad = init_quad("uminus", argquad->result, NULL, res_name);
 		list_push(quads, uquad);
 		return uquad;
 	}
@@ -38,6 +38,12 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 }
 
 QUAD* quad_from_stmt(AST_STMT* stmt, LIST* quads, SYM_TABLE* table) {
+	if(stmt->type == PRINT_STATEMENT) {
+		QUAD* expr_quad = quad_from_expr(list_get(stmt->values, 0), quads, table);
+		QUAD* pquad = init_quad("print", expr_quad->result, NULL, NULL);
+		list_push(quads, pquad);
+		return pquad;
+	}
 	if(stmt->type == EXPRESSION_STATEMENT) {
 		return quad_from_expr(list_get(stmt->values, 0), quads, table);
 	}

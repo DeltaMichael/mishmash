@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 
 	// For debugging only
 	const char *token_types[] = {"FUN", "BEGIN", "END", "DECLR", "RETURN", "COLON", "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET",
-								 "RIGHT_BRACKET", "COMMA", "LINE_TERM", "ASSIGN", "EQUALS", "PLUS", "MINUS", "MULT", "DIV",
+								 "RIGHT_BRACKET", "COMMA", "LINE_TERM", "PRINT_OP", "ASSIGN", "EQUALS", "PLUS", "MINUS", "MULT", "DIV",
 								 "STATIC_TYPE", "IDENTIFIER", "INT_LITERAL"};
 
 	const char *statement_types[] = {"ASSIGNMENT", "BLOCK", "PRINT", "EXPRESSION_STATEMENT"};
@@ -63,7 +63,9 @@ int main(int argc, char **argv)
 			if(strcmp(q->op, ":=") == 0) {
 				printf("%s := %s\n", q->result, q->arg1);
 			}
-
+			if(strcmp(q->op, "print") == 0) {
+				printf("print %s\n", q->arg1);
+			}
 		} else if(strcmp(q->op, "declr") == 0) {
 				printf("%s %s := %s\n", q->arg2, q->result, q->arg1);
 		}

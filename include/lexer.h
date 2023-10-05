@@ -28,6 +28,7 @@ typedef enum
 	COMMA,
 	LINE_TERM,
 	// OPERATORS
+	PRINT_OP,
 	ASSIGN,
 	EQUALS,
 	PLUS,

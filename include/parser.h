@@ -31,7 +31,7 @@ typedef enum {
 	ASSIGNMENT,
 	DECLARATION,
 	BLOCK,
-	PRINT,
+	PRINT_STATEMENT,
 	EXPRESSION_STATEMENT
 } AST_STMT_TYPE;
 
@@ -63,6 +63,7 @@ AST_STMT* parser_parse(PARSER* parser);
 AST_STMT* statement(PARSER* parser);
 AST_STMT* block(PARSER* parser);
 AST_STMT* block_body(PARSER* parser, LIST* values);
+AST_STMT* print_stmt(PARSER* parser);
 AST_STMT* declaration(PARSER* parser);
 AST_STMT* assignment(PARSER* parser);
 AST_STMT* expression_statement(PARSER* parser);
@@ -72,6 +73,5 @@ AST_EXPR* term(PARSER* parser);
 AST_EXPR* factor(PARSER* parser);
 AST_EXPR* unary(PARSER* parser);
 AST_EXPR* primary(PARSER* parser);
-
 #endif
 

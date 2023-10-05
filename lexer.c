@@ -71,7 +71,6 @@ TOKEN *get_token(LEXER *lexer)
 		token->lexeme = strndup(start, size);
 		if (strcmp(token->lexeme, "fun") == 0)
 		{
-			printf("Lexeme %s is of type function", token->lexeme);
 			token->type = FUN;
 		}
 		else if (strcmp(token->lexeme, "DECLR") == 0)
@@ -85,6 +84,10 @@ TOKEN *get_token(LEXER *lexer)
 		else if (strcmp(token->lexeme, "END") == 0)
 		{
 			token->type = END;
+		}
+		else if (strcmp(token->lexeme, "print") == 0)
+		{
+			token->type = PRINT_OP;
 		}
 		else if (strcmp(token->lexeme, "int") == 0 || strcmp(token->lexeme, "string") == 0)
 		{
