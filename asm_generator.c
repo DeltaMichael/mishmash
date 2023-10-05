@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define REGCOUNT 14
+
 char* regnames[REGCOUNT] = { "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"};
 
 ASM_GENERATOR* init_asm_generator(LIST* quads, SYM_TABLE* sym_table) {
@@ -100,6 +101,7 @@ void ag_assign_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 		}
 	}
 	// TODO: deallocate register variables that can be deallocated
+	ag_try_free_variable(asm_gen, input, index);
 }
 
 void ag_add_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
@@ -173,6 +175,8 @@ void ag_add_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 		mov_reg_stack(asm_gen->out, temp_reg, result_data->offset);
 	}
 	// TODO: deallocate register variables that can be deallocated
+	ag_try_free_variable(asm_gen, mfirst, index);
+	ag_try_free_variable(asm_gen, msecond, index);
 }
 
 void ag_mul_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
@@ -246,6 +250,8 @@ void ag_mul_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 		mov_reg_stack(asm_gen->out, temp_reg, result_data->offset);
 	}
 	// TODO: deallocate register variables that can be deallocated
+	ag_try_free_variable(asm_gen, mfirst, index);
+	ag_try_free_variable(asm_gen, msecond, index);
 }
 
 void ag_uminus_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
@@ -278,6 +284,7 @@ void ag_uminus_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 		mov_reg_stack(asm_gen->out, temp_reg, result_data->offset);
 	}
 	// TODO: deallocate register variables that can be deallocated
+	ag_try_free_variable(asm_gen, input, index);
 }
 
 char* ag_alloc_reg(ASM_GENERATOR* asm_gen, char* var) {
@@ -315,6 +322,16 @@ char* ag_realloc_reg(ASM_GENERATOR* asm_gen, char* reg) {
 	char* reg_name = ag_alloc_reg(asm_gen, var_name);
 	ag_free_reg(asm_gen, reg);
 	return reg_name;
+}
+
+void ag_try_free_variable(ASM_GENERATOR* asm_gen, char* var, int index) {
+	SYM_TABLE* table = asm_gen->sym_table;
+	VAR_DATA* var_data = hashmap_get(table->variables, var);
+	if(contains_key(table->variables, var)) {
+		if (var_data->location == REGISTER && var_data->last_index == index) {
+			ag_free_reg(asm_gen, var_data->reg_name);
+		}
+	}
 }
 
 void ag_free_reg(ASM_GENERATOR* asm_gen, char* reg) {
