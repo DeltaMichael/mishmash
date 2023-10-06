@@ -26,5 +26,8 @@ void add_val_stack(STRING_BUILDER* out, char* val, int out_offset, char* temp_re
 void neg_reg(STRING_BUILDER* out, char* reg);
 void neg_stack(STRING_BUILDER* out, int offset, char* temp_reg);
 
+void pop_reg(STRING_BUILDER* out, char* reg_name);
+void push_reg(STRING_BUILDER* out, char* reg_name);
+void call(STRING_BUILDER* out, char* function);
 #endif
 

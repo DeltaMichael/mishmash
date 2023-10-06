@@ -64,6 +64,8 @@ void ag_quad_to_asm(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 
 	} else if (strcmp(op, "uminus") == 0) {
 		ag_uminus_quad(asm_gen, quad, index);
+	} else if (strcmp(op, "print") == 0) {
+		ag_print_quad(asm_gen, quad, index);
 	}
 }
 
@@ -299,6 +301,43 @@ void ag_uminus_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
 		}
 	}
 	ag_try_free_variable(asm_gen, input, index);
+}
+
+void ag_print_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index) {
+	ag_preserve_registers(asm_gen);
+	SYM_TABLE* table = asm_gen->sym_table;
+	char* input = quad->arg1;
+	// print a variable
+	if(contains_key(table->variables, input)) {
+		VAR_DATA* input_data = hashmap_get(table->variables, input);
+		if (input_data->location == REGISTER) {
+			mov_reg_reg(asm_gen->out, input_data->reg_name, "rdi");
+		}
+		if (input_data->location == STACK) {
+			mov_stack_reg(asm_gen->out, input_data->offset, "rdi");
+		}
+	// print a literal
+	} else {
+		mov_val_reg(asm_gen->out, input, "rdi");
+	}
+	call(asm_gen->out, "print_num");
+	ag_restore_registers(asm_gen);
+}
+
+void ag_preserve_registers(ASM_GENERATOR* asm_gen) {
+	for (int i = 0; i < REGCOUNT; i++) {
+		if(hashmap_get(asm_gen->registers, regnames[i]) != NULL) {
+			push_reg(asm_gen->out, regnames[i]);
+		}
+	}
+}
+
+void ag_restore_registers(ASM_GENERATOR* asm_gen) {
+	for (int i = REGCOUNT - 1; i >= 0; i--) {
+		if(hashmap_get(asm_gen->registers, regnames[i]) != NULL) {
+			pop_reg(asm_gen->out, regnames[i]);
+		}
+	}
 }
 
 char* ag_alloc_reg(ASM_GENERATOR* asm_gen, char* var) {

@@ -28,6 +28,9 @@ void ag_index_variables(ASM_GENERATOR* asm_gen);
 void ag_add_exit(ASM_GENERATOR* asm_gen);
 void ag_generate_code(ASM_GENERATOR* asm_gen);
 char* ag_get_code(ASM_GENERATOR* gen);
+void ag_print_quad(ASM_GENERATOR* asm_gen, QUAD* quad, int index);
+void ag_preserve_registers(ASM_GENERATOR* asm_gen);
+void ag_restore_registers(ASM_GENERATOR* asm_gen);
 
 #endif
 

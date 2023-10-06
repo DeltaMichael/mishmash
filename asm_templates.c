@@ -136,3 +136,21 @@ void neg_stack(STRING_BUILDER* out, int offset, char* temp_reg) {
 	mov_reg_stack(out, temp_reg, offset);
 }
 
+void push_reg(STRING_BUILDER* out, char* reg_name) {
+	sb_append(out, "\tpush %");
+	sb_append(out, reg_name);
+	sb_append(out, "\n");
+}
+
+void pop_reg(STRING_BUILDER* out, char* reg_name) {
+	sb_append(out, "\tpop %");
+	sb_append(out, reg_name);
+	sb_append(out, "\n");
+}
+
+void call(STRING_BUILDER* out, char* function) {
+	sb_append(out, "\tcall ");
+	sb_append(out, function);
+	sb_append(out, "\n");
+}
+
