@@ -17,12 +17,6 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	// For debugging only
-	const char *token_types[] = {"FUN", "BEGIN", "END", "DECLR", "RETURN", "COLON", "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET",
-								 "RIGHT_BRACKET", "COMMA", "LINE_TERM", "PRINT_OP", "ASSIGN", "EQUALS", "PLUS", "MINUS", "MULT", "DIV",
-								 "STATIC_TYPE", "IDENTIFIER", "INT_LITERAL"};
-
-	const char *statement_types[] = {"ASSIGNMENT", "BLOCK", "PRINT", "EXPRESSION_STATEMENT"};
 
 	LEXER *lexer = init_from_file(argv[1]);
 	LIST* tokens = init_list(sizeof(TOKEN*));
@@ -31,10 +25,7 @@ int main(int argc, char **argv)
 		TOKEN *token = get_token(lexer);
 		list_push(tokens, token);
 	}
-	for(int i = 0; i < tokens->size; i++) {
-		TOKEN* token = tokens->elements[i];
-		printf("line: %d lexeme: %s type: %s\n", token->line, token->lexeme, token_types[token->type]);
-	}
+
 
 	PARSER *parser = init_parser(tokens);
 	AST_STMT* stmt = parser_parse(parser);
@@ -43,14 +34,51 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Compilation error\n");
 		return 1;
 	}
-	print_ast_stmt(stmt);
+
 
 	LIST* quads = init_list(sizeof(QUAD*));
 	SYM_TABLE* table = init_symtable(NULL);
 	quad_from_stmt(stmt, quads, table);
 	ASM_GENERATOR* asm_gen = init_asm_generator(quads, table);
-	// print quads
-	// TODO: Move to printer
+
+
+	ag_generate_code(asm_gen);
+	char* out = ag_get_code(asm_gen);
+
+	int file_name_length = strlen(argv[1]);
+	STRING_BUILDER* out_name_builder = init_sb();
+	for (int i = file_name_length - 1; i >= 0; i--) {
+		if(argv[1][i] == '.') {
+			file_name_length = i;
+			break;
+		}
+	}
+	for (int i = 0; i < file_name_length; i++) {
+		sb_append_char(out_name_builder, argv[1][i]);
+	}
+	sb_append(out_name_builder, ".s");
+
+	char* out_file_path = sb_build(out_name_builder);
+	FILE *f = fopen(out_file_path, "w");
+	fprintf(f, "%s", out);
+
+	// debug output
+	const char *token_types[] = {"FUN", "BEGIN", "END", "DECLR", "RETURN", "COLON", "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET",
+								 "RIGHT_BRACKET", "COMMA", "LINE_TERM", "PRINT_OP", "ASSIGN", "EQUALS", "PLUS", "MINUS", "MULT", "DIV",
+								 "STATIC_TYPE", "IDENTIFIER", "INT_LITERAL"};
+
+	const char *statement_types[] = {"ASSIGNMENT", "BLOCK", "PRINT", "EXPRESSION_STATEMENT"};
+
+	// debug output
+	for(int i = 0; i < tokens->size; i++) {
+		TOKEN* token = tokens->elements[i];
+		printf("line: %d lexeme: %s type: %s\n", token->line, token->lexeme, token_types[token->type]);
+	}
+
+	// debug output
+	print_ast_stmt(stmt);
+
+	// debug output
 	for(int i = 0; i < quads->size; i++) {
 		QUAD* q = list_get(quads, i);
 		if(q->arg2 == NULL) {
@@ -74,26 +102,10 @@ int main(int argc, char **argv)
 			printf("%s := %s %s %s\n", q->result, q->arg1, q->op, q->arg2);
 		}
 	}
-	ag_generate_code(asm_gen);
-	char* out = ag_get_code(asm_gen);
 
-	int file_name_length = strlen(argv[1]);
-	STRING_BUILDER* out_name_builder = init_sb();
-	for (int i = file_name_length - 1; i >= 0; i--) {
-		if(argv[1][i] == '.') {
-			file_name_length = i;
-			break;
-		}
-	}
-	for (int i = 0; i < file_name_length; i++) {
-		sb_append_char(out_name_builder, argv[1][i]);
-	}
-	sb_append(out_name_builder, ".s");
-
-	char* out_file_path = sb_build(out_name_builder);
-	FILE *f = fopen(out_file_path, "w");
+	//debug output
 	printf("%s", out);
-	fprintf(f, "%s", out);
+
 	return 0;
 }
 
