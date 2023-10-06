@@ -1,5 +1,3 @@
 #!/bin/sh
-
-as mashlib.s -o mashlib.o
-ld -fPIE -shared --dynamic-linker=/lib64/ld-linux-x86-64.so.2 mashlib.o -o mashlib.so
-rm mashlib.o
+gcc -shared -o mashlib.so -fPIC mashlib.c
+# move .so to /lib64 after building or set LD_LIBRARY_PATH to where the .so is located
