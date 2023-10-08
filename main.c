@@ -10,6 +10,27 @@
 #include "include/tac_generator.h"
 #include "string.h"
 
+void output_source_to_file(char* file_path, char* asm_source) {
+	int file_name_length = strlen(file_path);
+
+	STRING_BUILDER* out_name_builder = init_sb();
+	for (int i = file_name_length - 1; i >= 0; i--) {
+		if(file_path[i] == '.') {
+			file_name_length = i;
+			break;
+		}
+	}
+	for (int i = 0; i < file_name_length; i++) {
+		sb_append_char(out_name_builder, file_path[i]);
+	}
+	sb_append(out_name_builder, ".s");
+
+	char* out_file_path = sb_build(out_name_builder);
+	FILE *f = fopen(out_file_path, "w");
+	fprintf(f, "%s", asm_source);
+	// TODO free string builder
+}
+
 int main(int argc, char **argv)
 {
 	if (argc == 0) {
@@ -45,22 +66,7 @@ int main(int argc, char **argv)
 	ag_generate_code(asm_gen);
 	char* out = ag_get_code(asm_gen);
 
-	int file_name_length = strlen(argv[1]);
-	STRING_BUILDER* out_name_builder = init_sb();
-	for (int i = file_name_length - 1; i >= 0; i--) {
-		if(argv[1][i] == '.') {
-			file_name_length = i;
-			break;
-		}
-	}
-	for (int i = 0; i < file_name_length; i++) {
-		sb_append_char(out_name_builder, argv[1][i]);
-	}
-	sb_append(out_name_builder, ".s");
-
-	char* out_file_path = sb_build(out_name_builder);
-	FILE *f = fopen(out_file_path, "w");
-	fprintf(f, "%s", out);
+	output_source_to_file(argv[1], out);
 
 	// debug output
 	const char *token_types[] = {"FUN", "BEGIN", "END", "DECLR", "RETURN", "COLON", "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET",
