@@ -3,3 +3,5 @@ obj
 build
 mishmash
 tags
+test/obj
+test/testmash
