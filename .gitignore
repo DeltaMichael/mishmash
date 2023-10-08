@@ -3,5 +3,6 @@ obj
 build
 mishmash
 tags
-test/obj
-test/testmash
+tests/*.o
+tests/*.s
+testmash
