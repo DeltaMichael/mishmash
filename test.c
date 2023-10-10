@@ -41,8 +41,7 @@ LIST* get_compilation_output(char* test_file_name) {
 	char command[256];
 	sprintf(command, "./mishmash ./tests/%s", test_file_name);
 	FILE* file = popen(command, "r");
-
-	char* line = malloc(sizeof(char) * 256);
+char* line = malloc(sizeof(char) * 256);
 	while (fgets(line, sizeof(line), file)) {
 	  list_push(output, line);
 	  line = malloc(sizeof(char) * 256);
@@ -148,14 +147,16 @@ bool assert_output(LIST* expected, LIST* actual) {
 
 bool run_test(char* file_name) {
 	printf("----------%s----------\n", file_name);
-	LIST* output = get_compilation_output(file_name);
-	for(int i = 0; i < output->size; i++) {
-		printf("%s", list_get(output, i));
-	}
-	create_objects_and_link(file_name);
-	LIST* run_output = get_run_output(file_name);
 	LIST* expected_values = get_expected_values(file_name);
-	bool passed = assert_output(expected_values, run_output);
+	LIST* compilation_output = get_compilation_output(file_name);
+	bool passed = true;
+	if(compilation_output->size > 0) {
+		passed = assert_output(expected_values, compilation_output);
+	} else {
+		create_objects_and_link(file_name);
+		LIST* run_output = get_run_output(file_name);
+		passed = assert_output(expected_values, run_output);
+	}
 	if (passed) {
 		// TODO collect failures in list and display at the end
 		printf("SUCCESS\n");
