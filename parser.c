@@ -54,7 +54,8 @@ TOKEN* parser_previous(PARSER* parser) {
 }
 
 void parser_error(PARSER* parser, char* message) {
-	fprintf(stderr, "error: line %d: near: '%s': ", parser->current->line, parser->current->lexeme);
+	TOKEN* prev = parser_previous(parser);
+	fprintf(stderr, "error: line %d: near: '%s': ", prev->line, prev->lexeme);
 	fprintf(stderr, "%s\n", message);
 	parser->has_error = 1;
 	parser->exited_with_error = 1;

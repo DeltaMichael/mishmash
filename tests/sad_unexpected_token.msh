@@ -1,9 +1,8 @@
-// error: line 1: Unexpected identifier outside of block
-ASDFf
-	x: int;
-	a: int;
-	b: int;
-	c: int;
+// error: line 1: Unexpected statement outside of block
+x: int;
+a: int;
+b: int;
+c: int;
 BEGIN
 	a := 2;
 	b := 4;
