@@ -55,7 +55,7 @@ LIST* get_run_output(char* test_file_name) {
 
 	LIST* output = init_list(sizeof(char*));
 
-	char bare_name[64];
+	char bare_name[256];
 	int name_length = strlen(test_file_name);
 	for (int i = 0; i < name_length; i++) {
 		if(test_file_name[i] == '.') {
@@ -80,7 +80,7 @@ LIST* get_run_output(char* test_file_name) {
 
 void create_objects_and_link(char* test_file_name) {
 	char command[256];
-	char bare_name[64];
+	char bare_name[256];
 	int name_length = strlen(test_file_name);
 	for (int i = 0; i < name_length; i++) {
 		if(test_file_name[i] == '.') {
@@ -98,7 +98,7 @@ void create_objects_and_link(char* test_file_name) {
 
 void clean_up(char* test_file_name) {
 	char command[256];
-	char bare_name[64];
+	char bare_name[256];
 	int name_length = strlen(test_file_name);
 	for (int i = 0; i < name_length; i++) {
 		if(test_file_name[i] == '.') {
@@ -112,12 +112,26 @@ void clean_up(char* test_file_name) {
 	system(command);
 }
 
-bool assert_output(LIST* expected, LIST* actual) {
-	bool passed = true;
-	if(expected->size != actual->size) {
-		passed = false;
-		printf("Output has %d lines. Expected %d lines.", expected->size, actual->size);
+void print_expected_output(LIST* expected, LIST* actual) {
+	printf("EXPECTED OUTPUT:\n");
+	for(int i = 0; i < expected->size; i++) {
+		printf("%s", list_get(expected, i));
 	}
+	printf("ACTUAL OUTPUT:\n");
+	for(int i = 0; i < actual->size; i++) {
+		printf("%s", list_get(actual, i));
+	}
+}
+
+bool assert_output(LIST* expected, LIST* actual) {
+
+	if(expected->size != actual->size) {
+		printf("Output has %d lines. Expected %d lines.\n", expected->size, actual->size);
+		print_expected_output(expected, actual);
+		return false;
+	}
+
+	bool passed = true;
 	for(int i = 0; i < expected->size; i++) {
 		char* expected_line = list_get(expected, i);
 		char* actual_line = list_get(actual, i);
@@ -127,27 +141,20 @@ bool assert_output(LIST* expected, LIST* actual) {
 		};
 	}
 	if(!passed) {
-		printf("EXPECTED OUTPUT:\n");
-		for(int i = 0; i < expected->size; i++) {
-			printf("%s", list_get(expected, i));
-		}
-		printf("ACTUAL OUTPUT:\n");
-		for(int i = 0; i < actual->size; i++) {
-			printf("%s", list_get(actual, i));
-		}
+		print_expected_output(expected, actual);
 	}
 	return passed;
 }
 
-int main(int argc, char** argv) {
-	printf("----------math_print_happy.msh----------\n");
-	LIST* output = get_compilation_output("math_print_happy.msh");
+bool run_test(char* file_name) {
+	printf("----------%s----------\n", file_name);
+	LIST* output = get_compilation_output(file_name);
 	for(int i = 0; i < output->size; i++) {
 		printf("%s", list_get(output, i));
 	}
-	create_objects_and_link("math_print_happy.msh");
-	LIST* run_output = get_run_output("math_print_happy.msh");
-	LIST* expected_values = get_expected_values("math_print_happy.msh");
+	create_objects_and_link(file_name);
+	LIST* run_output = get_run_output(file_name);
+	LIST* expected_values = get_expected_values(file_name);
 	bool passed = assert_output(expected_values, run_output);
 	if (passed) {
 		// TODO collect failures in list and display at the end
@@ -155,9 +162,25 @@ int main(int argc, char** argv) {
 	} else {
 		printf("FAIL\n");
 	}
-	printf("----------math_print_happy.msh----------\n\n");
-	clean_up("math_print_happy.msh");
+	printf("----------%s----------\n\n", file_name);
+	clean_up(file_name);
+	return passed;
 	// TODO: Free lists
+}
+
+int main(int argc, char** argv) {
+	FILE* file = popen("ls -1 ./tests", "r");
+	char line[256];
+	int success_count = 0;
+	int total_count = 0;
+	while (fgets(line, sizeof(line), file)) {
+		line[strcspn(line, "\n")] = 0;
+		bool result = run_test(line);
+		success_count += result;
+		total_count++;
+	}
+	pclose(file);
+	printf("Passed %d/%d\n", success_count, total_count);
 	return 0;
 }
 
