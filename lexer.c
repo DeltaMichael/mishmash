@@ -60,6 +60,13 @@ void skip_whitespace(LEXER *lexer)
 	}
 }
 
+void skip_comment(LEXER *lexer) {
+	while(*lexer->current != '\n') {
+		advance(lexer);
+	}
+	skip_whitespace(lexer);
+}
+
 TOKEN *get_token(LEXER *lexer)
 {
 	TOKEN *token = malloc(sizeof(TOKEN));
@@ -142,8 +149,13 @@ TOKEN *get_token(LEXER *lexer)
 			token->type = MULT;
 			break;
 		case '/':
-			token->type = DIV;
-			break;
+			if(peek(lexer) == '/') {
+				skip_comment(lexer);
+				return get_token(lexer);
+			} else {
+				token->type = DIV;
+				break;
+			}
 		case ':':
 			if (peek(lexer) == '=')
 			{
