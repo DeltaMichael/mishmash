@@ -39,12 +39,12 @@ LIST* get_compilation_output(char* test_file_name) {
 	LIST* output = init_list(sizeof(char*));
 
 	char command[256];
-	sprintf(command, "./mishmash ./tests/%s", test_file_name);
+	sprintf(command, "./mishmash ./tests/%s 2>&1", test_file_name);
 	FILE* file = popen(command, "r");
-char* line = malloc(sizeof(char) * 256);
-	while (fgets(line, sizeof(line), file)) {
-	  list_push(output, line);
-	  line = malloc(sizeof(char) * 256);
+	char* line = malloc(sizeof(char) * 256);
+	while (fgets(line, 256, file)) {
+	  	list_push(output, line);
+	  	line = malloc(sizeof(char) * 256);
 	}
 	pclose(file);
 	return output;
@@ -69,7 +69,7 @@ LIST* get_run_output(char* test_file_name) {
 	FILE* file = popen(command, "r");
 
 	char* line = malloc(sizeof(char) * 256);
-	while (fgets(line, sizeof(line), file)) {
+	while (fgets(line, 256, file)) {
 	  list_push(output, line);
 	  line = malloc(sizeof(char) * 256);
 	}
@@ -125,7 +125,7 @@ void print_expected_output(LIST* expected, LIST* actual) {
 bool assert_output(LIST* expected, LIST* actual) {
 
 	if(expected->size != actual->size) {
-		printf("Output has %d lines. Expected %d lines.\n", expected->size, actual->size);
+		printf("Output has %d lines. Expected %d lines.\n", actual->size, expected->size);
 		print_expected_output(expected, actual);
 		return false;
 	}
@@ -156,6 +156,7 @@ bool run_test(char* file_name) {
 		create_objects_and_link(file_name);
 		LIST* run_output = get_run_output(file_name);
 		passed = assert_output(expected_values, run_output);
+		clean_up(file_name);
 	}
 	if (passed) {
 		// TODO collect failures in list and display at the end
@@ -164,7 +165,6 @@ bool run_test(char* file_name) {
 		printf("FAIL\n");
 	}
 	printf("----------%s----------\n\n", file_name);
-	clean_up(file_name);
 	return passed;
 	// TODO: Free lists
 }
@@ -182,6 +182,7 @@ int main(int argc, char** argv) {
 	}
 	pclose(file);
 	printf("Passed %d/%d\n", success_count, total_count);
+	// run_test("sad_unexpected_token.msh");
 	return 0;
 }
 
