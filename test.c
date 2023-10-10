@@ -1,7 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "include/list.h"
+
+LIST* get_expected_values(char* test_file_name) {
+	LIST* output = init_list(sizeof(char*));
+
+	char file_path[256];
+	sprintf(file_path, "./tests/%s", test_file_name);
+	FILE* file = fopen(file_path, "r");
+
+	char line[256];
+	while (fgets(line, sizeof(line), file)) {
+		char* value = malloc(sizeof(char) * 256);
+		int line_index = 0;
+		int value_index = 0;
+		// skip whitespace
+		while(line[line_index] == ' ') line_index++;
+		if (line[0] == '/' && line[1] == '/') {
+			// skip comment and whitespace
+			line_index += 2;
+			while(line[line_index] == ' ') line_index++;
+			while(line[line_index] != 0) {
+				value[value_index] = line[line_index];
+				value_index++;
+				line_index++;
+			}
+			value[value_index] = 0;
+			list_push(output, value);
+		}
+	}
+	fclose(file);
+	return output;
+}
 
 LIST* get_compilation_output(char* test_file_name) {
 	LIST* output = init_list(sizeof(char*));
@@ -34,7 +66,7 @@ LIST* get_run_output(char* test_file_name) {
 	}
 
 	char command[256];
-	sprintf(command, "./tests/%s", bare_name);
+	sprintf(command, "./tests/%s 2>&1", bare_name);
 	FILE* file = popen(command, "r");
 
 	char* line = malloc(sizeof(char) * 256);
@@ -64,23 +96,67 @@ void create_objects_and_link(char* test_file_name) {
 	system(command);
 }
 
-void clean_up() {
+void clean_up(char* test_file_name) {
+	char command[256];
+	char bare_name[64];
+	int name_length = strlen(test_file_name);
+	for (int i = 0; i < name_length; i++) {
+		if(test_file_name[i] == '.') {
+			bare_name[i] = 0;
+			break;
+		}
+		bare_name[i] = test_file_name[i];
+	}
+	sprintf(command, "rm ./tests/%s", bare_name);
 	system("rm ./tests/*.s ./tests/*.o");
-	system("rm ./tests/expr");
+	system(command);
+}
+
+bool assert_output(LIST* expected, LIST* actual) {
+	bool passed = true;
+	if(expected->size != actual->size) {
+		passed = false;
+		printf("Output has %d lines. Expected %d lines.", expected->size, actual->size);
+	}
+	for(int i = 0; i < expected->size; i++) {
+		char* expected_line = list_get(expected, i);
+		char* actual_line = list_get(actual, i);
+		if (strcmp(expected_line, actual_line) != 0) {
+			passed = false;
+			printf("Expected: %sActual: %s\n", expected_line, actual_line);
+		};
+	}
+	if(!passed) {
+		printf("EXPECTED OUTPUT:\n");
+		for(int i = 0; i < expected->size; i++) {
+			printf("%s", list_get(expected, i));
+		}
+		printf("ACTUAL OUTPUT:\n");
+		for(int i = 0; i < actual->size; i++) {
+			printf("%s", list_get(actual, i));
+		}
+	}
+	return passed;
 }
 
 int main(int argc, char** argv) {
-	LIST* output = get_compilation_output("expr.msh");
+	printf("----------math_print_happy.msh----------\n");
+	LIST* output = get_compilation_output("math_print_happy.msh");
 	for(int i = 0; i < output->size; i++) {
 		printf("%s", list_get(output, i));
 	}
-	create_objects_and_link("expr.msh");
-	LIST* run_output = get_run_output("expr.msh");
-	for(int i = 0; i < run_output->size; i++) {
-		printf("%s", list_get(run_output, i));
+	create_objects_and_link("math_print_happy.msh");
+	LIST* run_output = get_run_output("math_print_happy.msh");
+	LIST* expected_values = get_expected_values("math_print_happy.msh");
+	bool passed = assert_output(expected_values, run_output);
+	if (passed) {
+		// TODO collect failures in list and display at the end
+		printf("SUCCESS\n");
+	} else {
+		printf("FAIL\n");
 	}
-	clean_up();
-	// TODO: Implement comments and put expect output as a comment at top of test file
+	printf("----------math_print_happy.msh----------\n\n");
+	clean_up("math_print_happy.msh");
 	// TODO: Free lists
 	return 0;
 }
