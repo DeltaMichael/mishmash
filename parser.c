@@ -55,7 +55,7 @@ TOKEN* parser_previous(PARSER* parser) {
 
 void parser_error(PARSER* parser, char* message) {
 	TOKEN* prev = parser_previous(parser);
-	fprintf(stderr, "error: line %d: near: '%s': ", prev->line, prev->lexeme);
+	fprintf(stderr, "error: line %d: near: '%s': ", prev->line + 1, prev->lexeme);
 	fprintf(stderr, "%s\n", message);
 	parser->has_error = 1;
 	parser->exited_with_error = 1;
@@ -103,7 +103,10 @@ AST_STMT* parser_parse(PARSER* parser) {
 		if(parser->has_error) {
 			parser->has_error = 0;
 			parser_sync(parser);
-			return NULL;
+			// TODO: Collect all statements that are parsed
+			//		 This will be necessary for function declarations
+			// 		 Check that the statement types are all blocks/functions
+			// return NULL;
 		} else {
 			return stmt;
 		}

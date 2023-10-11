@@ -1,0 +1,16 @@
+// error: line 11: near: '4': Expected line terminator at end of line
+// error: line 15: near: 'c': Expected line terminator at end of line
+// Compilation error
+DECLR
+	x: int;
+	a: int;
+	b: int;
+	c: int;
+BEGIN
+	a := 2;
+	b := 4
+	c := -8;
+	x := a * -c + b * -c;
+	print x;
+	print c
+END
