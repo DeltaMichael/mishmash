@@ -47,10 +47,10 @@ void* list_get(LIST* list, int index) {
 }
 
 void free_list(LIST* list) {
-	for(int i = 0; i < list->size; i++) {
-		free(list->elements[i]);
-		list->elements[i] = NULL;
-	}
+	// for(int i = 0; i < list->size; i++) {
+	// 	free(list->elements[i]);
+	// 	list->elements[i] = NULL;
+	// }
 	free(list->elements);
 	free(list);
 }

@@ -14,10 +14,18 @@ QUAD* init_quad(char* op, char* arg1, char* arg2, char* result) {
 }
 
 void free_quad(QUAD* quad) {
-	free(quad->op);
-	free(quad->arg1);
-	free(quad->arg2);
-	free(quad->result);
+	// if (quad->op != NULL) {
+	// 	free(quad->op);
+	// }
+	// if (quad->arg1 != NULL) {
+	// 	free(quad->arg1);
+	// }
+	// if (quad->arg2 != NULL) {
+	// 	free(quad->arg2);
+	// }
+	// if (quad->result != NULL) {
+	// 	free(quad->result);
+	// }
 	free(quad);
 }
 

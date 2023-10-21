@@ -135,10 +135,11 @@ int main(int argc, char **argv)
 	}
 
 	free_parser(parser);
-	for (size_t i; i < quads->size; i++) {
+	for (size_t i = 0; i < quads->size; i++) {
 		free_quad(quads->elements[i]);
 		quads->elements[i] = NULL;
 	}
+
 	return 0;
 }
 

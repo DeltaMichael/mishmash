@@ -18,11 +18,12 @@ PARSER* init_parser(LIST* tokens) {
 
 void free_parser(PARSER* parser) {
 	for (int i = 0; i < parser->tokens->size; i++) {
-		TOKEN* token = list_get(parser->tokens, i);
+		TOKEN* token = parser->tokens->elements[i];
 		free(token->lexeme);
+		free(token);
 	}
 	free_list(parser->tokens);
-	free(parser->current);
+	// free(parser->current);
 	free(parser);
 }
 
