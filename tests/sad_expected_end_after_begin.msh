@@ -1,0 +1,10 @@
+// error: line 10: near: ';': Expected 'END' at the end of block
+// Compilation error
+DECLR
+	x: int;
+	a: int;
+	b: int;
+BEGIN
+	x := 1;
+	a := x;
+	b := 2;

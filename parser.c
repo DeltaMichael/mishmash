@@ -141,6 +141,9 @@ AST_STMT* block(PARSER* parser) {
 AST_STMT* block_body(PARSER* parser, LIST* values) {
 	while(parser->current->type != END && !parser_is_at_end(parser)) {
 		AST_STMT* stmt = statement(parser);
+		if(stmt->type == DECLARATION) {
+			parser_error(parser, "Declaration outside block DECLR header");
+		}
 		list_push(values, stmt);
 	}
 	AST_STMT* stmt = init_ast_stmt(BLOCK, values, NULL);

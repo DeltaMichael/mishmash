@@ -1,0 +1,15 @@
+// error: line 8: near: ';': Declaration outside block DECLR header
+// Compilation error
+DECLR
+	x: int;
+	a: int;
+	b: int;
+BEGIN
+	c: int;
+	a := 2;
+	b := 4;
+	c := -8;
+	x := a * -c + b * -c;
+	print x;
+	print c;
+END

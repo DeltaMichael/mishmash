@@ -1,0 +1,7 @@
+// error: line 7: near: ';': Expected BEGIN after DECLR
+// error: line 7: near: ';': Expected 'END' at the end of block
+// Compilation error
+DECLR
+	x: int;
+	a: int;
+	b: int;

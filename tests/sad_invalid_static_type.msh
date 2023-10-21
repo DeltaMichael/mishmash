@@ -1,0 +1,15 @@
+// error: line 6: near: ':': Invalid static type
+// error: line 6: near: ';': Only declarations allowed in block DECLR header
+// Compilation error
+DECLR
+	x: int;
+	a: asdf;
+	b: int;
+BEGIN
+	a := 2;
+	b := 4;
+	c := -8;
+	x := a * -c + b * -c;
+	print x;
+	print c;
+END
