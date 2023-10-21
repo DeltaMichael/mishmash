@@ -43,6 +43,8 @@ typedef struct {
 
 // Init functions
 PARSER* init_parser(LIST* tokens);
+void free_parser(PARSER* parser);
+
 AST_EXPR* init_ast_expr(TOKEN* op, AST_EXPR_TYPE type, LIST* children);
 AST_STMT* init_ast_stmt(AST_STMT_TYPE type, LIST* values, TOKEN* id);
 

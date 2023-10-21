@@ -16,6 +16,16 @@ PARSER* init_parser(LIST* tokens) {
 	return parser;
 }
 
+void free_parser(PARSER* parser) {
+	for (int i = 0; i < parser->tokens->size; i++) {
+		TOKEN* token = list_get(parser->tokens, i);
+		free(token->lexeme);
+	}
+	free_list(parser->tokens);
+	free(parser->current);
+	free(parser);
+}
+
 AST_EXPR* init_ast_expr(TOKEN* op, AST_EXPR_TYPE type, LIST* children) {
 	AST_EXPR* node = malloc(sizeof(AST_EXPR));
 	node->op = op;

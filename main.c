@@ -71,10 +71,13 @@ int main(int argc, char **argv)
 	PARSER *parser = init_parser(tokens);
 	AST_STMT* stmt = parser_parse(parser);
 	free_lexer(lexer);
+
 	if(parser->exited_with_error) {
+		free_parser(parser);
 		fprintf(stderr, "Compilation error\n");
 		return 1;
 	}
+
 
 	LIST* quads = init_list(sizeof(QUAD*));
 	SYM_TABLE* table = init_symtable(NULL);
@@ -129,6 +132,12 @@ int main(int argc, char **argv)
 
 		//debug output
 		printf("%s", out);
+	}
+
+	free_parser(parser);
+	for (size_t i; i < quads->size; i++) {
+		free_quad(quads->elements[i]);
+		quads->elements[i] = NULL;
 	}
 	return 0;
 }

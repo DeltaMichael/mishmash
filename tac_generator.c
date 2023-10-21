@@ -13,9 +13,19 @@ QUAD* init_quad(char* op, char* arg1, char* arg2, char* result) {
 	return quad;
 }
 
+void free_quad(QUAD* quad) {
+	free(quad->op);
+	free(quad->arg1);
+	free(quad->arg2);
+	free(quad->result);
+	free(quad);
+}
+
 QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 	if(expr->type == PRIMARY) {
-		return init_quad(NULL, NULL, NULL, expr->op->lexeme);
+		QUAD* pquad = init_quad("skip", NULL, NULL, expr->op->lexeme);
+		list_push(quads, pquad);
+		return pquad;
 	}
 	if(expr->type == UNARY) {
 		AST_EXPR* arg = list_get(expr->children, 0);
