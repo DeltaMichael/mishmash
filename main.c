@@ -67,23 +67,26 @@ int main(int argc, char **argv)
 		TOKEN *token = get_token(lexer);
 		if (token != NULL)
 		{
+			list_push(tokens, token);
 			printf("line:%d lexeme: %s\n", token->line, token->lexeme);
 		} else {
 			printf("comment\n");
 		}
-		list_push(tokens, token);
 	}
 
-	// PARSER *parser = init_parser(tokens);
+	PARSER *parser = init_parser(tokens);
 	// AST_STMT* stmt = parser_parse(parser);
+
+	if(parser->exited_with_error) {
+		free_list(tokens, free_token);
+		free_lexer(lexer);
+		free_parser(parser);
+		fprintf(stderr, "Compilation error\n");
+		return 1;
+	}
 	free_list(tokens, free_token);
 	free_lexer(lexer);
-
-	// if(parser->exited_with_error) {
-	// 	// free_parser(parser);
-	// 	fprintf(stderr, "Compilation error\n");
-	// 	return 1;
-	// }
+	free_parser(parser);
 
 
 	// LIST* quads = init_list(sizeof(QUAD*));

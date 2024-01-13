@@ -17,12 +17,8 @@ PARSER* init_parser(LIST* tokens) {
 }
 
 void free_parser(PARSER* parser) {
-	for (int i = 0; i < parser->tokens->size; i++) {
-		TOKEN* token = parser->tokens->elements[i];
-		free(token->lexeme);
-		free(token);
-	}
 	free(parser);
+	parser = NULL;
 }
 
 AST_EXPR* init_ast_expr(TOKEN* op, AST_EXPR_TYPE type, LIST* children) {
