@@ -73,6 +73,7 @@ TOKEN *get_token(LEXER *lexer)
 	size_t size = advance_word(lexer);
 	char *start = lexer->current - size;
 	token->line = lexer->line;
+	token->lexeme = NULL;
 	if (size > 0)
 	{
 		token->lexeme = strndup(start, size);
@@ -115,8 +116,9 @@ TOKEN *get_token(LEXER *lexer)
 	}
 	else
 	{
-		token->lexeme = strndup(start, 1);
-		switch (*token->lexeme)
+		char lexeme = *start;
+		int pace = 1;
+		switch (lexeme)
 		{
 		case ')':
 			token->type = RIGHT_PAREN;
@@ -151,7 +153,8 @@ TOKEN *get_token(LEXER *lexer)
 		case '/':
 			if(peek(lexer) == '/') {
 				skip_comment(lexer);
-				return get_token(lexer);
+				free_token(token);
+				return NULL;
 			} else {
 				token->type = DIV;
 				break;
@@ -159,9 +162,10 @@ TOKEN *get_token(LEXER *lexer)
 		case ':':
 			if (peek(lexer) == '=')
 			{
-				token->lexeme = strdup(":=");
+				// token->lexeme = strdup(":=");
 				token->type = ASSIGN;
-				advance(lexer);
+				pace = 2;
+				// advance(lexer);
 			}
 			else
 			{
@@ -172,7 +176,10 @@ TOKEN *get_token(LEXER *lexer)
 			token->type = IDENTIFIER;
 			break;
 		}
-		advance(lexer);
+		token->lexeme = strndup(start, pace);
+		for (int i = 0; i < pace; i++) {
+			advance(lexer);
+		}
 	}
 	skip_whitespace(lexer);
 	return token;
@@ -181,8 +188,22 @@ TOKEN *get_token(LEXER *lexer)
 void free_lexer(LEXER *lexer)
 {
 	free(lexer->source);
-	lexer->current = NULL;
+	lexer->source = NULL;
 	free(lexer);
+	lexer = NULL;
+}
+
+void free_token(TOKEN *token)
+{
+	if (token == NULL) {
+		return;
+	}
+	if (token->lexeme != NULL) {
+		free(token->lexeme);
+		token->lexeme = NULL;
+	}
+	free(token);
+	token = NULL;
 }
 
 char *read_file(char *path)
@@ -194,6 +215,7 @@ char *read_file(char *path)
 	char *out = malloc(file_size + 1);
 	fread(out, sizeof(char), file_size, f);
 	out[file_size] = 0;
+	fclose(f);
 	return out;
 }
 

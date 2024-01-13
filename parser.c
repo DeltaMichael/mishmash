@@ -22,8 +22,6 @@ void free_parser(PARSER* parser) {
 		free(token->lexeme);
 		free(token);
 	}
-	free_list(parser->tokens);
-	// free(parser->current);
 	free(parser);
 }
 

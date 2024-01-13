@@ -54,9 +54,12 @@ LEXER *init_from_file(char *path);
 char advance(LEXER *lexer);
 size_t advance_word(LEXER *lexer);
 char peek(LEXER *lexer);
-void free_lexer(LEXER *lexer);
 TOKEN *get_token(LEXER *lexer);
 char *read_file(char *path);
+
+// Memmory deallocation
+void free_token(TOKEN  *token);
+void free_lexer(LEXER *lexer);
 
 #endif
 

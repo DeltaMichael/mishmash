@@ -11,10 +11,12 @@ typedef struct {
 } LIST;
 
 LIST* init_list(size_t element_size);
-void free_list(LIST* list);
 void* list_pop(LIST* list);
 void* list_get(LIST* list, int index);
 void list_push(LIST* list, void* element);
+
+// Memmory deallocation
+void free_list(LIST* list, void (*f)(void*));
 
 #endif
 
