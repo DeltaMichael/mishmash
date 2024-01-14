@@ -47,6 +47,8 @@ void free_parser(PARSER* parser);
 
 AST_EXPR* init_ast_expr(TOKEN* op, AST_EXPR_TYPE type, LIST* children);
 AST_STMT* init_ast_stmt(AST_STMT_TYPE type, LIST* values, TOKEN* id);
+void free_ast_expr(AST_EXPR* expr);
+void free_ast_stmt(AST_STMT* stmt);
 
 // Parser navigation functions
 void parser_advance(PARSER* parser);

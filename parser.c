@@ -37,6 +37,52 @@ AST_STMT* init_ast_stmt(AST_STMT_TYPE type, LIST* values, TOKEN* id) {
 	return node;
 }
 
+void free_ast_expr(AST_EXPR* root) {
+	if(!root->children) {
+		free(root);
+		root = NULL;
+		return;
+	} else {
+		for(int i = 0; i < root->children->size; i++) {
+			free_ast_expr(root->children->elements[i]);
+		}
+	}
+	free(root->children->elements);
+	root->children->elements = NULL;
+	free(root->children);
+	root->children = NULL;
+	free(root);
+	root = NULL;
+}
+
+void free_ast_stmt(AST_STMT* root) {
+	if (root == NULL) {
+		return;
+	}
+	if (root->type == EXPRESSION_STATEMENT) {
+		for(int i = 0; i < root->values->size; i++) {
+			free_ast_expr(root->values->elements[i]);
+		}
+	}
+	if (root->type != DECLARATION && root->type != EXPRESSION_STATEMENT) {
+		if(root->values) {
+			for(int i = 0; i < root->values->size; i++) {
+				free_ast_stmt(root->values->elements[i]);
+			}
+		}
+	}
+	if (root->values && root->values->elements) {
+		free(root->values->elements);
+		root->values->elements = NULL;
+	}
+	if (root->values) {
+		free(root->values);
+		root->values = NULL;
+	}
+	free(root);
+	root = NULL;
+}
+
 void parser_advance(PARSER* parser) {
 	parser->index++;
 	if(parser->index < parser->size) {
@@ -123,9 +169,9 @@ AST_STMT* statement(PARSER* parser) {
 }
 
 AST_STMT* block(PARSER* parser) {
-	LIST* values = init_list(sizeof(AST_STMT*));
 	if(parser_match(parser, DECLR)) {
 		// parse declarations and block
+		LIST* values = init_list(sizeof(AST_STMT*));
 		while(parser->current->type != BEGIN && !parser_is_at_end(parser)) {
 			AST_STMT* stmt = statement(parser);
 			if(stmt->type != DECLARATION) {
@@ -138,6 +184,7 @@ AST_STMT* block(PARSER* parser) {
 	}
 	if(parser_match(parser, BEGIN)) {
 		// just parse block
+		LIST* values = init_list(sizeof(AST_STMT*));
 		return block_body(parser, values);
 	}
 	return print_stmt(parser);

@@ -75,8 +75,8 @@ int main(int argc, char **argv)
 	}
 
 	PARSER *parser = init_parser(tokens);
-	// AST_STMT* stmt = parser_parse(parser);
-
+	AST_STMT* stmt = parser_parse(parser);
+	print_ast_stmt(stmt);
 	if(parser->exited_with_error) {
 		free_list(tokens, free_token);
 		free_lexer(lexer);
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 	free_list(tokens, free_token);
 	free_lexer(lexer);
 	free_parser(parser);
-
+	free_ast_stmt(stmt);
 
 	// LIST* quads = init_list(sizeof(QUAD*));
 	// SYM_TABLE* table = init_symtable(NULL);
