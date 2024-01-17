@@ -41,6 +41,7 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* sym_table);
 QUAD* quad_from_stmt(AST_STMT* stmt, LIST* quads, SYM_TABLE* sym_table);
 
 SYM_TABLE* init_symtable(SYM_TABLE* enclosing);
+void free_symtable(SYM_TABLE* table);
 void symtable_init_var(SYM_TABLE* table, char* name, VAR_LOCATION location, char* type);
 char* symtable_get_temp(SYM_TABLE* table);
 

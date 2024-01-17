@@ -22,6 +22,26 @@ H_MAP* init_hashmap() {
 	map->entries = entries;
 	return map;
 }
+
+void free_hashmap(H_MAP* map) {
+	for(int i = 0; i < MAP_SIZE; i++) {
+		if(map->entries[i] != NULL) {
+			H_ENTRY *current = map->entries[i];
+			while (current != NULL) {
+				H_ENTRY *next = current->next;
+				current->next = NULL;
+				free(current);
+				current = next;
+			}
+			map->entries[i] = NULL;
+		}
+	}
+	free(map->entries);
+	map->entries = NULL;
+	free(map);
+	map = NULL;
+}
+
 void* hashmap_get(H_MAP* map, char* key) {
 	int index = hash(key);
 	H_ENTRY* entry = map->entries[index];
@@ -36,7 +56,8 @@ void* hashmap_get(H_MAP* map, char* key) {
 	return entry->value;
 }
 
-// this will produce a lot of garbage on re-writing
+// TODO: Delete equivalent entries on re-writing
+// this produces a lot of garbage on re-writing
 // the same key
 void hashmap_put(H_MAP* map, char* key, void* value) {
 	int index = hash(key);

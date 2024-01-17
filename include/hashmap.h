@@ -16,6 +16,7 @@ typedef struct {
 int hash(char* key);
 int hash_int(int key);
 H_MAP* init_hashmap();
+void free_hashmap(H_MAP* map);
 void* hashmap_get(H_MAP* map, char* key);
 void hashmap_put(H_MAP* map, char* key, void* value);
 void print_entry(H_ENTRY* entry);

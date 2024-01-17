@@ -84,14 +84,16 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Compilation error\n");
 		return 1;
 	}
+
+	// LIST* quads = init_list(sizeof(QUAD*));
+	SYM_TABLE* table = init_symtable(NULL);
+	// quad_from_stmt(stmt, quads, table);
+
 	free_list(tokens, free_token);
 	free_lexer(lexer);
 	free_parser(parser);
 	free_ast_stmt(stmt);
-
-	// LIST* quads = init_list(sizeof(QUAD*));
-	// SYM_TABLE* table = init_symtable(NULL);
-	// quad_from_stmt(stmt, quads, table);
+	free_symtable(table);
 	// ASM_GENERATOR* asm_gen = init_asm_generator(quads, table);
 
 	// ag_generate_code(asm_gen);

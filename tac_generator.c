@@ -109,6 +109,18 @@ SYM_TABLE* init_symtable(SYM_TABLE* enclosing) {
 	return table;
 }
 
+void free_symtable(SYM_TABLE* table) {
+	SYM_TABLE* current = table;
+	while (current != NULL) {
+		SYM_TABLE* next = current->enclosing;
+		current->enclosing = NULL;
+		free_hashmap(current->variables);
+		current->variables = NULL;
+		free(current);
+		current = next;
+	}
+}
+
 void symtable_init_var(SYM_TABLE* table, char* name, VAR_LOCATION location, char* type) {
 	int offset = 0;
 	if(location == STACK) {
