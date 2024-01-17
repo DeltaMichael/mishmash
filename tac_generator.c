@@ -4,34 +4,28 @@
 #include <stdio.h>
 
 
-QUAD* init_quad(char* op, char* arg1, char* arg2, char* result) {
+QUAD* init_quad(char* op, char* arg1, char* arg2, char* result, bool uses_temp) {
 	QUAD* quad = malloc(sizeof(QUAD));
 	quad->op = op;
 	quad->arg1 = arg1;
 	quad->arg2 = arg2;
 	quad->result = result;
+	// TODO: Figure out a better way to do this
+	quad->uses_temp = uses_temp;
 	return quad;
 }
 
 void free_quad(QUAD* quad) {
-	// if (quad->op != NULL) {
-	// 	free(quad->op);
-	// }
-	// if (quad->arg1 != NULL) {
-	// 	free(quad->arg1);
-	// }
-	// if (quad->arg2 != NULL) {
-	// 	free(quad->arg2);
-	// }
-	// if (quad->result != NULL) {
-	// 	free(quad->result);
-	// }
+	if (quad->uses_temp) {
+		free(quad->result);
+		quad->result = NULL;
+	}
 	free(quad);
 }
 
 QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 	if(expr->type == PRIMARY) {
-		QUAD* pquad = init_quad("skip", NULL, NULL, expr->op->lexeme);
+		QUAD* pquad = init_quad("skip", NULL, NULL, expr->op->lexeme, false);
 		list_push(quads, pquad);
 		return pquad;
 	}
@@ -39,7 +33,7 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 		AST_EXPR* arg = list_get(expr->children, 0);
 		QUAD* argquad = quad_from_expr(arg, quads, table);
 		char* res_name = symtable_get_temp(table);
-       	QUAD* uquad = init_quad("uminus", argquad->result, NULL, res_name);
+       	QUAD* uquad = init_quad("uminus", argquad->result, NULL, res_name, true);
 		list_push(quads, uquad);
 		return uquad;
 	}
@@ -49,7 +43,7 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 		QUAD* left_quad = quad_from_expr(left, quads, table);
 		QUAD* right_quad = quad_from_expr(right, quads, table);
 		char* res_name = symtable_get_temp(table);
-		QUAD* bquad = init_quad(expr->op->lexeme, left_quad->result, right_quad->result, res_name);
+		QUAD* bquad = init_quad(expr->op->lexeme, left_quad->result, right_quad->result, res_name, true);
 		list_push(quads, bquad);
 		return bquad;
 	}
@@ -58,7 +52,7 @@ QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* table) {
 QUAD* quad_from_stmt(AST_STMT* stmt, LIST* quads, SYM_TABLE* table) {
 	if(stmt->type == PRINT_STATEMENT) {
 		QUAD* expr_quad = quad_from_expr(list_get(stmt->values, 0), quads, table);
-		QUAD* pquad = init_quad("print", expr_quad->result, NULL, NULL);
+		QUAD* pquad = init_quad("print", expr_quad->result, NULL, NULL, false);
 		list_push(quads, pquad);
 		return pquad;
 	}
@@ -72,7 +66,7 @@ QUAD* quad_from_stmt(AST_STMT* stmt, LIST* quads, SYM_TABLE* table) {
 	}
 	if(stmt->type == ASSIGNMENT) {
 		QUAD* value = quad_from_stmt(list_get(stmt->values, 0), quads, table);
-		QUAD* aquad = init_quad(":=", value->result, NULL, stmt->id->lexeme);
+		QUAD* aquad = init_quad(":=", value->result, NULL, stmt->id->lexeme, false);
 		list_push(quads, aquad);
 		return aquad;
 	}
@@ -109,6 +103,8 @@ SYM_TABLE* init_symtable(SYM_TABLE* enclosing) {
 	return table;
 }
 
+// TODO: This should also take a function pointer as argument
+// For freeing the values
 void free_symtable(SYM_TABLE* table) {
 	SYM_TABLE* current = table;
 	while (current != NULL) {

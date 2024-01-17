@@ -30,6 +30,8 @@ void free_hashmap(H_MAP* map) {
 			while (current != NULL) {
 				H_ENTRY *next = current->next;
 				current->next = NULL;
+				free(current->value);
+				current->value = NULL;
 				free(current);
 				current = next;
 			}

@@ -18,6 +18,7 @@ typedef struct {
 	char* arg1;
 	char* arg2;
 	char* result;
+	bool uses_temp;
 } QUAD;
 
 typedef enum {
@@ -35,7 +36,7 @@ typedef struct {
 	int last_index;
 } VAR_DATA;
 
-QUAD* init_quad(char* op, char* arg1, char* arg2, char* result);
+QUAD* init_quad(char* op, char* arg1, char* arg2, char* result, bool uses_temp);
 void free_quad(QUAD* quad);
 QUAD* quad_from_expr(AST_EXPR* expr, LIST* quads, SYM_TABLE* sym_table);
 QUAD* quad_from_stmt(AST_STMT* stmt, LIST* quads, SYM_TABLE* sym_table);
