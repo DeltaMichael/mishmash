@@ -78,7 +78,6 @@ int main(int argc, char **argv)
 		free_list(tokens, free_token);
 		free_lexer(lexer);
 		free_parser(parser);
-		free_ast_stmt(stmt);
 		fprintf(stderr, "Compilation error\n");
 		return 1;
 	}
@@ -87,10 +86,13 @@ int main(int argc, char **argv)
 	SYM_TABLE* table = init_symtable(NULL);
 	quad_from_stmt(stmt, quads, table);
 
+	// LEAKS
 	ASM_GENERATOR* asm_gen = init_asm_generator(quads, table);
 	ag_generate_code(asm_gen);
 	char* out = ag_get_code(asm_gen);
 	output_source_to_file(file_path, out);
+	// LEAKS
+
 
 	if (debug_output) {
 		// debug output

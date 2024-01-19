@@ -6,3 +6,5 @@ tags
 tests/*.o
 tests/*.s
 testmash
+*.c~
+**/*.c~
