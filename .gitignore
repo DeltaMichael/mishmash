@@ -8,3 +8,5 @@ tests/*.s
 testmash
 *.c~
 **/*.c~
+*.h~
+**/*.h~
