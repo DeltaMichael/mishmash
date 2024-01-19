@@ -14,13 +14,13 @@ LIST *get_expected_values(char *test_file_name)
 
 	char line[256];
 	while (fgets(line, sizeof(line), file)) {
-		char *value = malloc(sizeof(char) * 256);
 		int line_index = 0;
 		int value_index = 0;
 		// skip whitespace
 		while (line[line_index] == ' ')
 			line_index++;
 		if (line[0] == '/' && line[1] == '/') {
+			char *value = malloc(sizeof(char) * 256);
 			// skip comment and whitespace
 			line_index += 2;
 			while (line[line_index] == ' ')
@@ -50,6 +50,7 @@ LIST *get_compilation_output(char *test_file_name)
 		list_push(output, line);
 		line = malloc(sizeof(char) * 256);
 	}
+	free(line);
 	pclose(file);
 	return output;
 }
@@ -78,6 +79,7 @@ LIST *get_run_output(char *test_file_name)
 		list_push(output, line);
 		line = malloc(sizeof(char) * 256);
 	}
+	free(line);
 	pclose(file);
 	return output;
 }
@@ -172,6 +174,7 @@ bool run_test(char *file_name)
 		LIST *run_output = get_run_output(file_name);
 		passed = assert_output(expected_values, run_output);
 		clean_up(file_name);
+		free_list(run_output, free);
 	}
 	if (passed) {
 		// TODO collect failures in list and display at the end
@@ -180,8 +183,9 @@ bool run_test(char *file_name)
 		printf("FAIL\n");
 	}
 	printf("----------%s----------\n\n", file_name);
+	free_list(expected_values, free);
+	free_list(compilation_output, free);
 	return passed;
-	// TODO: Free lists
 }
 
 int main(int argc, char **argv)
@@ -201,3 +205,4 @@ int main(int argc, char **argv)
 	// run_test("sad_unexpected_token.msh");
 	return 0;
 }
+
