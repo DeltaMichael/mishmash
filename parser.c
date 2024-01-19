@@ -43,6 +43,9 @@ AST_STMT *init_ast_stmt(AST_STMT_TYPE type, LIST *values, TOKEN *id)
 
 void free_ast_expr(AST_EXPR *root)
 {
+	if (root == NULL) {
+		return;
+	}
 	if (!root->children) {
 		free(root);
 		root = NULL;
@@ -170,10 +173,7 @@ AST_STMT *parser_parse(PARSER *parser)
 		if (parser->has_error) {
 			parser->has_error = 0;
 			parser_sync(parser);
-			// TODO: Collect all statements that are parsed
-			//               This will be necessary for function declarations
-			//               Check that the statement types are all blocks/functions
-			// return NULL;
+			free_ast_stmt(stmt);
 		} else {
 			return stmt;
 		}
@@ -361,8 +361,7 @@ AST_EXPR *primary(PARSER *parser)
 		parser_eat(parser, RIGHT_PAREN, "Expected closing ')'");
 		return expr;
 	}
-	// TODO: Error handling and synchronization
-	// Print all errors, not just the first one
 	parser_error(parser, "Unexpected token");
-	exit(1);
+	return NULL;
 }
+
