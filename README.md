@@ -16,8 +16,10 @@ make
 
 ## Compile and run a Mish-Mash program
 
+```
 ./mishmash my_program.msh
 ./my_program
+```
 
 ## Compile test suite
 
@@ -40,4 +42,4 @@ cd ./mashlib
 ./build.sh
 ```
 
-Then either move mashlib.so to /lib64 after building or set `LD_LIBRARY_PATH` to where the .so is located
+Then either move mashlib.so to `/lib64` or set `LD_LIBRARY_PATH` to where the .so is located
