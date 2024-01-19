@@ -4,28 +4,32 @@
 #include <stdlib.h>
 #include <string.h>
 
-int hash(char* key) {
+int hash(char *key)
+{
 	// sum the string characters
 	int sum = 0;
-	while(*key != '\0') {
+	while (*key != '\0') {
 		sum += *key;
 		key += sizeof(char);
 	}
 	return hash_int(sum);
 }
-H_MAP* init_hashmap() {
-	H_MAP* map = malloc(sizeof(H_MAP));
-	H_ENTRY** entries = malloc(MAP_SIZE * (sizeof(H_ENTRY*)));
-	for(int i = 0; i < MAP_SIZE; i++) {
+
+H_MAP *init_hashmap()
+{
+	H_MAP *map = malloc(sizeof(H_MAP));
+	H_ENTRY **entries = malloc(MAP_SIZE * (sizeof(H_ENTRY *)));
+	for (int i = 0; i < MAP_SIZE; i++) {
 		entries[i] = NULL;
 	}
 	map->entries = entries;
 	return map;
 }
 
-void free_hashmap(H_MAP* map) {
-	for(int i = 0; i < MAP_SIZE; i++) {
-		if(map->entries[i] != NULL) {
+void free_hashmap(H_MAP *map)
+{
+	for (int i = 0; i < MAP_SIZE; i++) {
+		if (map->entries[i] != NULL) {
 			H_ENTRY *current = map->entries[i];
 			while (current != NULL) {
 				H_ENTRY *next = current->next;
@@ -44,15 +48,16 @@ void free_hashmap(H_MAP* map) {
 	map = NULL;
 }
 
-void* hashmap_get(H_MAP* map, char* key) {
+void *hashmap_get(H_MAP *map, char *key)
+{
 	int index = hash(key);
-	H_ENTRY* entry = map->entries[index];
+	H_ENTRY *entry = map->entries[index];
 
-	if(entry == NULL) {
+	if (entry == NULL) {
 		return NULL;
 	}
 
-	while(entry != NULL && strcmp(key, entry->key) != 0) {
+	while (entry != NULL && strcmp(key, entry->key) != 0) {
 		entry = entry->next;
 	}
 	return entry->value;
@@ -61,20 +66,22 @@ void* hashmap_get(H_MAP* map, char* key) {
 // TODO: Delete equivalent entries on re-writing
 // this produces a lot of garbage on re-writing
 // the same key
-void hashmap_put(H_MAP* map, char* key, void* value) {
+void hashmap_put(H_MAP *map, char *key, void *value)
+{
 	int index = hash(key);
-	H_ENTRY* entry = map->entries[index];
-	H_ENTRY* new_entry = malloc(sizeof(H_ENTRY));
+	H_ENTRY *entry = map->entries[index];
+	H_ENTRY *new_entry = malloc(sizeof(H_ENTRY));
 	new_entry->key = key;
 	new_entry->value = value;
 	new_entry->next = NULL;
-	if(entry != NULL) {
+	if (entry != NULL) {
 		new_entry->next = entry;
 	}
 	map->entries[index] = new_entry;
 }
 
-int hash_int(int key) {
+int hash_int(int key)
+{
 	// square the key
 	key *= key;
 
@@ -91,30 +98,32 @@ int hash_int(int key) {
 	// get the upper middle digit
 	int upper_digit = (key / upper) % 10;
 	// get the lower middle digit
-	int lower_digit = (key % upper)/(lower/10);
+	int lower_digit = (key % upper) / (lower / 10);
 	return upper_digit * 10 + lower_digit;
 }
 
-void print_entry(H_ENTRY* entry) {
-	while(entry != NULL) {
-		printf("{ key: %s value: %d }", entry->key, *(int*)entry->value);
+void print_entry(H_ENTRY *entry)
+{
+	while (entry != NULL) {
+		printf("{ key: %s value: %d }", entry->key,
+		       *(int *)entry->value);
 		entry = entry->next;
 	}
 	printf("\n");
 }
 
-bool contains_key(H_MAP* map, char* key) {
+bool contains_key(H_MAP *map, char *key)
+{
 	int index = hash(key);
-	H_ENTRY* entry = map->entries[index];
+	H_ENTRY *entry = map->entries[index];
 
-	if(entry == NULL) {
+	if (entry == NULL) {
 		return false;
 	}
 
-	while(entry != NULL && strcmp(key, entry->key) != 0) {
+	while (entry != NULL && strcmp(key, entry->key) != 0) {
 		entry = entry->next;
 	}
 
 	return entry != NULL;
 }
-
