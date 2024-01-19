@@ -13,6 +13,7 @@ typedef struct {
 } ASM_GENERATOR;
 
 ASM_GENERATOR* init_asm_generator(LIST* quads, SYM_TABLE* sym_table);
+void free_asm_generator(ASM_GENERATOR *asm_gen);
 char* ag_alloc_reg(ASM_GENERATOR* asm_gen, char* var_name);
 char* ag_realloc_reg(ASM_GENERATOR* asm_gen, char* reg);
 char* ag_get_temp_reg(ASM_GENERATOR* asm_gen);

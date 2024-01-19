@@ -9,6 +9,15 @@ STRING_BUILDER* init_sb() {
 	return sb;
 }
 
+void free_sb(STRING_BUILDER *sb) {
+	if(sb->characters != NULL) {
+		free(sb->characters);
+		sb->characters = NULL;
+	}
+	free(sb);
+	sb = NULL;
+}
+
 char sb_pop(STRING_BUILDER* sb) {
 	char c = sb->characters[sb->size - 1];
 	char* new_characters = realloc(sb->characters, (sb->size - 1) * sizeof(char));

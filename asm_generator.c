@@ -30,6 +30,19 @@ ASM_GENERATOR* init_asm_generator(LIST* quads, SYM_TABLE* sym_table) {
 	return gen;
 }
 
+void free_asm_generator(ASM_GENERATOR* asm_gen) {
+	free_sb(asm_gen->out);
+	asm_gen->out = NULL;
+	free_hashmap(asm_gen->registers);
+	asm_gen->registers = NULL;
+	free_symtable(asm_gen->sym_table);
+	asm_gen->sym_table = NULL;
+	free_list(asm_gen->quads, free_quad);
+	asm_gen->quads = NULL;
+	free(asm_gen);
+	asm_gen = NULL;
+}
+
 void ag_index_variables(ASM_GENERATOR* asm_gen) {
 	LIST* quads = asm_gen->quads;
 	SYM_TABLE* table = asm_gen->sym_table;

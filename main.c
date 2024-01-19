@@ -28,7 +28,8 @@ void output_source_to_file(char* file_path, char* asm_source) {
 	char* out_file_path = sb_build(out_name_builder);
 	FILE *f = fopen(out_file_path, "w");
 	fprintf(f, "%s", asm_source);
-	// TODO free string builder
+	free_sb(out_name_builder);
+	fclose(f);
 }
 
 void usage() {
@@ -142,8 +143,7 @@ int main(int argc, char **argv)
 	free_lexer(lexer);
 	free_parser(parser);
 	free_ast_stmt(stmt);
-	free_symtable(table);
-	free_list(quads, free_quad);
+	free_asm_generator(asm_gen);
 
 	return 0;
 }

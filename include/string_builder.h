@@ -10,6 +10,7 @@ typedef struct {
 } STRING_BUILDER;
 
 STRING_BUILDER* init_sb();
+void free_sb(STRING_BUILDER *sb);
 char sb_pop(STRING_BUILDER* builder);
 char sb_get(STRING_BUILDER* builder, int index);
 void sb_append_char(STRING_BUILDER* builder, char c);

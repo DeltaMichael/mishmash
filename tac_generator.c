@@ -16,10 +16,10 @@ QUAD* init_quad(char* op, char* arg1, char* arg2, char* result, bool uses_temp) 
 }
 
 void free_quad(QUAD* quad) {
-	if (quad->uses_temp) {
-		free(quad->result);
-		quad->result = NULL;
-	}
+	// if (quad->uses_temp) {
+	// 	free(quad->result);
+	// 	quad->result = NULL;
+	// }
 	free(quad);
 }
 
