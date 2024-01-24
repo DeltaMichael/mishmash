@@ -1,0 +1,17 @@
+// error: line 6: near: 'x': Unexpected statement outside of block
+// error: line 7: near: 'a': Unexpected statement outside of block
+// error: line 8: near: 'b': Unexpected statement outside of block
+// error: line 9: near: 'c': Unexpected statement outside of block
+// Compilation error
+x: int;
+a: int;
+b: int;
+c: int;
+BEGIN
+	a := 2;
+	b := 4;
+	c := -8;
+	x := a * -c + b * -c;
+	print x;
+	print c;
+END

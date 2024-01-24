@@ -116,14 +116,19 @@ TOKEN *parser_previous(PARSER *parser)
 	return parser->current;
 }
 
-void parser_error(PARSER *parser, char *message)
+void parser_error_at(PARSER *parser, TOKEN* token, char *message)
 {
-	TOKEN *prev = parser_previous(parser);
-	fprintf(stderr, "error: line %d: near: '%s': ", prev->line + 1,
-		prev->lexeme);
+	fprintf(stderr, "error: line %d: near: '%s': ", token->line + 1,
+		token->lexeme);
 	fprintf(stderr, "%s\n", message);
 	parser->has_error = 1;
 	parser->exited_with_error = 1;
+}
+
+void parser_error(PARSER *parser, char *message)
+{
+	TOKEN *prev = parser_previous(parser);
+	parser_error_at(parser, prev, message);
 }
 
 bool parser_match(PARSER *parser, TOKEN_TYPE type)
@@ -168,16 +173,31 @@ void parser_sync(PARSER *parser)
 
 AST_STMT *parser_parse(PARSER *parser)
 {
+	LIST* statements = init_list(sizeof(AST_STMT*));
 	while (!parser_is_at_end(parser)) {
-		AST_STMT *stmt = statement(parser);
+		list_push(statements, statement(parser));
 		if (parser->has_error) {
 			parser->has_error = 0;
 			parser_sync(parser);
-			free_ast_stmt(stmt);
-		} else {
-			return stmt;
 		}
 	}
+	// If we have statements outside of the main block
+	if (statements->size > 1) {
+		for(int i = 0; i < statements->size; i++) {
+			AST_STMT* stmt = list_get(statements, i);
+			if(stmt->type != BLOCK) {
+				parser_error_at(parser, stmt->id, "Unexpected statement outside of block");
+			}
+		}
+	}
+	// If there was an error, free everything
+	// and return NULL
+	if (parser->exited_with_error) {
+		free_list(statements, free_ast_stmt);
+		return NULL;
+	}
+	AST_STMT* out = list_get(statements, 0);
+	return out;
 }
 
 AST_STMT *statement(PARSER *parser)

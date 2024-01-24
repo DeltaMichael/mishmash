@@ -60,5 +60,8 @@ void free_list(LIST *list, void (*f)(void *))
 		(*f) (list->elements[i]);
 	}
 	free(list->elements);
+	list->elements = NULL;
 	free(list);
+	list = NULL;
 }
+

@@ -55,6 +55,7 @@ void parser_advance(PARSER * parser);
 TOKEN *parser_peek(PARSER * parser);
 TOKEN *parser_previous(PARSER * parser);
 void parser_error(PARSER * parser, char *message);
+void parser_error_at(PARSER *parser, TOKEN* token, char *message);
 bool parser_match(PARSER * parser, TOKEN_TYPE type);
 void parser_eat(PARSER * parser, TOKEN_TYPE type, char *message);
 bool parser_is_at_end(PARSER * parser);
@@ -78,3 +79,4 @@ AST_EXPR *factor(PARSER * parser);
 AST_EXPR *unary(PARSER * parser);
 AST_EXPR *primary(PARSER * parser);
 #endif
+
