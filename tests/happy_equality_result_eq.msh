@@ -1,0 +1,11 @@
+// 1
+DECLR
+	x: int;
+	a: int;
+	b: int;
+BEGIN
+	a := 4;
+	b := 4;
+	x := a = b;
+	print x;
+END
