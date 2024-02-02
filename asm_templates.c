@@ -183,3 +183,46 @@ void call(STRING_BUILDER *out, char *function)
 	sb_append(out, function);
 	sb_append(out, "\n");
 }
+
+void cmp_reg_reg(STRING_BUILDER *out, char* first_reg, char* second_reg)
+{
+	sb_append(out, "\tcmpq ");
+	sb_append(out, first_reg);
+	sb_append(out, ", ");
+	sb_append(out, second_reg);
+	sb_append(out, "\n");
+}
+
+void cmp_stack_reg(STRING_BUILDER *out, int offset, char* reg)
+{
+	sb_append(out, "\tcmpq -");
+	sb_append_int(out, offset);
+	sb_append(out, "(%rbp), %");
+	sb_append(out, reg);
+	sb_append(out, "\n");
+}
+
+void cmp_val_reg(STRING_BUILDER *out, char *val, char *reg)
+{
+	sb_append(out, "\tcmpq $");
+	sb_append(out, val);
+	sb_append(out, ", %");
+	sb_append(out, reg);
+	sb_append(out, "\n");
+}
+
+void eq_flag_reg(STRING_BUILDER* out, char *reg)
+{
+
+	sb_append(out, "\tpushfq\n");
+	sb_append(out, "\tpopq %");
+	sb_append(out, reg);
+	sb_append(out, "\n");
+	sb_append(out, "\tand $0b1000000, %");
+	sb_append(out, reg);
+	sb_append(out, "\n");
+	sb_append(out, "\tshr $6, %");
+	sb_append(out, reg);
+	sb_append(out, "\n");
+}
+
