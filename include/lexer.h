@@ -29,6 +29,8 @@ typedef enum {
 	PRINT_OP,
 	ASSIGN,
 	EQUALS,
+	LESS_THAN,
+	GREATER_THAN,
 	PLUS,
 	MINUS,
 	MULT,
@@ -59,3 +61,4 @@ void free_token(TOKEN * token);
 void free_lexer(LEXER * lexer);
 
 #endif
+

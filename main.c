@@ -98,7 +98,7 @@ int main(int argc, char **argv)
 		    { "FUN", "BEGIN", "END", "DECLR", "RETURN", "COLON",
 			"LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET",
 			"RIGHT_BRACKET", "COMMA", "LINE_TERM", "PRINT_OP",
-			"ASSIGN", "EQUALS", "PLUS", "MINUS", "MULT", "DIV",
+			"ASSIGN", "EQUALS", "LESS_THAN", "GREATER_THAN", "PLUS", "MINUS", "MULT", "DIV",
 			"STATIC_TYPE", "IDENTIFIER", "INT_LITERAL"
 		};
 

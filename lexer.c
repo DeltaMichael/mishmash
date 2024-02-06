@@ -124,6 +124,12 @@ TOKEN *get_token(LEXER *lexer)
 		case '=':
 			token->type = EQUALS;
 			break;
+		case '<':
+			token->type = LESS_THAN;
+			break;
+		case '>':
+			token->type = GREATER_THAN;
+			break;
 		case '+':
 			token->type = PLUS;
 			break;
@@ -198,3 +204,4 @@ char *read_file(char *path)
 	fclose(f);
 	return out;
 }
+

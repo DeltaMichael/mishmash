@@ -313,7 +313,7 @@ AST_EXPR *equality(PARSER *parser)
 {
 	AST_EXPR *left = term(parser);
 	AST_EXPR *right;
-	while (parser_match(parser, EQUALS)) {
+	while (parser_match(parser, EQUALS) || parser_match(parser, LESS_THAN) || parser_match(parser, GREATER_THAN)) {
 		TOKEN *op = parser_previous(parser);
 		right = term(parser);
 		LIST *children = init_list(sizeof(AST_EXPR *));

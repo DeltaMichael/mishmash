@@ -226,3 +226,27 @@ void eq_flag_reg(STRING_BUILDER* out, char *reg)
 	sb_append(out, "\n");
 }
 
+void lt_flag_reg(STRING_BUILDER *out, char *reg, char* temp_reg) {
+	sb_append(out, "\tpushfq\n");
+	sb_append(out, "\tpopq %");
+	sb_append(out, reg);
+	sb_append(out, "\n");
+	sb_append(out, "\tand $0b10000000, %");
+	sb_append(out, reg);
+	sb_append(out, "\n");
+	sb_append(out, "\tshr $7, %");
+	sb_append(out, reg);
+	sb_append(out, "\n");
+	sb_append(out, "\tand $0b100000000000, %");
+	sb_append(out, temp_reg);
+	sb_append(out, "\n");
+	sb_append(out, "\tshr $11, %");
+	sb_append(out, temp_reg);
+	sb_append(out, "\n");
+	sb_append(out, "\txor %");
+	sb_append(out, temp_reg);
+	sb_append(out, ", %");
+	sb_append(out, reg);
+	sb_append(out, "\n");
+}
+

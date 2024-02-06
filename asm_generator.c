@@ -91,6 +91,8 @@ void ag_quad_to_asm(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		ag_print_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "=") == 0) {
 		ag_equals_quad(asm_gen, quad, index);
+	} else if (strcmp(op, "<") == 0) {
+		ag_equals_quad(asm_gen, quad, index);
 	}
 }
 
@@ -435,23 +437,47 @@ void ag_equals_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		if (mfirst_data->location == REGISTER
 		    && msecond_data->location == REGISTER) {
 			cmp_reg_reg(asm_gen->out, mfirst_data->reg_name, msecond_data->reg_name);
-			eq_flag_reg(asm_gen->out, temp_reg);
+			if (strcmp(quad->op, "=") == 0) {
+				eq_flag_reg(asm_gen->out, temp_reg);
+			} else if (strcmp(quad->op, "<") == 0) {
+				char *another_temp_reg = ag_get_temp_reg(asm_gen);
+				lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
+			}
+
 		}
 		if (mfirst_data->location == STACK
 		    && msecond_data->location == REGISTER) {
 			cmp_stack_reg(asm_gen->out, mfirst_data->offset, msecond_data->reg_name);
-			eq_flag_reg(asm_gen->out, temp_reg);
+			if (strcmp(quad->op, "=") == 0) {
+				eq_flag_reg(asm_gen->out, temp_reg);
+			} else if (strcmp(quad->op, "<") == 0) {
+				char *another_temp_reg = ag_get_temp_reg(asm_gen);
+				lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
+			}
+
+
 		}
 		if (mfirst_data->location == REGISTER
 		    && msecond_data->location == STACK) {
 			cmp_stack_reg(asm_gen->out, msecond_data->offset, mfirst_data->reg_name);
-			eq_flag_reg(asm_gen->out, temp_reg);
+			if (strcmp(quad->op, "=") == 0) {
+				eq_flag_reg(asm_gen->out, temp_reg);
+			} else if (strcmp(quad->op, "<") == 0) {
+				char *another_temp_reg = ag_get_temp_reg(asm_gen);
+				lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
+			}
+
 		}
 		if (mfirst_data->location == STACK
 		    && msecond_data->location == STACK) {
 			mov_stack_reg(asm_gen->out, mfirst_data->offset, temp_reg);
 			cmp_stack_reg(asm_gen->out, msecond_data->offset, temp_reg);
-			eq_flag_reg(asm_gen->out, temp_reg);
+			if (strcmp(quad->op, "=") == 0) {
+				eq_flag_reg(asm_gen->out, temp_reg);
+			} else if (strcmp(quad->op, "<") == 0) {
+				char *another_temp_reg = ag_get_temp_reg(asm_gen);
+				lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
+			}
 		}
 	} else {
 		// first is variable, second is literal
@@ -549,8 +575,8 @@ char *ag_realloc_reg(ASM_GENERATOR *asm_gen, char *reg)
 void ag_try_free_variable(ASM_GENERATOR *asm_gen, char *var, int index)
 {
 	SYM_TABLE *table = asm_gen->sym_table;
-	VAR_DATA *var_data = hashmap_get(table->variables, var);
 	if (contains_key(table->variables, var)) {
+		VAR_DATA *var_data = hashmap_get(table->variables, var);
 		if (var_data->location == REGISTER
 		    && var_data->last_index == index) {
 			ag_free_reg(asm_gen, var_data->reg_name);
