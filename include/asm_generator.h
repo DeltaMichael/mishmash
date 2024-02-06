@@ -19,7 +19,7 @@ void ag_assign_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_uminus_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_mul_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_add_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
-void ag_equals_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index);
+void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index);
 void ag_add_exit(ASM_GENERATOR * asm_gen);
 
 // Register and stack management

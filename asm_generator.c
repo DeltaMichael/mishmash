@@ -89,10 +89,8 @@ void ag_quad_to_asm(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		ag_uminus_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "print") == 0) {
 		ag_print_quad(asm_gen, quad, index);
-	} else if (strcmp(op, "=") == 0) {
-		ag_equals_quad(asm_gen, quad, index);
-	} else if (strcmp(op, "<") == 0) {
-		ag_equals_quad(asm_gen, quad, index);
+	} else if (strcmp(op, "=") == 0 || strcmp(op, "<") == 0) {
+		ag_comparison_quad(asm_gen, quad, index);
 	}
 }
 
@@ -408,7 +406,7 @@ void ag_print_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 	ag_restore_registers(asm_gen);
 }
 
-void ag_equals_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
+void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 {
 	SYM_TABLE *table = asm_gen->sym_table;
 	char *mfirst = quad->arg1;
