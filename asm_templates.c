@@ -231,6 +231,7 @@ void lt_flag_reg(STRING_BUILDER *out, char *reg, char* temp_reg) {
 	sb_append(out, "\tpopq %");
 	sb_append(out, reg);
 	sb_append(out, "\n");
+	// mov_reg_reg(out, reg, temp_reg);
 	sb_append(out, "\tand $0b10000000, %");
 	sb_append(out, reg);
 	sb_append(out, "\n");

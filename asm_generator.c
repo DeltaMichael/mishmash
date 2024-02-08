@@ -435,74 +435,50 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		if (mfirst_data->location == REGISTER
 		    && msecond_data->location == REGISTER) {
 			cmp_reg_reg(asm_gen->out, mfirst_data->reg_name, msecond_data->reg_name);
-			if (strcmp(quad->op, "=") == 0) {
-				eq_flag_reg(asm_gen->out, temp_reg);
-			} else if (strcmp(quad->op, "<") == 0) {
-				char *another_temp_reg = ag_get_temp_reg(asm_gen);
-				lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
-			}
-
 		}
 		if (mfirst_data->location == STACK
 		    && msecond_data->location == REGISTER) {
 			cmp_stack_reg(asm_gen->out, mfirst_data->offset, msecond_data->reg_name);
-			if (strcmp(quad->op, "=") == 0) {
-				eq_flag_reg(asm_gen->out, temp_reg);
-			} else if (strcmp(quad->op, "<") == 0) {
-				char *another_temp_reg = ag_get_temp_reg(asm_gen);
-				lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
-			}
-
-
 		}
 		if (mfirst_data->location == REGISTER
 		    && msecond_data->location == STACK) {
 			cmp_stack_reg(asm_gen->out, msecond_data->offset, mfirst_data->reg_name);
-			if (strcmp(quad->op, "=") == 0) {
-				eq_flag_reg(asm_gen->out, temp_reg);
-			} else if (strcmp(quad->op, "<") == 0) {
-				char *another_temp_reg = ag_get_temp_reg(asm_gen);
-				lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
-			}
-
 		}
 		if (mfirst_data->location == STACK
 		    && msecond_data->location == STACK) {
 			mov_stack_reg(asm_gen->out, mfirst_data->offset, temp_reg);
 			cmp_stack_reg(asm_gen->out, msecond_data->offset, temp_reg);
-			if (strcmp(quad->op, "=") == 0) {
-				eq_flag_reg(asm_gen->out, temp_reg);
-			} else if (strcmp(quad->op, "<") == 0) {
-				char *another_temp_reg = ag_get_temp_reg(asm_gen);
-				lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
-			}
 		}
 	} else {
 		// first is variable, second is literal
 		if (contains_key(table->variables, mfirst)) {
 			VAR_DATA *mfirst_data =
 			    hashmap_get(table->variables, mfirst);
+			mov_val_reg(asm_gen->out, msecond, temp_reg);
 			if (mfirst_data->location == REGISTER) {
-
+				cmp_reg_reg(asm_gen->out, mfirst_data->reg_name, temp_reg);
 			}
 			if (mfirst_data->location == STACK) {
-
+				cmp_stack_reg(asm_gen->out, mfirst_data->offset, temp_reg);
 			}
 			// first is literal, second is variable
 		} else if (contains_key(table->variables, msecond)) {
 			VAR_DATA *msecond_data =
 			    hashmap_get(table->variables, msecond);
 			if (msecond_data->location == REGISTER) {
-
+				cmp_val_reg(asm_gen->out, mfirst, msecond_data->reg_name);
 			}
 			if (msecond_data->location == STACK) {
-
+				mov_stack_reg(asm_gen->out, msecond_data->offset, temp_reg);
+				cmp_val_reg(asm_gen->out, mfirst, temp_reg);
 			}
 		} else {
 			// TODO: What if they're both literals?
-			printf("TODO: IMPLEMENT COMPARISON OF TWO LITERALS");
+			mov_val_reg(asm_gen->out, msecond, temp_reg);
+			cmp_val_reg(asm_gen->out, mfirst, temp_reg);
 		}
 	}
+	ag_output_comp_result(asm_gen, quad->op, temp_reg);
 
 	if (result_data->location == STACK) {
 		mov_reg_stack(asm_gen->out, temp_reg, result_data->offset);
@@ -510,6 +486,16 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 	// TODO: deallocate register variables that can be deallocated
 	ag_try_free_variable(asm_gen, mfirst, index);
 	ag_try_free_variable(asm_gen, msecond, index);
+}
+
+void ag_output_comp_result(ASM_GENERATOR *asm_gen, char *op, char* temp_reg)
+{
+	if (strcmp(op, "=") == 0) {
+		eq_flag_reg(asm_gen->out, temp_reg);
+	} else if (strcmp(op, "<") == 0) {
+		char *another_temp_reg = ag_get_temp_reg(asm_gen);
+		lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
+	}
 }
 
 void ag_preserve_registers(ASM_GENERATOR *asm_gen)
