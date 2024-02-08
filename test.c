@@ -96,8 +96,7 @@ void create_objects_and_link(char *test_file_name)
 		}
 		bare_name[i] = test_file_name[i];
 	}
-	sprintf(command, "as ./tests/%s.s -o ./tests/%s.o", bare_name,
-		bare_name);
+	sprintf(command, "nasm -felf64 ./tests/%s.asm", bare_name);
 	system(command);
 
 	sprintf(command,

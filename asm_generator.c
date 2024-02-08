@@ -22,14 +22,16 @@ ASM_GENERATOR *init_asm_generator(LIST *quads, SYM_TABLE *sym_table)
 		hashmap_put(gen->registers, regnames[i], NULL);
 	}
 	gen->out = init_sb();
-	sb_append(gen->out, ".globl _start\n");
-	sb_append(gen->out, ".section .text\n");
+	// TODO: Find way to auto-generate function defs
+	sb_append(gen->out, "extern print_num\n");
+	sb_append(gen->out, "global\t_start\n");
+	sb_append(gen->out, "section\t.text\n");
 	sb_append(gen->out, "_start:\n");
 
 	// Stack allocate non-temp variables
-	sb_append(gen->out, "\tenter $");
+	sb_append(gen->out, "\tenter ");
 	sb_append_int(gen->out, gen->sym_table->offset);
-	sb_append(gen->out, ", $0\n");
+	sb_append(gen->out, ", 0\n");
 
 	return gen;
 }
@@ -591,8 +593,8 @@ void ag_generate_code(ASM_GENERATOR *asm_gen)
 void ag_add_exit(ASM_GENERATOR *asm_gen)
 {
 	sb_append(asm_gen->out, "\tleave\n");
-	sb_append(asm_gen->out, "\tmovq $0, %rdi\n");
-	sb_append(asm_gen->out, "\tmovq $60, %rax\n");
+	sb_append(asm_gen->out, "\tmov rdi, 0\n");
+	sb_append(asm_gen->out, "\tmov rax, 60\n");
 	sb_append(asm_gen->out, "\tsyscall\n");
 }
 

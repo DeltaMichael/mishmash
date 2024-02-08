@@ -24,7 +24,7 @@ void output_source_to_file(char *file_path, char *asm_source)
 	for (int i = 0; i < file_name_length; i++) {
 		sb_append_char(out_name_builder, file_path[i]);
 	}
-	sb_append(out_name_builder, ".s");
+	sb_append(out_name_builder, ".asm");
 
 	char *out_file_path = sb_build(out_name_builder);
 	FILE *f = fopen(out_file_path, "w");
