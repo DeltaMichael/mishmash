@@ -2,6 +2,7 @@
 // 0
 // 0
 // 0
+// 0
 DECLR
 	x: int;
 	a: int;
@@ -20,5 +21,7 @@ BEGIN
 	x := a < b;
 	print x;
 	x := a < 7;
+	print x;
+	x := 7 < -4;
 	print x;
 END
