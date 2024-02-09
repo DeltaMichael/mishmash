@@ -1,5 +1,7 @@
 // 1
 // 1
+// 1
+// 1
 DECLR
 	x: int;
 	a: int;
@@ -12,5 +14,9 @@ BEGIN
 	a := 4;
 	b := 6;
 	x := a < b;
+	print x;
+	x := 5 < b;
+	print x;
+	x := 4 < 5;
 	print x;
 END

@@ -485,7 +485,7 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		} else {
 			// TODO: What if they're both literals?
 			mov_val_reg(asm_gen->out, mfirst, temp_reg);
-			cmp_reg_val(asm_gen->out, temp_reg, mfirst);
+			cmp_reg_val(asm_gen->out, temp_reg, msecond);
 		}
 	}
 	ag_output_comp_result(asm_gen, quad->op, temp_reg);
