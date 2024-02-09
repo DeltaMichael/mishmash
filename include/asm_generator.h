@@ -19,15 +19,15 @@ void ag_assign_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_uminus_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_mul_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_add_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
-void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index);
-void ag_output_comp_result(ASM_GENERATOR *asm_gen, char *op, char* temp_reg);
+void ag_comparison_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
+void ag_output_comp_result(ASM_GENERATOR * asm_gen, char *op, char *temp_reg);
 void ag_add_exit(ASM_GENERATOR * asm_gen);
 
 // Register and stack management
 char *ag_alloc_reg(ASM_GENERATOR * asm_gen, char *var_name);
 char *ag_realloc_reg(ASM_GENERATOR * asm_gen, char *reg);
 char *ag_get_temp_reg(ASM_GENERATOR * asm_gen);
-int ag_get_temp_byte_reg_index(ASM_GENERATOR *asm_gen);
+int ag_get_temp_byte_reg_index(ASM_GENERATOR * asm_gen);
 int ag_alloc_stack(ASM_GENERATOR * asm_gen);
 void ag_free_reg(ASM_GENERATOR * asm_gen, char *reg);
 void ag_try_free_variable(ASM_GENERATOR * asm_gen, char *var, int index);
@@ -41,4 +41,3 @@ char *ag_get_code(ASM_GENERATOR * gen);
 void ag_print_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 
 #endif
-

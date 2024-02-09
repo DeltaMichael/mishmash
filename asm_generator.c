@@ -13,7 +13,7 @@ char *regnames[REGCOUNT] =
 };
 
 char *regnames_byte[REGCOUNT] =
-	{ "al", "bl", "cl", "dl", "sil", NULL, "r8b", "r9b", "r10b", "r11b", "r12b",
+    { "al", "bl", "cl", "dl", "sil", NULL, "r8b", "r9b", "r10b", "r11b", "r12b",
 	"r13b", "r14b", "r15b"
 };
 
@@ -96,7 +96,9 @@ void ag_quad_to_asm(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		ag_uminus_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "print") == 0) {
 		ag_print_quad(asm_gen, quad, index);
-	} else if (strcmp(op, "=") == 0 || strcmp(op, "<") == 0) {
+	} else if (strcmp(op, "=") == 0 || strcmp(op, "<") == 0
+		   || strcmp(op, ">") == 0 || strcmp(op, "<=") == 0
+		   || strcmp(op, ">=") == 0) {
 		ag_comparison_quad(asm_gen, quad, index);
 	}
 }
@@ -115,6 +117,7 @@ void ag_assign_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 	// check if we're pushing a literal
 	if (contains_key(table->variables, input)) {
 		VAR_DATA *input_data = hashmap_get(table->variables, input);
+
 		if (input_data->location == REGISTER
 		    && result_data->location == REGISTER) {
 			mov_reg_reg(asm_gen->out, input_data->reg_name,
@@ -441,21 +444,27 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		VAR_DATA *msecond_data = hashmap_get(table->variables, msecond);
 		if (mfirst_data->location == REGISTER
 		    && msecond_data->location == REGISTER) {
-			cmp_reg_reg(asm_gen->out, mfirst_data->reg_name, msecond_data->reg_name);
+			cmp_reg_reg(asm_gen->out, mfirst_data->reg_name,
+				    msecond_data->reg_name);
 		}
 		if (mfirst_data->location == STACK
 		    && msecond_data->location == REGISTER) {
-			mov_stack_reg(asm_gen->out, mfirst_data->offset, temp_reg);
-			cmp_reg_reg(asm_gen->out, temp_reg, msecond_data->reg_name);
+			mov_stack_reg(asm_gen->out, mfirst_data->offset,
+				      temp_reg);
+			cmp_reg_reg(asm_gen->out, temp_reg,
+				    msecond_data->reg_name);
 		}
 		if (mfirst_data->location == REGISTER
 		    && msecond_data->location == STACK) {
-			cmp_reg_stack(asm_gen->out, mfirst_data->reg_name, msecond_data->offset);
+			cmp_reg_stack(asm_gen->out, mfirst_data->reg_name,
+				      msecond_data->offset);
 		}
 		if (mfirst_data->location == STACK
 		    && msecond_data->location == STACK) {
-			mov_stack_reg(asm_gen->out, mfirst_data->offset, temp_reg);
-			cmp_reg_stack(asm_gen->out, temp_reg, msecond_data->offset);
+			mov_stack_reg(asm_gen->out, mfirst_data->offset,
+				      temp_reg);
+			cmp_reg_stack(asm_gen->out, temp_reg,
+				      msecond_data->offset);
 		}
 	} else {
 		// first is variable, second is literal
@@ -464,12 +473,15 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 			    hashmap_get(table->variables, mfirst);
 			mov_val_reg(asm_gen->out, msecond, temp_reg);
 			if (mfirst_data->location == REGISTER) {
-				cmp_reg_reg(asm_gen->out, mfirst_data->reg_name, temp_reg);
+				cmp_reg_reg(asm_gen->out, mfirst_data->reg_name,
+					    temp_reg);
 			}
 			if (mfirst_data->location == STACK) {
 				char *another_reg = ag_get_temp_reg(asm_gen);
-				mov_stack_reg(asm_gen->out, mfirst_data->offset, another_reg);
-				cmp_reg_reg(asm_gen->out, another_reg, temp_reg);
+				mov_stack_reg(asm_gen->out, mfirst_data->offset,
+					      another_reg);
+				cmp_reg_reg(asm_gen->out, another_reg,
+					    temp_reg);
 			}
 			// first is literal, second is variable
 		} else if (contains_key(table->variables, msecond)) {
@@ -477,10 +489,12 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 			    hashmap_get(table->variables, msecond);
 			mov_val_reg(asm_gen->out, mfirst, temp_reg);
 			if (msecond_data->location == REGISTER) {
-				cmp_reg_reg(asm_gen->out, temp_reg, msecond_data->reg_name);
+				cmp_reg_reg(asm_gen->out, temp_reg,
+					    msecond_data->reg_name);
 			}
 			if (msecond_data->location == STACK) {
-				cmp_reg_stack(asm_gen->out, temp_reg, msecond_data->offset);
+				cmp_reg_stack(asm_gen->out, temp_reg,
+					      msecond_data->offset);
 			}
 		} else {
 			// TODO: What if they're both literals?
@@ -498,7 +512,7 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 	ag_try_free_variable(asm_gen, msecond, index);
 }
 
-void ag_output_comp_result(ASM_GENERATOR *asm_gen, char *op, char* temp_reg)
+void ag_output_comp_result(ASM_GENERATOR *asm_gen, char *op, char *temp_reg)
 {
 	int index = ag_get_temp_byte_reg_index(asm_gen);
 	char *another_reg = regnames[index];
@@ -508,6 +522,12 @@ void ag_output_comp_result(ASM_GENERATOR *asm_gen, char *op, char* temp_reg)
 		eq_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
 	} else if (strcmp(op, "<") == 0) {
 		lt_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
+	} else if (strcmp(op, ">") == 0) {
+		gt_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
+	} else if (strcmp(op, "<=") == 0) {
+		lte_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
+	} else if (strcmp(op, ">=") == 0) {
+		gte_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
 	}
 	mov_reg_reg(asm_gen->out, another_reg, temp_reg);
 }
@@ -629,4 +649,3 @@ char *ag_get_code(ASM_GENERATOR *gen)
 	char *out = sb_build(gen->out);
 	return out;
 }
-

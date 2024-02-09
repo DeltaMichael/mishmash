@@ -98,12 +98,12 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 - addition
 - multiplication
 - negation
-- = and < comparison
+- comparison
 
 **Arithmetic operations to be implemented:**
+- != comparison
 - subtraction
 - division
-- `>=`, `<=`, `>` comparison
 
 **Logical operations implemented so far:**
 

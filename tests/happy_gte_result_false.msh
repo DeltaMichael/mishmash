@@ -3,25 +3,26 @@
 // 0
 // 0
 // 0
+// 0
 DECLR
 	x: int;
 	a: int;
 	b: int;
 BEGIN
-	a := 4;
-	b := 4;
-	x := a < b;
+	a := -4;
+	b := 0;
+	x := a > b;
 	print x;
 	a := 4;
-	b := -4;
-	x := a < b;
+	b := 6;
+	x := a > b;
 	print x;
-	a := 8;
-	b := 7;
-	x := a < b;
+	x := 5 > b;
 	print x;
-	x := a < 7;
+	x := 4 > 5;
 	print x;
-	x := 7 < -4;
+	x := -5 > 4;
+	print x;
+	x := 5 >= 6;
 	print x;
 END

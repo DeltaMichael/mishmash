@@ -184,7 +184,7 @@ void call(STRING_BUILDER *out, char *function)
 	sb_append(out, "\n");
 }
 
-void cmp_reg_reg(STRING_BUILDER *out, char* first_reg, char* second_reg)
+void cmp_reg_reg(STRING_BUILDER *out, char *first_reg, char *second_reg)
 {
 	sb_append(out, "\tcmp ");
 	sb_append(out, first_reg);
@@ -193,7 +193,7 @@ void cmp_reg_reg(STRING_BUILDER *out, char* first_reg, char* second_reg)
 	sb_append(out, "\n");
 }
 
-void cmp_reg_stack(STRING_BUILDER *out, char* reg, int offset)
+void cmp_reg_stack(STRING_BUILDER *out, char *reg, int offset)
 {
 	sb_append(out, "\tcmp ");
 	sb_append(out, reg);
@@ -211,16 +211,37 @@ void cmp_reg_val(STRING_BUILDER *out, char *reg, char *val)
 	sb_append(out, "\n");
 }
 
-void eq_flag_reg(STRING_BUILDER* out, char *reg, char* byte_reg)
+void eq_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
 {
 	sb_append(out, "\tsete ");
 	sb_append(out, byte_reg);
 	sb_append(out, "\n");
 }
 
-void lt_flag_reg(STRING_BUILDER *out, char *reg, char* byte_reg)
+void lt_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
 {
 	sb_append(out, "\tsetl ");
+	sb_append(out, byte_reg);
+	sb_append(out, "\n");
+}
+
+void lte_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
+{
+	sb_append(out, "\tsetle ");
+	sb_append(out, byte_reg);
+	sb_append(out, "\n");
+}
+
+void gt_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
+{
+	sb_append(out, "\tsetg ");
+	sb_append(out, byte_reg);
+	sb_append(out, "\n");
+}
+
+void gte_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
+{
+	sb_append(out, "\tsetge ");
 	sb_append(out, byte_reg);
 	sb_append(out, "\n");
 }
@@ -231,4 +252,3 @@ void clear_reg(STRING_BUILDER *out, char *reg)
 	sb_append(out, reg);
 	sb_append(out, ", 0\n");
 }
-

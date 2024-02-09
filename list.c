@@ -56,7 +56,7 @@ void *list_get(LIST *list, int index)
 
 void free_list(LIST *list, void (*f)(void *))
 {
-	for (int i = 0; i < list->size; i++) {
+	for(int i = 0; i < list->size; i++) {
 		(*f) (list->elements[i]);
 	}
 	free(list->elements);
@@ -64,4 +64,3 @@ void free_list(LIST *list, void (*f)(void *))
 	free(list);
 	list = NULL;
 }
-

@@ -1,0 +1,31 @@
+// 1
+// 1
+// 1
+// 1
+// 1
+// 1
+// 1
+DECLR
+	x: int;
+	a: int;
+	b: int;
+BEGIN
+	a := 0;
+	b := -4;
+	x := a > b;
+	print x;
+	a := 6;
+	b := 4;
+	x := a > b;
+	print x;
+	x := 7 > b;
+	print x;
+	x := 5 > 4;
+	print x;
+	x := 5 > -4;
+	print x;
+	x := 5 >= -4;
+	print x;
+	x := 5 >= 5;
+	print x;
+END

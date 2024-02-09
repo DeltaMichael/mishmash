@@ -126,9 +126,20 @@ TOKEN *get_token(LEXER *lexer)
 			break;
 		case '<':
 			token->type = LESS_THAN;
+			if (peek(lexer) == '=') {
+				token->type = LESS_THAN_EQ;
+				pace = 2;
+			} else {
+				token->type = LESS_THAN;
+			}
 			break;
 		case '>':
-			token->type = GREATER_THAN;
+			if (peek(lexer) == '=') {
+				token->type = GREATER_THAN_EQ;
+				pace = 2;
+			} else {
+				token->type = GREATER_THAN;
+			}
 			break;
 		case '+':
 			token->type = PLUS;
@@ -150,10 +161,8 @@ TOKEN *get_token(LEXER *lexer)
 			}
 		case ':':
 			if (peek(lexer) == '=') {
-				// token->lexeme = strdup(":=");
 				token->type = ASSIGN;
 				pace = 2;
-				// advance(lexer);
 			} else {
 				token->type = COLON;
 			}
@@ -163,6 +172,7 @@ TOKEN *get_token(LEXER *lexer)
 			break;
 		}
 		token->lexeme = strndup(start, pace);
+		// TODO: Create advance_with function
 		for (int i = 0; i < pace; i++) {
 			advance(lexer);
 		}
