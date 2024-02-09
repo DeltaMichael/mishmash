@@ -445,16 +445,17 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		}
 		if (mfirst_data->location == STACK
 		    && msecond_data->location == REGISTER) {
-			cmp_stack_reg(asm_gen->out, mfirst_data->offset, msecond_data->reg_name);
+			mov_stack_reg(asm_gen->out, mfirst_data->offset, temp_reg);
+			cmp_reg_reg(asm_gen->out, temp_reg, msecond_data->reg_name);
 		}
 		if (mfirst_data->location == REGISTER
 		    && msecond_data->location == STACK) {
-			cmp_stack_reg(asm_gen->out, msecond_data->offset, mfirst_data->reg_name);
+			cmp_reg_stack(asm_gen->out, mfirst_data->reg_name, msecond_data->offset);
 		}
 		if (mfirst_data->location == STACK
 		    && msecond_data->location == STACK) {
 			mov_stack_reg(asm_gen->out, mfirst_data->offset, temp_reg);
-			cmp_stack_reg(asm_gen->out, msecond_data->offset, temp_reg);
+			cmp_reg_stack(asm_gen->out, temp_reg, msecond_data->offset);
 		}
 	} else {
 		// first is variable, second is literal
@@ -466,23 +467,25 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 				cmp_reg_reg(asm_gen->out, mfirst_data->reg_name, temp_reg);
 			}
 			if (mfirst_data->location == STACK) {
-				cmp_stack_reg(asm_gen->out, mfirst_data->offset, temp_reg);
+				char *another_reg = ag_get_temp_reg(asm_gen);
+				mov_stack_reg(asm_gen->out, mfirst_data->offset, another_reg);
+				cmp_reg_reg(asm_gen->out, another_reg, temp_reg);
 			}
 			// first is literal, second is variable
 		} else if (contains_key(table->variables, msecond)) {
 			VAR_DATA *msecond_data =
 			    hashmap_get(table->variables, msecond);
+			mov_val_reg(asm_gen->out, mfirst, temp_reg);
 			if (msecond_data->location == REGISTER) {
-				cmp_val_reg(asm_gen->out, mfirst, msecond_data->reg_name);
+				cmp_reg_reg(asm_gen->out, temp_reg, msecond_data->reg_name);
 			}
 			if (msecond_data->location == STACK) {
-				mov_stack_reg(asm_gen->out, msecond_data->offset, temp_reg);
-				cmp_val_reg(asm_gen->out, mfirst, temp_reg);
+				cmp_reg_stack(asm_gen->out, temp_reg, msecond_data->offset);
 			}
 		} else {
 			// TODO: What if they're both literals?
-			mov_val_reg(asm_gen->out, msecond, temp_reg);
-			cmp_val_reg(asm_gen->out, mfirst, temp_reg);
+			mov_val_reg(asm_gen->out, mfirst, temp_reg);
+			cmp_reg_val(asm_gen->out, temp_reg, mfirst);
 		}
 	}
 	ag_output_comp_result(asm_gen, quad->op, temp_reg);

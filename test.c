@@ -118,7 +118,7 @@ void clean_up(char *test_file_name)
 		bare_name[i] = test_file_name[i];
 	}
 	sprintf(command, "rm ./tests/%s", bare_name);
-	system("rm ./tests/*.s ./tests/*.o");
+	system("rm ./tests/*.asm ./tests/*.o");
 	system(command);
 }
 

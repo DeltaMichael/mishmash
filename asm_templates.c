@@ -187,24 +187,28 @@ void call(STRING_BUILDER *out, char *function)
 void cmp_reg_reg(STRING_BUILDER *out, char* first_reg, char* second_reg)
 {
 	sb_append(out, "\tcmp ");
-	sb_append(out, second_reg);
-	sb_append(out, ", ");
 	sb_append(out, first_reg);
+	sb_append(out, ", ");
+	sb_append(out, second_reg);
 	sb_append(out, "\n");
 }
 
-void cmp_stack_reg(STRING_BUILDER *out, int offset, char* reg)
+void cmp_reg_stack(STRING_BUILDER *out, char* reg, int offset)
 {
 	sb_append(out, "\tcmp ");
 	sb_append(out, reg);
 	sb_append(out, ", [rbp - ");
 	sb_append_int(out, offset);
-	sb_append(out, " ]\n");
+	sb_append(out, "]\n");
 }
 
-void cmp_val_reg(STRING_BUILDER *out, char *val, char *reg)
+void cmp_reg_val(STRING_BUILDER *out, char *reg, char *val)
 {
-
+	sb_append(out, "\tcmp ");
+	sb_append(out, reg);
+	sb_append(out, ", ");
+	sb_append(out, val);
+	sb_append(out, "\n");
 }
 
 void eq_flag_reg(STRING_BUILDER* out, char *reg, char* byte_reg)

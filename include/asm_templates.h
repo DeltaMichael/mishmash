@@ -38,8 +38,8 @@ void push_reg(STRING_BUILDER * out, char *reg_name);
 void call(STRING_BUILDER * out, char *function);
 
 void cmp_reg_reg(STRING_BUILDER *out, char* first_reg, char* second_reg);
-void cmp_stack_reg(STRING_BUILDER *out, int offset, char* reg);
-void cmp_val_reg(STRING_BUILDER *out, char *val, char *reg);
+void cmp_reg_stack(STRING_BUILDER *out, char* reg, int offset);
+void cmp_reg_val(STRING_BUILDER *out, char *reg, char* val);
 void eq_flag_reg(STRING_BUILDER* out, char *reg, char* byte_reg);
 void lt_flag_reg(STRING_BUILDER *out, char *reg, char* byte_reg);
 void clear_reg(STRING_BUILDER *out, char *reg);
