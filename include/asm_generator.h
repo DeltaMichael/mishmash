@@ -27,6 +27,7 @@ void ag_add_exit(ASM_GENERATOR * asm_gen);
 char *ag_alloc_reg(ASM_GENERATOR * asm_gen, char *var_name);
 char *ag_realloc_reg(ASM_GENERATOR * asm_gen, char *reg);
 char *ag_get_temp_reg(ASM_GENERATOR * asm_gen);
+int ag_get_temp_byte_reg_index(ASM_GENERATOR *asm_gen);
 int ag_alloc_stack(ASM_GENERATOR * asm_gen);
 void ag_free_reg(ASM_GENERATOR * asm_gen, char *reg);
 void ag_try_free_variable(ASM_GENERATOR * asm_gen, char *var, int index);

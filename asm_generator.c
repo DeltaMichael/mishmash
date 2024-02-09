@@ -12,6 +12,11 @@ char *regnames[REGCOUNT] =
 	"r13", "r14", "r15"
 };
 
+char *regnames_byte[REGCOUNT] =
+	{ "al", "bl", "cl", "dl", "sil", NULL, "r8b", "r9b", "r10b", "r11b", "r12b",
+	"r13b", "r14b", "r15b"
+};
+
 ASM_GENERATOR *init_asm_generator(LIST *quads, SYM_TABLE *sym_table)
 {
 	ASM_GENERATOR *gen = malloc(sizeof(ASM_GENERATOR));
@@ -492,12 +497,16 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 
 void ag_output_comp_result(ASM_GENERATOR *asm_gen, char *op, char* temp_reg)
 {
+	int index = ag_get_temp_byte_reg_index(asm_gen);
+	char *another_reg = regnames[index];
+	char *another_reg_byte = regnames_byte[index];
+	clear_reg(asm_gen->out, another_reg);
 	if (strcmp(op, "=") == 0) {
-		eq_flag_reg(asm_gen->out, temp_reg);
+		eq_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
 	} else if (strcmp(op, "<") == 0) {
-		char *another_temp_reg = ag_get_temp_reg(asm_gen);
-		lt_flag_reg(asm_gen->out, temp_reg, another_temp_reg);
+		lt_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
 	}
+	mov_reg_reg(asm_gen->out, another_reg, temp_reg);
 }
 
 void ag_preserve_registers(ASM_GENERATOR *asm_gen)
@@ -545,6 +554,20 @@ char *ag_get_temp_reg(ASM_GENERATOR *asm_gen)
 	}
 	// TODO: Move variable to stack if no free register
 	return NULL;
+}
+
+int ag_get_temp_byte_reg_index(ASM_GENERATOR *asm_gen)
+{
+	for (int i = 0; i < REGCOUNT; i++) {
+		if (hashmap_get(asm_gen->registers, regnames[i]) == NULL) {
+			if (regnames_byte[i] == NULL) {
+				continue;
+			}
+			return i;
+		}
+	}
+	// TODO: Move variable to stack if no free register
+	return -1;
 }
 
 char *ag_realloc_reg(ASM_GENERATOR *asm_gen, char *reg)

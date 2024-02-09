@@ -4,7 +4,7 @@ build
 mishmash
 tags
 tests/*.o
-tests/*.s
+tests/*.asm
 testmash
 *.c~
 **/*.c~

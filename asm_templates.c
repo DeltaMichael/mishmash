@@ -195,11 +195,11 @@ void cmp_reg_reg(STRING_BUILDER *out, char* first_reg, char* second_reg)
 
 void cmp_stack_reg(STRING_BUILDER *out, int offset, char* reg)
 {
-	sb_append(out, "\tcmp [rbp -");
-	sb_append(out, offset);
-	sb_append(out, "], ");
+	sb_append(out, "\tcmp ");
 	sb_append(out, reg);
-	sb_append(out, "\n");
+	sb_append(out, ", [rbp - ");
+	sb_append_int(out, offset);
+	sb_append(out, " ]\n");
 }
 
 void cmp_val_reg(STRING_BUILDER *out, char *val, char *reg)
@@ -207,13 +207,24 @@ void cmp_val_reg(STRING_BUILDER *out, char *val, char *reg)
 
 }
 
-void eq_flag_reg(STRING_BUILDER* out, char *reg)
+void eq_flag_reg(STRING_BUILDER* out, char *reg, char* byte_reg)
 {
-
+	sb_append(out, "\tsete ");
+	sb_append(out, byte_reg);
+	sb_append(out, "\n");
 }
 
-void lt_flag_reg(STRING_BUILDER *out, char *reg, char* temp_reg)
+void lt_flag_reg(STRING_BUILDER *out, char *reg, char* byte_reg)
 {
+	sb_append(out, "\tsetl ");
+	sb_append(out, byte_reg);
+	sb_append(out, "\n");
+}
 
+void clear_reg(STRING_BUILDER *out, char *reg)
+{
+	sb_append(out, "\tmov ");
+	sb_append(out, reg);
+	sb_append(out, ", 0\n");
 }
 
