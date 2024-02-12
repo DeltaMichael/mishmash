@@ -23,7 +23,7 @@ void mov_stack_reg(STRING_BUILDER *out, int in_offset, char *out_reg)
 {
 	sb_append(out, "\tmov qword ");
 	sb_append(out, out_reg);
-	sb_append(out, ",[rbp - ");
+	sb_append(out, ", [rbp - ");
 	sb_append_int(out, in_offset);
 	sb_append(out, "]\n");
 }
@@ -211,6 +211,33 @@ void cmp_reg_val(STRING_BUILDER *out, char *reg, char *val)
 	sb_append(out, "\n");
 }
 
+void sub_reg_reg(STRING_BUILDER *out, char *first_reg, char *second_reg)
+{
+	sb_append(out, "\tsub ");
+	sb_append(out, first_reg);
+	sb_append(out, ", ");
+	sb_append(out, second_reg);
+	sb_append(out, "\n");
+}
+
+void sub_reg_stack(STRING_BUILDER *out, char *reg, int offset)
+{
+	sb_append(out, "\tsub ");
+	sb_append(out, reg);
+	sb_append(out, ", [rbp - ");
+	sb_append_int(out, offset);
+	sb_append(out, "]\n");
+}
+
+void sub_reg_val(STRING_BUILDER *out, char *reg, char *val)
+{
+	sb_append(out, "\tsub ");
+	sb_append(out, reg);
+	sb_append(out, ", ");
+	sb_append(out, val);
+	sb_append(out, "\n");
+}
+
 void eq_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
 {
 	sb_append(out, "\tsete ");
@@ -252,3 +279,4 @@ void clear_reg(STRING_BUILDER *out, char *reg)
 	sb_append(out, reg);
 	sb_append(out, ", 0\n");
 }
+

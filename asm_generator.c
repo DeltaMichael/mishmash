@@ -87,11 +87,10 @@ void ag_quad_to_asm(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 	} else if (strcmp(op, "+") == 0) {
 		ag_add_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "-") == 0) {
-
+		ag_sub_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "*") == 0) {
 		ag_mul_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "/") == 0) {
-
 	} else if (strcmp(op, "uminus") == 0) {
 		ag_uminus_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "print") == 0) {
@@ -232,8 +231,8 @@ void ag_add_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 				add_val_reg(asm_gen->out, mfirst, temp_reg);
 			}
 		} else {
-			// TODO: What if they're both literals?
-			printf("IMPLEMENT ADDITION OF TWO LITERALS");
+			mov_val_reg(asm_gen->out, mfirst, temp_reg);
+			add_val_reg(asm_gen->out, msecond, temp_reg);
 		}
 	}
 	if (result_data->location == STACK) {
@@ -326,8 +325,97 @@ void ag_mul_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 				mul_val_reg(asm_gen->out, mfirst, temp_reg);
 			}
 		} else {
-			// TODO: What if they're both literals?
-			printf("IMPLEMENT MULTIPLICATION OF TWO LITERALS");
+			mov_val_reg(asm_gen->out, mfirst, temp_reg);
+			mul_val_reg(asm_gen->out, msecond, temp_reg);
+		}
+	}
+	if (result_data->location == STACK) {
+		mov_reg_stack(asm_gen->out, temp_reg, result_data->offset);
+	}
+	// TODO: deallocate register variables that can be deallocated
+	ag_try_free_variable(asm_gen, mfirst, index);
+	ag_try_free_variable(asm_gen, msecond, index);
+}
+
+void ag_sub_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
+{
+	SYM_TABLE *table = asm_gen->sym_table;
+	char *mfirst = quad->arg1;
+	char *msecond = quad->arg2;
+	char *result = quad->result;
+	VAR_DATA *result_data = hashmap_get(table->variables, result);
+	// allocate register if not allocated already
+	if (result_data->location == REGISTER && result_data->reg_name == NULL) {
+		char *reg_name = ag_alloc_reg(asm_gen, result);
+		result_data->reg_name = reg_name;
+	}
+
+	char *temp_reg;
+	// If the result variable is a register, use it for the result
+	// If it's on the stack, use a temp register for the result
+	if (result_data->location == REGISTER) {
+		temp_reg = result_data->reg_name;
+	} else {
+		char *temp_reg = ag_get_temp_reg(asm_gen);
+	}
+	// check if both factors are variables
+	if (contains_key(table->variables, mfirst)
+	    && contains_key(table->variables, msecond)) {
+		VAR_DATA *mfirst_data = hashmap_get(table->variables, mfirst);
+		VAR_DATA *msecond_data = hashmap_get(table->variables, msecond);
+		if (mfirst_data->location == REGISTER
+		    && msecond_data->location == REGISTER) {
+			mov_reg_reg(asm_gen->out, mfirst_data->reg_name,
+				    temp_reg);
+			sub_reg_reg(asm_gen->out, temp_reg, msecond_data->reg_name);
+		}
+		if (mfirst_data->location == STACK
+		    && msecond_data->location == REGISTER) {
+			mov_stack_reg(asm_gen->out, mfirst_data->offset,
+				      temp_reg);
+			sub_reg_reg(asm_gen->out, temp_reg, msecond_data->reg_name);
+		}
+		if (mfirst_data->location == REGISTER
+		    && msecond_data->location == STACK) {
+			mov_reg_reg(asm_gen->out, mfirst_data->reg_name,
+				    temp_reg);
+			sub_reg_stack(asm_gen->out, temp_reg, msecond_data->offset);
+		}
+		if (mfirst_data->location == STACK
+		    && msecond_data->location == STACK) {
+			mov_stack_reg(asm_gen->out, mfirst_data->offset, temp_reg);
+			sub_reg_stack(asm_gen->out, temp_reg, msecond_data->offset);
+		}
+	} else {
+		// first is variable, second is literal
+		if (contains_key(table->variables, mfirst)) {
+			VAR_DATA *mfirst_data =
+			    hashmap_get(table->variables, mfirst);
+			if (mfirst_data->location == REGISTER) {
+				mov_reg_reg(asm_gen->out, mfirst_data->reg_name,
+					    temp_reg);
+				sub_reg_val(asm_gen->out, temp_reg, msecond);
+			}
+			if (mfirst_data->location == STACK) {
+				mov_stack_reg(asm_gen->out, mfirst_data->offset,
+					      temp_reg);
+				sub_reg_val(asm_gen->out, temp_reg, msecond);
+			}
+			// first is literal, second is variable
+		} else if (contains_key(table->variables, msecond)) {
+			VAR_DATA *msecond_data =
+			    hashmap_get(table->variables, msecond);
+			if (msecond_data->location == REGISTER) {
+				mov_val_reg(asm_gen->out, mfirst, temp_reg);
+				sub_reg_reg(asm_gen->out, temp_reg, msecond_data->reg_name);
+			}
+			if (msecond_data->location == STACK) {
+				mov_val_reg(asm_gen->out, mfirst, temp_reg);
+				sub_reg_stack(asm_gen->out, temp_reg, msecond_data->offset);
+			}
+		} else {
+			mov_val_reg(asm_gen->out, mfirst, temp_reg);
+			sub_reg_val(asm_gen->out, temp_reg, msecond);
 		}
 	}
 	if (result_data->location == STACK) {
@@ -649,3 +737,4 @@ char *ag_get_code(ASM_GENERATOR *gen)
 	char *out = sb_build(gen->out);
 	return out;
 }
+

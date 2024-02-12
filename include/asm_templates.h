@@ -40,6 +40,11 @@ void call(STRING_BUILDER * out, char *function);
 void cmp_reg_reg(STRING_BUILDER * out, char *first_reg, char *second_reg);
 void cmp_reg_stack(STRING_BUILDER * out, char *reg, int offset);
 void cmp_reg_val(STRING_BUILDER * out, char *reg, char *val);
+
+void sub_reg_reg(STRING_BUILDER * out, char *first_reg, char *second_reg);
+void sub_reg_stack(STRING_BUILDER * out, char *reg, int offset);
+void sub_reg_val(STRING_BUILDER * out, char *reg, char *val);
+
 void eq_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
 void lt_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
 void lte_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
@@ -48,3 +53,4 @@ void gte_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
 void clear_reg(STRING_BUILDER * out, char *reg);
 
 #endif
+
