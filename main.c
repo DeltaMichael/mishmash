@@ -10,6 +10,48 @@
 #include "include/tac_generator.h"
 #include "string.h"
 
+char* get_bare_path(char *source_file_path)
+{
+	char *bare_path = malloc(sizeof(256));
+	int path_length = strlen(source_file_path);
+	int ext_index = 0;
+	for (int i = path_length; i >= 0; i--) {
+		if (source_file_path[i] == '.') {
+			ext_index = i;
+			break;
+		}
+	}
+	for (int i = 0; i < ext_index; i++) {
+		bare_path[i] = source_file_path[i];
+	}
+	bare_path[ext_index] = 0;
+	return bare_path;
+}
+
+void run_asm_and_linker(char *bare_path)
+{
+	char command[256];
+	sprintf(command, "nasm -felf64 %s.asm", bare_path);
+	system(command);
+
+	// TODO: Remove this call after supporting multiple source files with PIC
+	// This is a compiler, this isn't 'Nam, there are rules here
+	sprintf(command,
+		"ld --dynamic-linker=/lib64/ld-linux-x86-64.so.2 %s.o /lib64/mashlib.so -o %s",
+		bare_path, bare_path);
+	system(command);
+}
+
+void clean_up(char *bare_path)
+{
+	char command[256];
+
+	// TODO: Clean up just .asm files after supporting multiple source files with PIC
+	// This is a compiler, this isn't 'Nam, there are rules here
+	sprintf(command, "rm %s.asm %s.o", bare_path, bare_path);
+	system(command);
+}
+
 void output_source_to_file(char *file_path, char *asm_source)
 {
 	int file_name_length = strlen(file_path);
@@ -91,6 +133,11 @@ int main(int argc, char **argv)
 	ag_generate_code(asm_gen);
 	char *out = ag_get_code(asm_gen);
 	output_source_to_file(file_path, out);
+	char *bare_path = get_bare_path(file_path);
+	printf("BARE_PATH: %s", bare_path);
+	run_asm_and_linker(bare_path);
+	clean_up(bare_path);
+	free(bare_path);
 
 	if (debug_output) {
 		// debug output

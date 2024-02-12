@@ -37,8 +37,11 @@ The debug output shows all tokens, AST in reverse-Polish notation, three-address
 
 ### Run a program
 
+There is currently only support for single source files. main.c calls NASM and ld and outputs a binary which is runnable.
+
 ```
-./run.sh my_program.msh
+./mishmash -d my_program.msh
+./my_program
 ```
 
 ## Compile test suite
@@ -96,13 +99,13 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 
 **Arithmetic operations implemented so far:**
 - addition
+- subtraction
 - multiplication
 - negation
 - comparison
 
 **Arithmetic operations to be implemented:**
 - != comparison
-- subtraction
 - division
 
 **Logical operations implemented so far:**
