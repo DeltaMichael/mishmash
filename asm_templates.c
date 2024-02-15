@@ -1,6 +1,7 @@
 #include "include/asm_templates.h"
 #include "include/string_builder.h"
 #include <stdio.h>
+
 void mov_reg_reg(STRING_BUILDER *out, char *in_reg, char *out_reg)
 {
 	sb_append(out, "\tmov ");

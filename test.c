@@ -118,7 +118,7 @@ void clean_up(char *test_file_name)
 		bare_name[i] = test_file_name[i];
 	}
 	sprintf(command, "rm ./tests/%s", bare_name);
-	system("rm ./tests/*.asm ./tests/*.o");
+	// system("rm ./tests/*.asm ./tests/*.o");
 	system(command);
 }
 
@@ -169,7 +169,7 @@ bool run_test(char *file_name)
 	if (compilation_output->size > 0) {
 		passed = assert_output(expected_values, compilation_output);
 	} else {
-		create_objects_and_link(file_name);
+		// create_objects_and_link(file_name);
 		LIST *run_output = get_run_output(file_name);
 		passed = assert_output(expected_values, run_output);
 		clean_up(file_name);
@@ -204,3 +204,4 @@ int main(int argc, char **argv)
 	// run_test("sad_unexpected_token.msh");
 	return 0;
 }
+

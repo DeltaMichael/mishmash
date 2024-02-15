@@ -12,7 +12,7 @@
 
 char* get_bare_path(char *source_file_path)
 {
-	char *bare_path = malloc(sizeof(256));
+	char *bare_path = malloc(sizeof(char) * 256);
 	int path_length = strlen(source_file_path);
 	int ext_index = 0;
 	for (int i = path_length; i >= 0; i--) {
@@ -134,7 +134,6 @@ int main(int argc, char **argv)
 	char *out = ag_get_code(asm_gen);
 	output_source_to_file(file_path, out);
 	char *bare_path = get_bare_path(file_path);
-	printf("BARE_PATH: %s", bare_path);
 	run_asm_and_linker(bare_path);
 	clean_up(bare_path);
 	free(bare_path);
