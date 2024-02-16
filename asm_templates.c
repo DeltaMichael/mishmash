@@ -2,7 +2,7 @@
 #include "include/string_builder.h"
 #include <stdio.h>
 
-void mov_reg_reg(STRING_BUILDER *out, char *in_reg, char *out_reg)
+void mov_reg_reg(STRING_BUILDER *out, char *out_reg, char *in_reg)
 {
 	sb_append(out, "\tmov ");
 	sb_append(out, out_reg);
@@ -11,7 +11,7 @@ void mov_reg_reg(STRING_BUILDER *out, char *in_reg, char *out_reg)
 	sb_append(out, "\n");
 }
 
-void mov_reg_stack(STRING_BUILDER *out, char *in_reg, int out_offset)
+void mov_stack_reg(STRING_BUILDER *out, int out_offset, char* in_reg)
 {
 	sb_append(out, "\tmov qword [rbp - ");
 	sb_append_int(out, out_offset);
@@ -20,7 +20,7 @@ void mov_reg_stack(STRING_BUILDER *out, char *in_reg, int out_offset)
 	sb_append(out, "\n");
 }
 
-void mov_stack_reg(STRING_BUILDER *out, int in_offset, char *out_reg)
+void mov_reg_stack(STRING_BUILDER *out, char *out_reg, int in_offset)
 {
 	sb_append(out, "\tmov qword ");
 	sb_append(out, out_reg);
@@ -29,14 +29,14 @@ void mov_stack_reg(STRING_BUILDER *out, int in_offset, char *out_reg)
 	sb_append(out, "]\n");
 }
 
-void mov_stack_stack(STRING_BUILDER *out, int in_offset, int out_offset,
+void mov_stack_stack(STRING_BUILDER *out, int out_offset, int in_offset,
 		     char *temp_reg)
 {
-	mov_stack_reg(out, in_offset, temp_reg);
-	mov_reg_stack(out, temp_reg, out_offset);
+	mov_reg_stack(out, temp_reg, in_offset);
+	mov_stack_reg(out, out_offset, temp_reg);
 }
 
-void mov_val_reg(STRING_BUILDER *out, char *val, char *out_reg)
+void mov_reg_val(STRING_BUILDER *out, char *out_reg, char* val)
 {
 	sb_append(out, "\tmov ");
 	sb_append(out, out_reg);
@@ -45,7 +45,7 @@ void mov_val_reg(STRING_BUILDER *out, char *val, char *out_reg)
 	sb_append(out, "\n");
 }
 
-void mov_val_stack(STRING_BUILDER *out, char *val, int out_offset)
+void mov_stack_val(STRING_BUILDER *out, int out_offset, char* val)
 {
 	sb_append(out, "\tmov qword [rbp - ");
 	sb_append_int(out, out_offset);
@@ -66,7 +66,7 @@ void mul_reg_reg(STRING_BUILDER *out, char *in_reg, char *out_reg)
 void mul_reg_stack(STRING_BUILDER *out, char *in_reg, int out_offset,
 		   char *temp_reg)
 {
-	mov_stack_reg(out, out_offset, temp_reg);
+	mov_reg_stack(out, temp_reg, out_offset);
 	mul_reg_reg(out, in_reg, temp_reg);
 }
 
@@ -82,7 +82,7 @@ void mul_stack_reg(STRING_BUILDER *out, int in_offset, char *out_reg)
 void mul_stack_stack(STRING_BUILDER *out, int in_offset, int out_offset,
 		     char *temp_reg)
 {
-	mov_stack_reg(out, in_offset, temp_reg);
+	mov_reg_stack(out, temp_reg, in_offset);
 	mul_stack_reg(out, out_offset, temp_reg);
 }
 
@@ -98,7 +98,7 @@ void mul_val_reg(STRING_BUILDER *out, char *val, char *out_reg)
 void mul_val_stack(STRING_BUILDER *out, char *val, int out_offset,
 		   char *temp_reg)
 {
-	mov_stack_reg(out, out_offset, temp_reg);
+	mov_reg_stack(out, temp_reg, out_offset);
 	mul_val_reg(out, val, temp_reg);
 }
 
@@ -114,7 +114,7 @@ void add_reg_reg(STRING_BUILDER *out, char *in_reg, char *out_reg)
 void add_reg_stack(STRING_BUILDER *out, char *in_reg, int out_offset,
 		   char *temp_reg)
 {
-	mov_stack_reg(out, out_offset, temp_reg);
+	mov_reg_stack(out, temp_reg, out_offset);
 	add_reg_reg(out, in_reg, temp_reg);
 }
 
@@ -130,7 +130,7 @@ void add_stack_reg(STRING_BUILDER *out, int in_offset, char *out_reg)
 void add_stack_stack(STRING_BUILDER *out, int in_offset, int out_offset,
 		     char *temp_reg)
 {
-	mov_stack_reg(out, in_offset, temp_reg);
+	mov_reg_stack(out, temp_reg, in_offset);
 	add_stack_reg(out, out_offset, temp_reg);
 }
 
@@ -146,7 +146,7 @@ void add_val_reg(STRING_BUILDER *out, char *val, char *out_reg)
 void add_val_stack(STRING_BUILDER *out, char *val, int out_offset,
 		   char *temp_reg)
 {
-	mov_stack_reg(out, out_offset, temp_reg);
+	mov_reg_stack(out, temp_reg, out_offset);
 	add_val_reg(out, val, temp_reg);
 }
 
@@ -159,9 +159,9 @@ void neg_reg(STRING_BUILDER *out, char *reg)
 
 void neg_stack(STRING_BUILDER *out, int offset, char *temp_reg)
 {
-	mov_stack_reg(out, offset, temp_reg);
-	neg_reg(out, temp_reg);
 	mov_reg_stack(out, temp_reg, offset);
+	neg_reg(out, temp_reg);
+	mov_stack_reg(out, offset, temp_reg);
 }
 
 void push_reg(STRING_BUILDER *out, char *reg_name)
