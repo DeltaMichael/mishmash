@@ -145,7 +145,7 @@ void ag_assign_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 	ag_try_free_variable(asm_gen, input, index);
 }
 
-void op_template(ASM_GENERATOR *asm_gen, QUAD *quad, int index, RRO reg_reg_op, SSO stack_stack_op, RVO reg_val_op)
+void op_template(ASM_GENERATOR *asm_gen, QUAD *quad, int index, RRO reg_reg_op, SSO stack_stack_op, RVO reg_val_op, RESULT_OUTPUT res_out)
 {
 	SYM_TABLE *table = asm_gen->sym_table;
 	char *mfirst = quad->arg1;
@@ -220,6 +220,9 @@ void op_template(ASM_GENERATOR *asm_gen, QUAD *quad, int index, RRO reg_reg_op, 
 			reg_val_op(asm_gen->out, temp_reg, msecond);
 		}
 	}
+	if (res_out != NULL) {
+		res_out(asm_gen, quad->op, temp_reg);
+	}
 	if (result_data->location == STACK) {
 		mov_stack_reg(asm_gen->out, result_data->offset, temp_reg);
 	}
@@ -230,19 +233,23 @@ void op_template(ASM_GENERATOR *asm_gen, QUAD *quad, int index, RRO reg_reg_op, 
 
 void ag_add_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 {
-	op_template(asm_gen, quad, index, add_reg_reg, add_stack_stack, add_reg_val);
+	op_template(asm_gen, quad, index, add_reg_reg, add_stack_stack, add_reg_val, NULL);
 }
 
 void ag_mul_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 {
-	op_template(asm_gen, quad, index, mul_reg_reg, mul_stack_stack, mul_reg_val);
+	op_template(asm_gen, quad, index, mul_reg_reg, mul_stack_stack, mul_reg_val, NULL);
 }
 
 void ag_sub_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 {
-	op_template(asm_gen, quad, index, sub_reg_reg, sub_stack_stack, sub_reg_val);
+	op_template(asm_gen, quad, index, sub_reg_reg, sub_stack_stack, sub_reg_val, NULL);
 }
 
+void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
+{
+	op_template(asm_gen, quad, index, cmp_reg_reg, cmp_stack_stack, cmp_reg_val, ag_output_comp_result);
+}
 void ag_uminus_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 {
 	SYM_TABLE *table = asm_gen->sym_table;
@@ -314,99 +321,6 @@ void ag_print_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 	}
 	call(asm_gen->out, "print_num");
 	ag_restore_registers(asm_gen);
-}
-
-void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
-{
-	SYM_TABLE *table = asm_gen->sym_table;
-	char *mfirst = quad->arg1;
-	char *msecond = quad->arg2;
-	char *result = quad->result;
-	VAR_DATA *result_data = hashmap_get(table->variables, result);
-	// allocate register if not allocated already
-	if (result_data->location == REGISTER && result_data->reg_name == NULL) {
-		char *reg_name = ag_alloc_reg(asm_gen, result);
-		result_data->reg_name = reg_name;
-	}
-
-	char *temp_reg;
-	// If the result variable is a register, use it for the result
-	// If it's on the stack, use a temp register for the result
-	if (result_data->location == REGISTER) {
-		temp_reg = result_data->reg_name;
-	} else {
-		char *temp_reg = ag_get_temp_reg(asm_gen);
-	}
-	// check if both factors are variables
-	if (contains_key(table->variables, mfirst)
-	    && contains_key(table->variables, msecond)) {
-		VAR_DATA *mfirst_data = hashmap_get(table->variables, mfirst);
-		VAR_DATA *msecond_data = hashmap_get(table->variables, msecond);
-		if (mfirst_data->location == REGISTER
-		    && msecond_data->location == REGISTER) {
-			cmp_reg_reg(asm_gen->out, mfirst_data->reg_name,
-				    msecond_data->reg_name);
-		}
-		if (mfirst_data->location == STACK
-		    && msecond_data->location == REGISTER) {
-			mov_reg_stack(asm_gen->out, temp_reg, mfirst_data->offset);
-			cmp_reg_reg(asm_gen->out, temp_reg,
-				    msecond_data->reg_name);
-		}
-		if (mfirst_data->location == REGISTER
-		    && msecond_data->location == STACK) {
-			cmp_reg_stack(asm_gen->out, mfirst_data->reg_name,
-				      msecond_data->offset);
-		}
-		if (mfirst_data->location == STACK
-		    && msecond_data->location == STACK) {
-			mov_reg_stack(asm_gen->out, temp_reg, mfirst_data->offset);
-			cmp_reg_stack(asm_gen->out, temp_reg,
-				      msecond_data->offset);
-		}
-	} else {
-		// first is variable, second is literal
-		if (contains_key(table->variables, mfirst)) {
-			VAR_DATA *mfirst_data =
-			    hashmap_get(table->variables, mfirst);
-			mov_reg_val(asm_gen->out, temp_reg, msecond);
-			if (mfirst_data->location == REGISTER) {
-				cmp_reg_reg(asm_gen->out, mfirst_data->reg_name,
-					    temp_reg);
-			}
-			if (mfirst_data->location == STACK) {
-				char *another_reg = ag_get_temp_reg(asm_gen);
-				mov_reg_stack(asm_gen->out, another_reg, mfirst_data->offset);
-				cmp_reg_reg(asm_gen->out, another_reg,
-					    temp_reg);
-			}
-			// first is literal, second is variable
-		} else if (contains_key(table->variables, msecond)) {
-			VAR_DATA *msecond_data =
-			    hashmap_get(table->variables, msecond);
-			mov_reg_val(asm_gen->out, temp_reg, mfirst);
-			if (msecond_data->location == REGISTER) {
-				cmp_reg_reg(asm_gen->out, temp_reg,
-					    msecond_data->reg_name);
-			}
-			if (msecond_data->location == STACK) {
-				cmp_reg_stack(asm_gen->out, temp_reg,
-					      msecond_data->offset);
-			}
-		} else {
-			// TODO: What if they're both literals?
-			mov_reg_val(asm_gen->out, temp_reg, mfirst);
-			cmp_reg_val(asm_gen->out, temp_reg, msecond);
-		}
-	}
-	ag_output_comp_result(asm_gen, quad->op, temp_reg);
-
-	if (result_data->location == STACK) {
-		mov_stack_reg(asm_gen->out, result_data->offset, temp_reg);
-	}
-	// TODO: deallocate register variables that can be deallocated
-	ag_try_free_variable(asm_gen, mfirst, index);
-	ag_try_free_variable(asm_gen, msecond, index);
 }
 
 void ag_output_comp_result(ASM_GENERATOR *asm_gen, char *op, char *temp_reg)

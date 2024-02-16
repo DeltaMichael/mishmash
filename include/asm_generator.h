@@ -47,7 +47,8 @@ typedef void (*RSO)(STRING_BUILDER*, char*, int);
 typedef void (*SSO)(STRING_BUILDER*, int, int, char*);
 typedef void (*RVO)(STRING_BUILDER*, char*, char*);
 typedef void (*SVO)(STRING_BUILDER*, int, char*);
+typedef void (*RESULT_OUTPUT)(ASM_GENERATOR*, char*, char*);
 
-void op_template(ASM_GENERATOR *asm_gen, QUAD *quad, int index, RRO reg_reg_op, SSO stack_stack_op, RVO reg_val_op);
+void op_template(ASM_GENERATOR *asm_gen, QUAD *quad, int index, RRO reg_reg_op, SSO stack_stack_op, RVO reg_val_op, RESULT_OUTPUT res_out);
 #endif
 

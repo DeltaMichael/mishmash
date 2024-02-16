@@ -33,6 +33,7 @@ void call(STRING_BUILDER * out, char *function);
 
 void cmp_reg_reg(STRING_BUILDER * out, char *first_reg, char *second_reg);
 void cmp_reg_stack(STRING_BUILDER * out, char *reg, int offset);
+void cmp_stack_stack(STRING_BUILDER *out, int out_offset, int in_offset, char *temp_reg);
 void cmp_reg_val(STRING_BUILDER * out, char *reg, char *val);
 
 void sub_reg_reg(STRING_BUILDER * out, char *first_reg, char *second_reg);
