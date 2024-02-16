@@ -227,6 +227,13 @@ void sub_reg_stack(STRING_BUILDER *out, char *reg, int offset)
 	sb_append(out, "]\n");
 }
 
+void sub_stack_stack(STRING_BUILDER *out, int out_offset, int in_offset,
+		     char *temp_reg)
+{
+	mov_reg_stack(out, temp_reg, in_offset);
+	sub_reg_stack(out, temp_reg, out_offset);
+}
+
 void sub_reg_val(STRING_BUILDER *out, char *reg, char *val)
 {
 	sb_append(out, "\tsub ");

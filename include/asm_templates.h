@@ -37,6 +37,7 @@ void cmp_reg_val(STRING_BUILDER * out, char *reg, char *val);
 
 void sub_reg_reg(STRING_BUILDER * out, char *first_reg, char *second_reg);
 void sub_reg_stack(STRING_BUILDER * out, char *reg, int offset);
+void sub_stack_stack(STRING_BUILDER *out, int out_offset, int in_offset, char *temp_reg);
 void sub_reg_val(STRING_BUILDER * out, char *reg, char *val);
 
 void eq_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
