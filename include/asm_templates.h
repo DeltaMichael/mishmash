@@ -40,11 +40,11 @@ void sub_reg_stack(STRING_BUILDER * out, char *reg, int offset);
 void sub_stack_stack(STRING_BUILDER *out, int out_offset, int in_offset, char *temp_reg);
 void sub_reg_val(STRING_BUILDER * out, char *reg, char *val);
 
-void eq_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
-void lt_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
-void lte_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
-void gt_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
-void gte_flag_reg(STRING_BUILDER * out, char *reg, char *byte_reg);
+void eq_flag_reg(STRING_BUILDER * out, char *byte_reg);
+void lt_flag_reg(STRING_BUILDER * out, char *byte_reg);
+void lte_flag_reg(STRING_BUILDER * out, char *byte_reg);
+void gt_flag_reg(STRING_BUILDER * out, char *byte_reg);
+void gte_flag_reg(STRING_BUILDER * out, char *byte_reg);
 void clear_reg(STRING_BUILDER * out, char *reg);
 
 #endif

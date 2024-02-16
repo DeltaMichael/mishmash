@@ -416,15 +416,15 @@ void ag_output_comp_result(ASM_GENERATOR *asm_gen, char *op, char *temp_reg)
 	char *another_reg_byte = regnames_byte[index];
 	clear_reg(asm_gen->out, another_reg);
 	if (strcmp(op, "=") == 0) {
-		eq_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
+		eq_flag_reg(asm_gen->out, another_reg_byte);
 	} else if (strcmp(op, "<") == 0) {
-		lt_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
+		lt_flag_reg(asm_gen->out, another_reg_byte);
 	} else if (strcmp(op, ">") == 0) {
-		gt_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
+		gt_flag_reg(asm_gen->out, another_reg_byte);
 	} else if (strcmp(op, "<=") == 0) {
-		lte_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
+		lte_flag_reg(asm_gen->out, another_reg_byte);
 	} else if (strcmp(op, ">=") == 0) {
-		gte_flag_reg(asm_gen->out, temp_reg, another_reg_byte);
+		gte_flag_reg(asm_gen->out, another_reg_byte);
 	}
 	mov_reg_reg(asm_gen->out, temp_reg, another_reg);
 }

@@ -243,35 +243,35 @@ void sub_reg_val(STRING_BUILDER *out, char *reg, char *val)
 	sb_append(out, "\n");
 }
 
-void eq_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
+void eq_flag_reg(STRING_BUILDER *out, char *byte_reg)
 {
 	sb_append(out, "\tsete ");
 	sb_append(out, byte_reg);
 	sb_append(out, "\n");
 }
 
-void lt_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
+void lt_flag_reg(STRING_BUILDER *out, char *byte_reg)
 {
 	sb_append(out, "\tsetl ");
 	sb_append(out, byte_reg);
 	sb_append(out, "\n");
 }
 
-void lte_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
+void lte_flag_reg(STRING_BUILDER *out, char *byte_reg)
 {
 	sb_append(out, "\tsetle ");
 	sb_append(out, byte_reg);
 	sb_append(out, "\n");
 }
 
-void gt_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
+void gt_flag_reg(STRING_BUILDER *out, char *byte_reg)
 {
 	sb_append(out, "\tsetg ");
 	sb_append(out, byte_reg);
 	sb_append(out, "\n");
 }
 
-void gte_flag_reg(STRING_BUILDER *out, char *reg, char *byte_reg)
+void gte_flag_reg(STRING_BUILDER *out, char *byte_reg)
 {
 	sb_append(out, "\tsetge ");
 	sb_append(out, byte_reg);
