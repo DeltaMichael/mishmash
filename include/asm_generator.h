@@ -42,12 +42,12 @@ char *ag_get_code(ASM_GENERATOR * gen);
 void ag_print_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 
 typedef void (*RRO)(STRING_BUILDER *, char *, char *);
-typedef void (*RSO)(STRING_BUILDER*, char*, int, char*);
-typedef void (*SRO)(STRING_BUILDER*, int, char*);
+typedef void (*SRO)(STRING_BUILDER*, char*, char*, int);
+typedef void (*RSO)(STRING_BUILDER*, char*, int);
 typedef void (*SSO)(STRING_BUILDER*, int, int, char*);
-typedef void (*VRO)(STRING_BUILDER*, char*, char*);
-typedef void (*VSO)(STRING_BUILDER * out, char *val, int out_offset);
+typedef void (*RVO)(STRING_BUILDER*, char*, char*);
+typedef void (*SVO)(STRING_BUILDER*, int, char*);
 
-void op_template(ASM_GENERATOR *asm_gen, QUAD *quad, int index, RRO reg_reg_op, SSO stack_stack_op, VRO val_reg_op);
+void op_template(ASM_GENERATOR *asm_gen, QUAD *quad, int index, RRO reg_reg_op, SSO stack_stack_op, RVO reg_val_op);
 #endif
 
