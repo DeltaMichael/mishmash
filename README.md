@@ -101,12 +101,12 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 - addition
 - subtraction
 - multiplication
+- division
 - negation
 - comparison
 
 **Arithmetic operations to be implemented:**
 - != comparison
-- division
 
 **Logical operations implemented so far:**
 
@@ -134,3 +134,4 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 
 **Future assembly generation improvements**
 - register management
+- stack reclaiming
