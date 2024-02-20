@@ -91,6 +91,25 @@ void ag_quad_to_asm(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 	} else if (strcmp(op, "*") == 0) {
 		ag_mul_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "/") == 0) {
+		// Preserve rax and rdx
+		bool is_rax_pushed = false;
+		bool is_rdx_pushed = false;
+		if (hashmap_get(asm_gen->registers, "rax") != NULL) {
+			push_reg(asm_gen->out, "rax");
+			is_rax_pushed = true;
+		}
+		if (hashmap_get(asm_gen->registers, "rdx") != NULL) {
+			push_reg(asm_gen->out, "rdx");
+			is_rdx_pushed = true;
+		}
+		ag_div_quad(asm_gen, quad, index);
+		// Restore rax and rdx
+		if (is_rdx_pushed == true) {
+			pop_reg(asm_gen->out, "rdx");
+		}
+		if (is_rax_pushed == true) {
+			pop_reg(asm_gen->out, "rax");
+		}
 	} else if (strcmp(op, "uminus") == 0) {
 		ag_uminus_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "print") == 0) {
@@ -241,6 +260,11 @@ void ag_mul_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 void ag_sub_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 {
 	op_template(asm_gen, quad, index, sub_reg_reg, sub_stack_stack, sub_reg_val);
+}
+
+void ag_div_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
+{
+	op_template(asm_gen, quad, index, div_reg_reg, div_stack_stack, div_reg_val);
 }
 
 void ag_uminus_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)

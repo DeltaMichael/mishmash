@@ -31,7 +31,7 @@ char* get_bare_path(char *source_file_path)
 void run_asm_and_linker(char *bare_path)
 {
 	char command[256];
-	sprintf(command, "nasm -felf64 %s.asm", bare_path);
+	sprintf(command, "nasm -felf64 -g %s.asm -o %s.o", bare_path, bare_path);
 	system(command);
 
 	// TODO: Remove this call after supporting multiple source files with PIC
@@ -48,7 +48,8 @@ void clean_up(char *bare_path)
 
 	// TODO: Clean up just .asm files after supporting multiple source files with PIC
 	// This is a compiler, this isn't 'Nam, there are rules here
-	sprintf(command, "rm %s.asm %s.o", bare_path, bare_path);
+	// sprintf(command, "rm %s.asm %s.o", bare_path, bare_path);
+	sprintf(command, "rm %s.o", bare_path, bare_path);
 	system(command);
 }
 

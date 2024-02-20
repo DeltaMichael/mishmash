@@ -20,6 +20,7 @@ void ag_uminus_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_mul_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_add_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_sub_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
+void ag_div_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_comparison_quad(ASM_GENERATOR * asm_gen, QUAD * quad, int index);
 void ag_output_comp_result(ASM_GENERATOR * asm_gen, char *op, char *temp_reg);
 void ag_add_exit(ASM_GENERATOR * asm_gen);

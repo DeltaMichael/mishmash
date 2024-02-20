@@ -1,6 +1,7 @@
 #include "include/asm_templates.h"
 #include "include/string_builder.h"
 #include <stdio.h>
+#include <string.h>
 
 void mov_reg_reg(STRING_BUILDER *out, char *out_reg, char *in_reg)
 {
@@ -241,6 +242,70 @@ void sub_reg_val(STRING_BUILDER *out, char *reg, char *val)
 	sb_append(out, ", ");
 	sb_append(out, val);
 	sb_append(out, "\n");
+}
+
+// Make sure the contents of rax and rdx are saved before calling this
+void div_reg_reg(STRING_BUILDER *out, char *first_reg, char *second_reg)
+{
+	if(strcmp("rax", first_reg) != 0) {
+		mov_reg_reg(out, "rax", first_reg);
+	}
+
+	sb_append(out, "\tcqo\n");
+	sb_append(out, "\tidiv ");
+	sb_append(out, second_reg);
+	sb_append(out, "\n");
+
+	if(strcmp("rax", first_reg) != 0) {
+		mov_reg_reg(out, first_reg, "rax");
+	}
+}
+
+// Make sure the contents of rax and rdx are saved before calling this
+void div_reg_stack(STRING_BUILDER *out, char *reg, int offset)
+{
+	if(strcmp("rax", reg) != 0) {
+		mov_reg_reg(out, "rax", reg);
+	}
+
+	sb_append(out, "\tcqo\n");
+	sb_append(out, "\tidiv [rbp - ");
+	sb_append_int(out, offset);
+	sb_append(out, "]\n");
+
+	if(strcmp("rax", reg) != 0) {
+		mov_reg_reg(out, reg, "rax");
+	}
+
+}
+
+// Make sure the contents of rax and rdx are saved before calling this
+void div_stack_stack(STRING_BUILDER *out, int out_offset, int in_offset,
+		     char *temp_reg)
+{
+	mov_reg_stack(out, temp_reg, in_offset);
+	div_reg_stack(out, temp_reg, out_offset);
+}
+
+// Make sure the contents of rax and rdx are saved before calling this
+void div_reg_val(STRING_BUILDER *out, char *reg, char *val)
+{
+	sb_append(out, "\tpush qword ");
+	sb_append(out, val);
+	sb_append(out, "\n");
+
+	if(strcmp("rax", reg) != 0) {
+		mov_reg_reg(out, "rax", reg);
+	}
+
+	sb_append(out, "\tcqo\n");
+	sb_append(out, "\tidiv qword [rsp]\n");
+
+	if(strcmp("rax", reg) != 0) {
+		mov_reg_reg(out, reg, "rax");
+	}
+
+	sb_append(out, "\tadd rsp, 8\n");
 }
 
 void eq_flag_reg(STRING_BUILDER *out, char *byte_reg)
