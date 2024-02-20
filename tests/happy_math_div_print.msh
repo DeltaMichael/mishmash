@@ -1,0 +1,16 @@
+// 0
+// -2
+// 2
+DECLR
+	x: int;
+	a: int;
+	b: int;
+	c: int;
+BEGIN
+	a := 2/4;
+	print a;
+	b := a / 2 - 8/4;
+	print b;
+	c := b / -1;
+	print c;
+END

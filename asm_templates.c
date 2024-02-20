@@ -269,7 +269,7 @@ void div_reg_stack(STRING_BUILDER *out, char *reg, int offset)
 	}
 
 	sb_append(out, "\tcqo\n");
-	sb_append(out, "\tidiv [rbp - ");
+	sb_append(out, "\tidiv qword [rbp - ");
 	sb_append_int(out, offset);
 	sb_append(out, "]\n");
 

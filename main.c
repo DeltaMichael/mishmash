@@ -48,8 +48,8 @@ void clean_up(char *bare_path)
 
 	// TODO: Clean up just .asm files after supporting multiple source files with PIC
 	// This is a compiler, this isn't 'Nam, there are rules here
-	// sprintf(command, "rm %s.asm %s.o", bare_path, bare_path);
-	sprintf(command, "rm %s.o", bare_path, bare_path);
+	sprintf(command, "rm %s.asm %s.o", bare_path, bare_path);
+	// sprintf(command, "rm %s.o", bare_path, bare_path);
 	system(command);
 }
 

@@ -137,7 +137,7 @@ void symtable_init_var(SYM_TABLE *table, char *name, VAR_LOCATION location,
 	int offset = 0;
 	if (location == STACK) {
 		// TODO: add offset based on type
-		offset = 64;
+		offset = 8; // 8 bytes
 	}
 	table->offset += offset;
 	VAR_DATA *data = init_var_data(location, type, table->offset);
@@ -153,3 +153,4 @@ char *symtable_get_temp(SYM_TABLE *table)
 	table->index++;
 	return buf;
 }
+

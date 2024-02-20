@@ -1,0 +1,9 @@
+// 2
+DECLR
+	x: int;
+	c: int;
+BEGIN
+	c := -2;
+	x := c / -1;
+	print x;
+END

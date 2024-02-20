@@ -92,23 +92,15 @@ void ag_quad_to_asm(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		ag_mul_quad(asm_gen, quad, index);
 	} else if (strcmp(op, "/") == 0) {
 		// Preserve rax and rdx
-		bool is_rax_pushed = false;
-		bool is_rdx_pushed = false;
-		if (hashmap_get(asm_gen->registers, "rax") != NULL) {
-			push_reg(asm_gen->out, "rax");
-			is_rax_pushed = true;
-		}
-		if (hashmap_get(asm_gen->registers, "rdx") != NULL) {
-			push_reg(asm_gen->out, "rdx");
-			is_rdx_pushed = true;
-		}
+		char *rax_var_name = ag_realloc_reg_stack(asm_gen, "rax");
+		char *rdx_var_name = ag_realloc_reg_stack(asm_gen, "rdx");
 		ag_div_quad(asm_gen, quad, index);
 		// Restore rax and rdx
-		if (is_rdx_pushed == true) {
-			pop_reg(asm_gen->out, "rdx");
+		if (rax_var_name) {
+			ag_realloc_stack_reg(asm_gen, rax_var_name);
 		}
-		if (is_rax_pushed == true) {
-			pop_reg(asm_gen->out, "rax");
+		if (rdx_var_name) {
+			ag_realloc_stack_reg(asm_gen, rdx_var_name);
 		}
 	} else if (strcmp(op, "uminus") == 0) {
 		ag_uminus_quad(asm_gen, quad, index);
@@ -469,6 +461,41 @@ void ag_restore_registers(ASM_GENERATOR *asm_gen)
 			pop_reg(asm_gen->out, regnames[i]);
 		}
 	}
+}
+
+char *ag_realloc_reg_stack(ASM_GENERATOR *asm_gen, char *reg_name)
+{
+	if (hashmap_get(asm_gen->registers, reg_name) == NULL) {
+		return NULL;
+	}
+	char* var = hashmap_get(asm_gen->registers, reg_name);
+	SYM_TABLE *table = asm_gen->sym_table;
+	if (contains_key(table->variables, var)) {
+		VAR_DATA *var_data = hashmap_get(table->variables, var);
+		var_data->reg_name = NULL;
+		var_data->location = STACK;
+		// TODO: Offset based on type
+		table->offset += 8; // 8 bytes
+		var_data->offset = table->offset;
+	}
+	push_reg(asm_gen->out, reg_name);
+	return var;
+}
+
+char *ag_realloc_stack_reg(ASM_GENERATOR *asm_gen, char *var)
+{
+	SYM_TABLE *table = asm_gen->sym_table;
+	if (!contains_key(table->variables, var)) {
+		return NULL;
+	}
+	VAR_DATA *var_data = hashmap_get(table->variables, var);
+	int offset = var_data->offset;
+	var_data->location = REGISTER;
+	var_data->offset = 0;
+	char* reg = ag_alloc_reg(asm_gen, var);
+	// TODO: Reclaim stack slot whenever possible
+	mov_reg_stack(asm_gen->out, reg, offset);
+	return reg;
 }
 
 char *ag_alloc_reg(ASM_GENERATOR *asm_gen, char *var)
