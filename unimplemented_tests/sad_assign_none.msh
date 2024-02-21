@@ -1,0 +1,21 @@
+// TODO: make this type of errors more informative
+// error: line 14: near: ':': Invalid static type
+// error: line 14: near: ';': Unexpected token
+// error: line 14: near: ';': Expected line terminator at end of line
+// error: line 14: near: ';': Only declarations allowed in block DECLR header
+// error: line 17: near: ';': Unexpected token
+// error: line 17: near: ';': Expected line terminator at end of line
+// error: line 19: near: ';': Unexpected token
+// error: line 19: near: ';': Expected line terminator at end of line
+// Compilation error
+DECLR
+	x: int;
+	a: int;
+	b: int;
+	c: ;
+BEGIN
+	a := 2;
+	b := ;
+	c := -8;
+	print;
+END

@@ -3,15 +3,19 @@
 
 #include <stdlib.h>
 
-typedef struct lexer {
+typedef struct lexer
+{
 	char *source;
 	char *current;
 	size_t size;
 	int line;
 } LEXER;
 
-typedef enum {
+typedef enum
+{
 	// KEYWORDS
+	IF,
+	ELSE,
 	FUN,
 	BEGIN,
 	END,
@@ -44,7 +48,8 @@ typedef enum {
 	INT_LITERAL
 } TOKEN_TYPE;
 
-typedef struct {
+typedef struct
+{
 	TOKEN_TYPE type;
 	char *lexeme;
 	int line;
@@ -52,15 +57,14 @@ typedef struct {
 
 LEXER *init(char *source);
 LEXER *init_from_file(char *path);
-char advance(LEXER * lexer);
-size_t advance_word(LEXER * lexer);
-char peek(LEXER * lexer);
-TOKEN *get_token(LEXER * lexer);
+char advance(LEXER *lexer);
+size_t advance_word(LEXER *lexer);
+char peek(LEXER *lexer);
+TOKEN *get_token(LEXER *lexer);
 char *read_file(char *path);
 
 // Memmory deallocation
-void free_token(TOKEN * token);
-void free_lexer(LEXER * lexer);
+void free_token(TOKEN *token);
+void free_lexer(LEXER *lexer);
 
 #endif
-

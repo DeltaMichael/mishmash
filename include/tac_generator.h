@@ -5,7 +5,8 @@
 #include "parser.h"
 #include "hashmap.h"
 
-typedef struct SYM_TABLE {
+typedef struct SYM_TABLE
+{
 	int index;
 	int depth;
 	int offset;
@@ -13,7 +14,8 @@ typedef struct SYM_TABLE {
 	struct SYM_TABLE *enclosing;
 } SYM_TABLE;
 
-typedef struct {
+typedef struct
+{
 	char *op;
 	char *arg1;
 	char *arg2;
@@ -21,13 +23,15 @@ typedef struct {
 	bool uses_temp;
 } QUAD;
 
-typedef enum {
+typedef enum
+{
 	REGISTER,
 	STACK,
 	HEAP
 } VAR_LOCATION;
 
-typedef struct {
+typedef struct
+{
 	char *reg_name;
 	char *type;
 	int offset;
@@ -37,16 +41,16 @@ typedef struct {
 } VAR_DATA;
 
 QUAD *init_quad(char *op, char *arg1, char *arg2, char *result, bool uses_temp);
-void free_quad(QUAD * quad);
-QUAD *quad_from_expr(AST_EXPR * expr, LIST * quads, SYM_TABLE * sym_table);
-QUAD *quad_from_stmt(AST_STMT * stmt, LIST * quads, SYM_TABLE * sym_table);
+void free_quad(QUAD *quad);
+QUAD *quad_from_expr(AST_EXPR *expr, LIST *quads, SYM_TABLE *sym_table);
+QUAD *quad_from_stmt(AST_STMT *stmt, LIST *quads, SYM_TABLE *sym_table);
 
-SYM_TABLE *init_symtable(SYM_TABLE * enclosing);
-void free_symtable(SYM_TABLE * table);
-void symtable_init_var(SYM_TABLE * table, char *name, VAR_LOCATION location,
-		       char *type);
-char *symtable_get_temp(SYM_TABLE * table);
-
+SYM_TABLE *init_symtable(SYM_TABLE *enclosing);
+void free_symtable(SYM_TABLE *table);
+void symtable_init_var(SYM_TABLE *table, char *name, VAR_LOCATION location,
+					   char *type);
+char *get_label(char type, size_t index);
+char *symtable_get_temp(SYM_TABLE *table);
 VAR_DATA *init_var_data(VAR_LOCATION location, char *type, int offset);
 
 #endif

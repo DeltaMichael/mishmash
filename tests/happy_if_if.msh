@@ -1,0 +1,25 @@
+// -2
+// 3
+DECLR
+	x: int;
+	c: int;
+BEGIN
+	c := -2;
+	x := c / -1;
+	x := 3;
+
+	if (c = -2)
+	BEGIN
+		print c;
+	END
+
+	if (x = 3)
+	BEGIN
+		print x;
+	END
+
+	if (x >= 4)
+	BEGIN
+		print 1;
+	END
+END

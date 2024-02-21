@@ -45,12 +45,17 @@ void div_reg_stack(STRING_BUILDER * out, char *reg, int offset);
 void div_stack_stack(STRING_BUILDER *out, int out_offset, int in_offset, char *temp_reg);
 void div_reg_val(STRING_BUILDER * out, char *reg, char *val);
 
-void eq_flag_reg(STRING_BUILDER * out, char *byte_reg);
-void lt_flag_reg(STRING_BUILDER * out, char *byte_reg);
-void lte_flag_reg(STRING_BUILDER * out, char *byte_reg);
-void gt_flag_reg(STRING_BUILDER * out, char *byte_reg);
-void gte_flag_reg(STRING_BUILDER * out, char *byte_reg);
+void eq_flag_reg(STRING_BUILDER *out, char *result_reg, char *true_reg);
+void lt_flag_reg(STRING_BUILDER *out, char *result_reg, char *true_reg);
+void lte_flag_reg(STRING_BUILDER *out, char *result_reg, char *true_reg);
+void gt_flag_reg(STRING_BUILDER *out, char *result_reg, char *true_reg);
+void gte_flag_reg(STRING_BUILDER *out, char *result_reg, char *true_reg);
 void clear_reg(STRING_BUILDER * out, char *reg);
+
+void test_reg_goto_false(STRING_BUILDER *out, char *reg, char *label);
+void test_stack_goto_false(STRING_BUILDER *out, int offset, char *temp_reg, char *label);
+void goto_label(STRING_BUILDER *out, char *label);
+void insert_label(STRING_BUILDER *out, char *label);
 
 #endif
 

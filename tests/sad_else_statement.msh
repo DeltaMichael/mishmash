@@ -1,0 +1,11 @@
+// error: line 7: near: 'else': Unexpected token
+// error: line 7: near: 'else': Expected line terminator at end of line
+// Compilation error
+DECLR
+	x: int;
+BEGIN
+	else
+	BEGIN
+		print x;
+	END
+END

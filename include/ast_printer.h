@@ -4,6 +4,7 @@
 #include "parser.h"
 
 void print_ast_expr(AST_EXPR * root);
-void print_ast_stmt(AST_STMT * root);
+void print_ast_stmt(AST_STMT * root, int depth);
 
 #endif
+

@@ -12,11 +12,6 @@ char *regnames[REGCOUNT] =
 	"r13", "r14", "r15"
 };
 
-char *regnames_byte[REGCOUNT] =
-    { "al", "bl", "cl", "dl", "sil", NULL, "r8b", "r9b", "r10b", "r11b", "r12b",
-	"r13b", "r14b", "r15b"
-};
-
 ASM_GENERATOR *init_asm_generator(LIST *quads, SYM_TABLE *sym_table)
 {
 	ASM_GENERATOR *gen = malloc(sizeof(ASM_GENERATOR));
@@ -110,7 +105,40 @@ void ag_quad_to_asm(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 		   || strcmp(op, ">") == 0 || strcmp(op, "<=") == 0
 		   || strcmp(op, ">=") == 0) {
 		ag_comparison_quad(asm_gen, quad, index);
+	} else if (strcmp(op, "iffalse") == 0) {
+		ag_iffalse_quad(asm_gen, quad, index);
+	} else if (strcmp(op, "goto") == 0) {
+		goto_label(asm_gen->out, quad->arg1);
+	} else if (strcmp(op, "label") == 0) {
+		insert_label(asm_gen->out, quad->arg1);
 	}
+}
+
+void ag_iffalse_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
+{
+	SYM_TABLE *table = asm_gen->sym_table;
+	char *input = quad->arg1;
+	char *label = quad->result;
+
+	// check if we're pushing a literal
+	if (contains_key(table->variables, input)) {
+		VAR_DATA *input_data = hashmap_get(table->variables, input);
+
+		if (input_data->location == REGISTER) {
+			test_reg_goto_false(asm_gen->out, input_data->reg_name, label);
+		}
+
+		if (input_data->location == STACK) {
+			char *temp_reg = ag_get_temp_reg(asm_gen);
+			test_stack_goto_false(asm_gen->out, input_data->offset, temp_reg, label);
+		}
+	} else {
+		char *temp_reg = ag_get_temp_reg(asm_gen);
+		mov_reg_val(asm_gen->out, temp_reg, input);
+		test_reg_goto_false(asm_gen->out, temp_reg, label);
+	}
+	// TODO: deallocate register variables that can be deallocated
+	ag_try_free_variable(asm_gen, input, index);
 }
 
 void ag_assign_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
@@ -425,24 +453,23 @@ void ag_comparison_quad(ASM_GENERATOR *asm_gen, QUAD *quad, int index)
 	ag_try_free_variable(asm_gen, msecond, index);
 }
 
+// TODO: Switch result extraction to using CMOVxx to avoid this stupidity
 void ag_output_comp_result(ASM_GENERATOR *asm_gen, char *op, char *temp_reg)
 {
-	int index = ag_get_temp_byte_reg_index(asm_gen);
-	char *another_reg = regnames[index];
-	char *another_reg_byte = regnames_byte[index];
-	clear_reg(asm_gen->out, another_reg);
+	char *true_reg = ag_get_temp_excl(asm_gen, temp_reg);
+	mov_reg_val(asm_gen->out, temp_reg, "0");
+	mov_reg_val(asm_gen->out, true_reg, "1");
 	if (strcmp(op, "=") == 0) {
-		eq_flag_reg(asm_gen->out, another_reg_byte);
+		eq_flag_reg(asm_gen->out, temp_reg, true_reg);
 	} else if (strcmp(op, "<") == 0) {
-		lt_flag_reg(asm_gen->out, another_reg_byte);
+		lt_flag_reg(asm_gen->out, temp_reg, true_reg);
 	} else if (strcmp(op, ">") == 0) {
-		gt_flag_reg(asm_gen->out, another_reg_byte);
+		gt_flag_reg(asm_gen->out, temp_reg, true_reg);
 	} else if (strcmp(op, "<=") == 0) {
-		lte_flag_reg(asm_gen->out, another_reg_byte);
+		lte_flag_reg(asm_gen->out, temp_reg, true_reg);
 	} else if (strcmp(op, ">=") == 0) {
-		gte_flag_reg(asm_gen->out, another_reg_byte);
+		gte_flag_reg(asm_gen->out, temp_reg, true_reg);
 	}
-	mov_reg_reg(asm_gen->out, temp_reg, another_reg);
 }
 
 void ag_preserve_registers(ASM_GENERATOR *asm_gen)
@@ -527,18 +554,19 @@ char *ag_get_temp_reg(ASM_GENERATOR *asm_gen)
 	return NULL;
 }
 
-int ag_get_temp_byte_reg_index(ASM_GENERATOR *asm_gen)
+char *ag_get_temp_excl(ASM_GENERATOR *asm_gen, char* prev)
 {
 	for (int i = 0; i < REGCOUNT; i++) {
 		if (hashmap_get(asm_gen->registers, regnames[i]) == NULL) {
-			if (regnames_byte[i] == NULL) {
+			if(strcmp(regnames[i], prev) == 0)
+			{
 				continue;
 			}
-			return i;
+			return regnames[i];
 		}
 	}
 	// TODO: Move variable to stack if no free register
-	return -1;
+	return NULL;
 }
 
 char *ag_realloc_reg(ASM_GENERATOR *asm_gen, char *reg)
