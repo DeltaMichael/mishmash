@@ -91,6 +91,60 @@ BEGIN
     print y;
 END
 ```
+
+**Conditional statements**
+
+```
+DECLR
+	x: int;
+	c: int;
+BEGIN
+	c := -2;
+	x := c / -1;
+	x := 3;
+
+	if (c = -2)
+	BEGIN
+		print c;
+	END
+	else BEGIN
+		print x;
+	END
+
+	if (c = -3)
+	BEGIN
+		print c;
+	END
+	else BEGIN
+		print x;
+	END
+END
+```
+
+**Loops**
+
+```
+// print the first 10 fibonacci numbers
+DECLR
+	i: int;
+	first: int;
+	second: int;
+	temp: int;
+BEGIN
+	first := 0;
+	second := 1;
+	temp := second;
+	while (i < 10)
+	BEGIN
+		print temp;
+		first := second;
+		second := temp;
+		temp := first + second;
+		i := i + 1;
+	END
+END
+```
+
 There is no main function, the program is contained in a DECLR-BEGIN-END block.
 Variables are declared in the DECLR block and are initialized to 0.
 The DECLR part is optional, i.e. you can have a BEGIN-END block that doesn't operate on variables.
@@ -118,10 +172,10 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 
 **Logical blocks implemented so far:**
 - main block
-
-**Logical blocks to be implemented:**
 - conditional
 - while and for loops
+
+**Logical blocks to be implemented:**
 - functions
 
 **Types implemented:**
@@ -135,3 +189,8 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 **Future assembly generation improvements**
 - register management
 - stack reclaiming
+
+**Other tech debt**
+
+Memory leaks when creating labels
+Undefined behavior when freeing lists
