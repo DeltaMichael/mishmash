@@ -66,5 +66,13 @@ void print_ast_stmt(AST_STMT *root, int depth)
 		}
 		printf("\n");
 	}
+	if (root->type == LOOP)
+	{
+		TOKEN *type = list_get(root->values, 0);
+		printf("\nwhile ");
+		print_ast_stmt(list_get(root->values, 0), depth);
+		print_ast_stmt(list_get(root->values, 1), depth);
+		printf("\n");
+	}
 }
 

@@ -14,6 +14,7 @@ typedef struct lexer
 typedef enum
 {
 	// KEYWORDS
+	WHILE,
 	IF,
 	ELSE,
 	FUN,
@@ -68,3 +69,4 @@ void free_token(TOKEN *token);
 void free_lexer(LEXER *lexer);
 
 #endif
+

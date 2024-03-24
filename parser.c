@@ -304,6 +304,18 @@ AST_STMT *conditional_stmt(PARSER *parser)
 		}
 		AST_STMT *stmt = init_ast_stmt(CONDITION, values, NULL);
 		return stmt;
+	} else if (parser_match(parser, WHILE)) {
+		LIST *values = init_list(sizeof(AST_STMT *));
+
+		LIST *expr_stmt_values = init_list(sizeof(AST_EXPR *));
+		list_push(expr_stmt_values, expression(parser));
+		AST_STMT *condition = init_ast_stmt(EXPRESSION_STATEMENT, expr_stmt_values, NULL);
+
+		AST_STMT *body = block(parser);
+		list_push(values, condition);
+		list_push(values, body);
+		AST_STMT *stmt = init_ast_stmt(LOOP, values, NULL);
+		return stmt;
 	}
 	return print_stmt(parser);
 }

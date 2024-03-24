@@ -32,6 +32,7 @@ typedef struct
 
 typedef enum
 {
+	LOOP,
 	CONDITION,
 	ASSIGNMENT,
 	DECLARATION,
@@ -86,3 +87,4 @@ AST_EXPR *factor(PARSER *parser);
 AST_EXPR *unary(PARSER *parser);
 AST_EXPR *primary(PARSER *parser);
 #endif
+

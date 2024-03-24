@@ -1,0 +1,28 @@
+// 1
+// 2
+// 3
+// 5
+// 8
+// 13
+// 21
+// 34
+// 55
+// 89
+DECLR
+	i: int;
+	first: int;
+	second: int;
+	temp: int;
+BEGIN
+	first := 0;
+	second := 1;
+	temp := second;
+	while (i < 10)
+	BEGIN
+		print temp;
+		first := second;
+		second := temp;
+		temp := first + second;
+		i := i + 1;
+	END
+END

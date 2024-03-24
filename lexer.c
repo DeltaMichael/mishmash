@@ -80,7 +80,11 @@ TOKEN *get_token(LEXER *lexer)
 	if (size > 0)
 	{
 		token->lexeme = strndup(start, size);
-		if (strcmp(token->lexeme, "if") == 0)
+		if (strcmp(token->lexeme, "while") == 0)
+		{
+			token->type = WHILE;
+		}
+		else if (strcmp(token->lexeme, "if") == 0)
 		{
 			token->type = IF;
 		}
@@ -259,3 +263,4 @@ char *read_file(char *path)
 	fclose(f);
 	return out;
 }
+

@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 	{
 		// debug output
 		const char *token_types[] =
-			{"IF", "ELSE", "FUN", "BEGIN", "END", "DECLR", "RETURN", "COLON",
+			{"WHILE", "IF", "ELSE", "FUN", "BEGIN", "END", "DECLR", "RETURN", "COLON",
 			 "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACKET",
 			 "RIGHT_BRACKET", "COMMA", "LINE_TERM", "PRINT_OP",
 			 "ASSIGN", "EQUALS", "LESS_THAN", "LESS_THAN_EQ", "GREATER_THAN", "GREATER_THAN_EQ", "PLUS",

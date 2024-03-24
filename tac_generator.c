@@ -140,6 +140,35 @@ QUAD *quad_from_stmt(AST_STMT *stmt, LIST *quads, SYM_TABLE *table)
 		}
 		return NULL;
 	}
+	if (stmt->type == LOOP)
+	{
+		// create start label
+		char *start_label = get_label('S', quads->size);
+		QUAD *s_quad = init_quad("label", start_label, NULL, NULL, false);
+		list_push(quads, s_quad);
+
+		// iffalse conditional goto loop exit label
+		AST_STMT *condition = list_get(stmt->values, 0);
+		QUAD *cquad = quad_from_expr(list_get(condition->values, 0), quads, table);
+		QUAD *check_quad = init_quad("iffalse", cquad->result, "goto", NULL, false);
+		list_push(quads, check_quad);
+
+		AST_STMT *body = list_get(stmt->values, 1);
+		quad_from_stmt(body, quads, table);
+
+		QUAD *goto_start_quad = init_quad("goto", start_label, NULL, NULL, false);
+		list_push(quads, goto_start_quad);
+
+		// create end label quad
+		char *end_label = get_label('E', quads->size);
+		QUAD *el_quad = init_quad("label", end_label, NULL, NULL, false);
+		list_push(quads, el_quad);
+
+		// backpatch end label
+		check_quad->result = end_label;
+		return NULL;
+	}
+
 	return NULL;
 }
 
