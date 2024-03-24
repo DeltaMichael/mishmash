@@ -171,6 +171,9 @@ int main(int argc, char **argv)
 			{"ASSIGNMENT", "BLOCK", "PRINT", "EXPRESSION_STATEMENT"};
 
 		// debug output
+		printf("----------------\n");
+		printf("---- TOKENS ----\n");
+		printf("----------------\n");
 		for (int i = 0; i < tokens->size; i++)
 		{
 			TOKEN *token = tokens->elements[i];
@@ -178,9 +181,15 @@ int main(int argc, char **argv)
 				   token->lexeme, token_types[token->type]);
 		}
 
+		printf("-------------\n");
+		printf("---- AST ----\n");
+		printf("-------------\n");
 		// debug output
 		print_ast_stmt(stmt, 0);
 
+		printf("----------------------------\n");
+		printf("---- THREE-ADDRESS CODE ----\n");
+		printf("----------------------------\n");
 		// debug output
 		for (int i = 0; i < quads->size; i++)
 		{
@@ -237,6 +246,9 @@ int main(int argc, char **argv)
 			}
 		}
 
+		printf("------------------\n");
+		printf("---- ASSEMBLY ----\n");
+		printf("------------------\n");
 		// debug output
 		printf("%s", out);
 	}
