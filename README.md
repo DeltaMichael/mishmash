@@ -347,5 +347,5 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 
 **Other tech debt**
 
-Memory leaks when creating labels
+Memory leaks when creating labels    
 Undefined behavior when freeing lists
