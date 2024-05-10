@@ -14,13 +14,34 @@ typedef struct SYM_TABLE
 	struct SYM_TABLE *enclosing;
 } SYM_TABLE;
 
+typedef enum
+{
+	Q_SKIP,
+	Q_DECLR,
+	Q_PRINT,
+	Q_LABEL,
+	Q_GOTO,
+	Q_IFFALSE,
+	Q_ASSIGN,
+	Q_ADD,
+	Q_SUB,
+	Q_DIV,
+	Q_MUL,
+	Q_UMINUS,
+	Q_EQ,
+	Q_LT,
+	Q_LTE,
+	Q_GT,
+	Q_GTE
+} QUAD_OP;
+
 typedef struct
 {
+	QUAD_OP operation;
 	char *op;
 	char *arg1;
 	char *arg2;
 	char *result;
-	bool uses_temp;
 } QUAD;
 
 typedef enum
@@ -40,7 +61,7 @@ typedef struct
 	int last_index;
 } VAR_DATA;
 
-QUAD *init_quad(char *op, char *arg1, char *arg2, char *result, bool uses_temp);
+QUAD *init_quad(QUAD_OP operation, char *op, char *arg1, char *arg2, char *result);
 void free_quad(QUAD *quad);
 QUAD *quad_from_expr(AST_EXPR *expr, LIST *quads, SYM_TABLE *sym_table);
 QUAD *quad_from_stmt(AST_STMT *stmt, LIST *quads, SYM_TABLE *sym_table);
@@ -54,3 +75,4 @@ char *symtable_get_temp(SYM_TABLE *table);
 VAR_DATA *init_var_data(VAR_LOCATION location, char *type, int offset);
 
 #endif
+

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "include/lexer.h"
-#include "lexer.h"
+#include "include/list.h"
 
 LEXER *init(char *source)
 {
@@ -249,6 +249,17 @@ void free_token(TOKEN *token)
 	}
 	free(token);
 	token = NULL;
+}
+
+void free_token_list(LIST *list)
+{
+	for(int i = 0; i < list->size; i++) {
+		free_token(list->elements[i]);
+	}
+	free(list->elements);
+	list->elements = NULL;
+	free(list);
+	list = NULL;
 }
 
 char *read_file(char *path)

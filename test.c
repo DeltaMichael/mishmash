@@ -55,6 +55,23 @@ LIST *get_compilation_output(char *test_file_name)
 	return output;
 }
 
+LIST *get_interpreter_output(char *test_file_name)
+{
+	LIST *output = init_list(sizeof(char *));
+
+	char command[256];
+	sprintf(command, "./mishmash -i ./tests/%s 2>&1", test_file_name);
+	FILE *file = popen(command, "r");
+	char *line = malloc(sizeof(char) * 256);
+	while (fgets(line, 256, file)) {
+		list_push(output, line);
+		line = malloc(sizeof(char) * 256);
+	}
+	free(line);
+	pclose(file);
+	return output;
+}
+
 LIST *get_run_output(char *test_file_name)
 {
 
@@ -161,20 +178,29 @@ bool assert_output(LIST *expected, LIST *actual)
 	return passed;
 }
 
-bool run_test(char *file_name)
+bool run_test(char *file_name, bool interpret)
 {
+	bool passed = true;
 	printf("----------%s----------\n", file_name);
 	LIST *expected_values = get_expected_values(file_name);
-	LIST *compilation_output = get_compilation_output(file_name);
-	bool passed = true;
-	if (compilation_output->size > 0) {
-		passed = assert_output(expected_values, compilation_output);
+	if (interpret) {
+		LIST *interpreter_output = get_interpreter_output(file_name);
+		if (interpreter_output->size > 0) {
+			passed = assert_output(expected_values, interpreter_output);
+			free_list(interpreter_output);
+		}
 	} else {
-		// create_objects_and_link(file_name);
-		LIST *run_output = get_run_output(file_name);
-		passed = assert_output(expected_values, run_output);
-		clean_up(file_name);
-		free_list(run_output, free);
+		LIST *compilation_output = get_compilation_output(file_name);
+		if (compilation_output->size > 0) {
+			passed = assert_output(expected_values, compilation_output);
+			free_list(compilation_output);
+		} else {
+			LIST *run_output = get_run_output(file_name);
+			passed = assert_output(expected_values, run_output);
+			clean_up(file_name);
+			free_list(run_output);
+		}
+
 	}
 	if (passed) {
 		// TODO collect failures in list and display at the end
@@ -183,20 +209,40 @@ bool run_test(char *file_name)
 		printf("FAIL\n");
 	}
 	printf("----------%s----------\n\n", file_name);
-	free_list(expected_values, free);
-	free_list(compilation_output, free);
+	free_list(expected_values);
 	return passed;
+}
+
+void usage()
+{
+	printf("Usage: testmash\n");
+	printf("Options:\n");
+	printf("-i : Run in interpreter mode\n");
 }
 
 int main(int argc, char **argv)
 {
+	bool interpret = false;
+
+	if (argc > 2)
+	{
+		usage();
+		exit(1);
+	}
+
+	if (argc == 2 && strcmp(argv[1], "-i") == 0)
+	{
+		interpret = true;
+	}
+
+
 	FILE *file = popen("ls -1 ./tests", "r");
 	char line[256];
 	int success_count = 0;
 	int total_count = 0;
 	while (fgets(line, sizeof(line), file)) {
 		line[strcspn(line, "\n")] = 0;
-		bool result = run_test(line);
+		bool result = run_test(line, interpret);
 		success_count += result;
 		total_count++;
 	}

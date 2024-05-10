@@ -105,6 +105,17 @@ void free_ast_stmt(AST_STMT *root)
 	root = NULL;
 }
 
+void free_ast_stmt_list(LIST *list)
+{
+	for(int i = 0; i < list->size; i++) {
+		free_ast_stmt(list->elements[i]);
+	}
+	free(list->elements);
+	list->elements = NULL;
+	free(list);
+	list = NULL;
+}
+
 void parser_advance(PARSER *parser)
 {
 	parser->index++;
@@ -227,7 +238,7 @@ AST_STMT *parser_parse(PARSER *parser)
 	// and return NULL
 	if (parser->exited_with_error)
 	{
-		free_list(statements, free_ast_stmt);
+		free_ast_stmt_list(statements);
 		return NULL;
 	}
 	AST_STMT *out = list_get(statements, 0);

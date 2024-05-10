@@ -54,13 +54,14 @@ void *list_get(LIST *list, int index)
 	return element;
 }
 
-void free_list(LIST *list, void (*f)(void *))
+void free_list(LIST *list)
 {
 	for(int i = 0; i < list->size; i++) {
-		(*f) (list->elements[i]);
+		free(list->elements[i]);
 	}
 	free(list->elements);
 	list->elements = NULL;
 	free(list);
 	list = NULL;
 }
+

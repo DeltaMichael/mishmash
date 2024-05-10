@@ -2,25 +2,21 @@
 #include "include/list.h"
 #include "include/hashmap.h"
 #include <stdio.h>
+#include <string.h>
 
-QUAD *init_quad(char *op, char *arg1, char *arg2, char *result, bool uses_temp)
+QUAD *init_quad(QUAD_OP operation, char *op, char *arg1, char *arg2, char *result)
 {
 	QUAD *quad = malloc(sizeof(QUAD));
+	quad->operation = operation;
 	quad->op = op;
 	quad->arg1 = arg1;
 	quad->arg2 = arg2;
 	quad->result = result;
-	// TODO: Figure out a better way to do this
-	quad->uses_temp = uses_temp;
 	return quad;
 }
 
 void free_quad(QUAD *quad)
 {
-	// if (quad->uses_temp) {
-	//      free(quad->result);
-	//      quad->result = NULL;
-	// }
 	free(quad);
 }
 
@@ -29,7 +25,7 @@ QUAD *quad_from_expr(AST_EXPR *expr, LIST *quads, SYM_TABLE *table)
 	if (expr->type == PRIMARY)
 	{
 		QUAD *pquad =
-			init_quad("skip", NULL, NULL, expr->op->lexeme, false);
+			init_quad(Q_SKIP, "skip", NULL, NULL, expr->op->lexeme);
 		list_push(quads, pquad);
 		return pquad;
 	}
@@ -39,7 +35,7 @@ QUAD *quad_from_expr(AST_EXPR *expr, LIST *quads, SYM_TABLE *table)
 		QUAD *argquad = quad_from_expr(arg, quads, table);
 		char *res_name = symtable_get_temp(table);
 		QUAD *uquad =
-			init_quad("uminus", argquad->result, NULL, res_name, true);
+			init_quad(Q_UMINUS, "uminus", argquad->result, NULL, res_name);
 		list_push(quads, uquad);
 		return uquad;
 	}
@@ -50,8 +46,28 @@ QUAD *quad_from_expr(AST_EXPR *expr, LIST *quads, SYM_TABLE *table)
 		QUAD *left_quad = quad_from_expr(left, quads, table);
 		QUAD *right_quad = quad_from_expr(right, quads, table);
 		char *res_name = symtable_get_temp(table);
-		QUAD *bquad = init_quad(expr->op->lexeme, left_quad->result,
-								right_quad->result, res_name, true);
+		char *lexeme = expr->op->lexeme;
+		QUAD_OP operation;
+		if (strcmp(lexeme, "+") == 0) {
+			operation = Q_ADD;
+		} else if (strcmp(lexeme, "-") == 0) {
+			operation = Q_SUB;
+		} else if (strcmp(lexeme, "*") == 0) {
+			operation = Q_MUL;
+		} else if (strcmp(lexeme, "/") == 0) {
+			operation = Q_DIV;
+		} else if (strcmp(lexeme, "<") == 0) {
+			operation = Q_LT;
+		} else if (strcmp(lexeme, "<=") == 0) {
+			operation = Q_LTE;
+		} else if (strcmp(lexeme, ">") == 0) {
+			operation = Q_GT;
+		} else if (strcmp(lexeme, ">=") == 0) {
+			operation = Q_GTE;
+		} else if (strcmp(lexeme, "=") == 0) {
+			operation = Q_EQ;
+		}
+		QUAD *bquad = init_quad(operation, lexeme, left_quad->result, right_quad->result, res_name);
 		list_push(quads, bquad);
 		return bquad;
 	}
@@ -65,7 +81,7 @@ QUAD *quad_from_stmt(AST_STMT *stmt, LIST *quads, SYM_TABLE *table)
 		QUAD *expr_quad =
 			quad_from_expr(list_get(stmt->values, 0), quads, table);
 		QUAD *pquad =
-			init_quad("print", expr_quad->result, NULL, NULL, false);
+			init_quad(Q_PRINT, "print", expr_quad->result, NULL, NULL);
 		list_push(quads, pquad);
 		return pquad;
 	}
@@ -77,15 +93,15 @@ QUAD *quad_from_stmt(AST_STMT *stmt, LIST *quads, SYM_TABLE *table)
 	{
 		TOKEN *type = list_get(stmt->values, 0);
 		symtable_init_var(table, stmt->id->lexeme, STACK, type->lexeme);
-		return NULL;
+		QUAD *dquad =
+			init_quad(Q_DECLR, "declr", stmt->id->lexeme, type->lexeme, "0");
+		list_push(quads, dquad);
+		return dquad;
 	}
 	if (stmt->type == ASSIGNMENT)
 	{
-		QUAD *value =
-			quad_from_stmt(list_get(stmt->values, 0), quads, table);
-		QUAD *aquad =
-			init_quad(":=", value->result, NULL, stmt->id->lexeme,
-					  false);
+		QUAD *value = quad_from_stmt(list_get(stmt->values, 0), quads, table);
+		QUAD *aquad = init_quad(Q_ASSIGN, ":=", value->result, NULL, stmt->id->lexeme);
 		list_push(quads, aquad);
 		return aquad;
 	}
@@ -103,7 +119,7 @@ QUAD *quad_from_stmt(AST_STMT *stmt, LIST *quads, SYM_TABLE *table)
 		// iffalse conditional goto false_label
 		AST_STMT *condition = list_get(stmt->values, 0);
 		QUAD *cquad = quad_from_expr(list_get(condition->values, 0), quads, table);
-		QUAD *if_quad = init_quad("iffalse", cquad->result, "goto", NULL, false);
+		QUAD *if_quad = init_quad(Q_IFFALSE, "iffalse", cquad->result, "goto", NULL);
 		list_push(quads, if_quad);
 
 		AST_STMT *true_block = list_get(stmt->values, 1);
@@ -111,11 +127,11 @@ QUAD *quad_from_stmt(AST_STMT *stmt, LIST *quads, SYM_TABLE *table)
 		QUAD *goto_end_quad = NULL;
 		if (stmt->values->size == 3)
 		{
-			goto_end_quad = init_quad("goto", NULL, NULL, NULL, false);
+			goto_end_quad = init_quad(Q_GOTO, "goto", NULL, NULL, NULL);
 			list_push(quads, goto_end_quad);
 			// create false label quad
 			char *false_label = get_label('F', quads->size);
-			QUAD *fl_quad = init_quad("label", false_label, NULL, NULL, false);
+			QUAD *fl_quad = init_quad(Q_LABEL, "label", false_label, NULL, NULL);
 			list_push(quads, fl_quad);
 
 			// backpatch false label
@@ -126,7 +142,7 @@ QUAD *quad_from_stmt(AST_STMT *stmt, LIST *quads, SYM_TABLE *table)
 
 		// create end label quad
 		char *end_label = get_label('E', quads->size);
-		QUAD *el_quad = init_quad("label", end_label, NULL, NULL, false);
+		QUAD *el_quad = init_quad(Q_LABEL, "label", end_label, NULL, NULL);
 		list_push(quads, el_quad);
 
 		// backpatch end label
@@ -144,24 +160,24 @@ QUAD *quad_from_stmt(AST_STMT *stmt, LIST *quads, SYM_TABLE *table)
 	{
 		// create start label
 		char *start_label = get_label('S', quads->size);
-		QUAD *s_quad = init_quad("label", start_label, NULL, NULL, false);
+		QUAD *s_quad = init_quad(Q_LABEL, "label", start_label, NULL, NULL);
 		list_push(quads, s_quad);
 
 		// iffalse conditional goto loop exit label
 		AST_STMT *condition = list_get(stmt->values, 0);
 		QUAD *cquad = quad_from_expr(list_get(condition->values, 0), quads, table);
-		QUAD *check_quad = init_quad("iffalse", cquad->result, "goto", NULL, false);
+		QUAD *check_quad = init_quad(Q_IFFALSE, "iffalse", cquad->result, "goto", NULL);
 		list_push(quads, check_quad);
 
 		AST_STMT *body = list_get(stmt->values, 1);
 		quad_from_stmt(body, quads, table);
 
-		QUAD *goto_start_quad = init_quad("goto", start_label, NULL, NULL, false);
+		QUAD *goto_start_quad = init_quad(Q_GOTO, "goto", start_label, NULL, NULL);
 		list_push(quads, goto_start_quad);
 
 		// create end label quad
 		char *end_label = get_label('E', quads->size);
-		QUAD *el_quad = init_quad("label", end_label, NULL, NULL, false);
+		QUAD *el_quad = init_quad(Q_LABEL, "label", end_label, NULL, NULL);
 		list_push(quads, el_quad);
 
 		// backpatch end label

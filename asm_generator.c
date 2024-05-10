@@ -44,7 +44,7 @@ void free_asm_generator(ASM_GENERATOR *asm_gen)
 	asm_gen->registers = NULL;
 	free_symtable(asm_gen->sym_table);
 	asm_gen->sym_table = NULL;
-	free_list(asm_gen->quads, free_quad);
+	free_list(asm_gen->quads);
 	asm_gen->quads = NULL;
 	free(asm_gen);
 	asm_gen = NULL;

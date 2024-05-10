@@ -2,6 +2,7 @@
 #define LEXER_H
 
 #include <stdlib.h>
+#include "list.h"
 
 typedef struct lexer
 {
@@ -67,6 +68,7 @@ char *read_file(char *path);
 // Memmory deallocation
 void free_token(TOKEN *token);
 void free_lexer(LEXER *lexer);
+void free_token_list(LIST * list);
 
 #endif
 

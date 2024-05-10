@@ -8,6 +8,7 @@
 #include "include/string_builder.h"
 #include "include/hashmap.h"
 #include "include/tac_generator.h"
+#include "include/tac_interpreter.h"
 #include "string.h"
 
 char *get_bare_path(char *source_file_path)
@@ -86,19 +87,22 @@ void usage()
 {
 	printf("Usage: mishmash <file_path>\n");
 	printf("Options:\n");
-	printf("-d : Debug output. Show lexer, AST and TAC output.\n");
+	printf("-d : Debug output. Show lexer, AST and TAC output. Show assembly code if in compiler mode\n");
+	printf("-i : Run in interpreter mode\n");
 }
 
 int main(int argc, char **argv)
 {
-	if (argc == 1 || argc > 3)
+	if (argc == 1 || argc > 4)
 	{
 		usage();
 		exit(1);
 	}
 
 	char *file_path;
+	char *out;
 	bool debug_output = false;
+	bool interpreter_mode = false;
 	for (int i = 1; i < argc; i++)
 	{
 		if (argv[i][0] == '-')
@@ -106,6 +110,8 @@ int main(int argc, char **argv)
 			if (strcmp(argv[i], "-d") == 0)
 			{
 				debug_output = true;
+			} else if (strcmp(argv[i], "-i") == 0) {
+				interpreter_mode = true;
 			}
 			else
 			{
@@ -135,7 +141,7 @@ int main(int argc, char **argv)
 	AST_STMT *stmt = parser_parse(parser);
 	if (parser->exited_with_error)
 	{
-		free_list(tokens, free_token);
+		free_token_list(tokens);
 		free_lexer(lexer);
 		free_parser(parser);
 		free_ast_stmt(stmt);
@@ -147,14 +153,20 @@ int main(int argc, char **argv)
 	SYM_TABLE *table = init_symtable(NULL);
 	quad_from_stmt(stmt, quads, table);
 
-	ASM_GENERATOR *asm_gen = init_asm_generator(quads, table);
-	ag_generate_code(asm_gen);
-	char *out = ag_get_code(asm_gen);
-	output_source_to_file(file_path, out);
-	char *bare_path = get_bare_path(file_path);
-	run_asm_and_linker(bare_path);
-	clean_up(bare_path);
-	free(bare_path);
+	if (interpreter_mode) {
+		interpret(quads, table->variables);
+	} else {
+		ASM_GENERATOR *asm_gen = init_asm_generator(quads, table);
+		ag_generate_code(asm_gen);
+		out = ag_get_code(asm_gen);
+		output_source_to_file(file_path, out);
+		char *bare_path = get_bare_path(file_path);
+		run_asm_and_linker(bare_path);
+		clean_up(bare_path);
+		free(bare_path);
+		free_asm_generator(asm_gen);
+	}
+
 
 	if (debug_output)
 	{
@@ -194,70 +206,73 @@ int main(int argc, char **argv)
 		for (int i = 0; i < quads->size; i++)
 		{
 			QUAD *q = list_get(quads, i);
-			if (q->arg2 == NULL)
-			{
-				if (strcmp(q->op, "uminus") == 0)
-				{
-					printf("%s := %s %s\n", q->result,
-						   q->op, q->arg1);
-				}
-				if (strcmp(q->op, "-") == 0)
-				{
-					printf("%s := %s %s\n", q->result,
-						   q->op, q->arg1);
-				}
-				if (strcmp(q->op, ":=") == 0)
-				{
-					printf("%s := %s\n", q->result,
-						   q->arg1);
-				}
-				if (strcmp(q->op, "print") == 0)
-				{
+			switch(q->operation) {
+				case Q_SKIP:
+					break;
+				case Q_DECLR:
+					printf("%s %s := %s\n", q->arg2, q->arg1, "0");
+					break;
+				case Q_PRINT:
 					printf("print %s\n", q->arg1);
-				}
-				if (strcmp(q->op, "goto") == 0)
-				{
-					printf("goto %s\n", q->arg1);
-				}
-				if (strcmp(q->op, "label") == 0)
-				{
+					break;
+				case Q_LABEL:
 					printf("%s:\n", q->arg1);
-				}
-			}
-			else if (strcmp(q->op, "declr") == 0)
-			{
-				printf("%s %s := %s\n", q->arg2, q->result,
-					   q->arg1);
-			}
-
-			else
-			{
-				if (strcmp(q->op, "iffalse") == 0)
-				{
-					printf("iffalse %s %s %s\n", q->arg1,
-						   q->arg2, q->result);
-				}
-				else
-				{
-
-					printf("%s := %s %s %s\n", q->result, q->arg1,
-						   q->op, q->arg2);
-				}
+					break;
+				case Q_GOTO:
+					printf("goto %s\n", q->arg1);
+					break;
+				case Q_IFFALSE:
+					printf("iffalse %s %s %s\n", q->arg1, q->arg2, q->result);
+					break;
+				case Q_ASSIGN:
+					printf("%s := %s\n", q->result, q->arg1);
+					break;
+				case Q_ADD:
+					printf("%s := %s %s %s\n", q->result, q->arg1, "+", q->arg2);
+					break;
+				case Q_SUB:
+					printf("%s := %s %s %s\n", q->result, q->arg1, "-", q->arg2);
+					break;
+				case Q_DIV:
+					printf("%s := %s %s %s\n", q->result, q->arg1, "/", q->arg2);
+					break;
+				case Q_MUL:
+					printf("%s := %s %s %s\n", q->result, q->arg1, "*", q->arg2);
+					break;
+				case Q_UMINUS:
+					printf("%s := %s %s\n", q->result, "-", q->arg1);
+					break;
+				case Q_EQ:
+					printf("%s := %s %s %s\n", q->result, q->arg1, "=", q->arg2);
+					break;
+				case Q_LT:
+					printf("%s := %s %s %s\n", q->result, q->arg1, "<", q->arg2);
+					break;
+				case Q_LTE:
+					printf("%s := %s %s %s\n", q->result, q->arg1, "<=", q->arg2);
+					break;
+				case Q_GT:
+					printf("%s := %s %s %s\n", q->result, q->arg1, ">", q->arg2);
+					break;
+				case Q_GTE:
+					printf("%s := %s %s %s\n", q->result, q->arg1, ">=", q->arg2);
+					break;
 			}
 		}
 
-		printf("------------------\n");
-		printf("---- ASSEMBLY ----\n");
-		printf("------------------\n");
-		// debug output
-		printf("%s", out);
+		if (!interpreter_mode) {
+			printf("------------------\n");
+			printf("---- ASSEMBLY ----\n");
+			printf("------------------\n");
+			// debug output
+			printf("%s", out);
+		}
 	}
 
-	free_list(tokens, free_token);
+	free_token_list(tokens);
 	free_lexer(lexer);
 	free_parser(parser);
 	free_ast_stmt(stmt);
-	free_asm_generator(asm_gen);
 
 	return 0;
 }

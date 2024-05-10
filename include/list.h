@@ -16,6 +16,7 @@ void *list_get(LIST * list, int index);
 void list_push(LIST * list, void *element);
 
 // Memmory deallocation
-void free_list(LIST * list, void (*f)(void *));
+void free_list(LIST * list);
 
 #endif
+
