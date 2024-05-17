@@ -189,13 +189,19 @@ E26:
 	syscall
 ```
 
-### Run a program
+### Compile and run a program
 
 There is currently only support for single source files. main.c calls NASM and ld and outputs a binary which is runnable.
 
 ```
 ./mishmash my_program.msh
 ./my_program
+```
+
+### Run a program in interpreter mode
+
+```
+./mishmash -i my_program.msh
 ```
 
 ## Compile test suite
@@ -206,11 +212,19 @@ make testmash
 
 ## Run test suite
 
+Executes all the tests in the `test` directory.
+
+### Comipler mode
+
 ```
 ./testmash
 ```
 
-This will execute all the tests in the `test` directory.
+### Interpreter mode
+
+```
+./testmash -i
+```
 
 ## Compile mashlib
 
@@ -347,5 +361,7 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 
 **Other tech debt**
 
-Memory leaks when creating labels    
-Undefined behavior when freeing lists
+Memory leaks when creating labels
+Memory leaks in interpreter
+
+~~Undefined behavior when freeing lists~~
