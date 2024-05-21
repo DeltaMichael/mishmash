@@ -92,6 +92,10 @@ TOKEN *get_token(LEXER *lexer)
 		{
 			token->type = ELSE;
 		}
+		else if (strcmp(token->lexeme, "proc") == 0)
+		{
+			token->type = PROC;
+		}
 		else if (strcmp(token->lexeme, "fun") == 0)
 		{
 			token->type = FUN;

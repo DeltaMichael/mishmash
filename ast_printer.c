@@ -9,13 +9,13 @@ void print_ast_expr(AST_EXPR *root)
 	}
 	else
 	{
-		printf("(");
+		printf("[");
 		for (int i = 0; i < root->children->size; i++)
 		{
 			print_ast_expr(root->children->elements[i]);
 		}
 	}
-	printf("%s) ", root->op->lexeme);
+	printf("%s] ", root->op->lexeme);
 }
 
 void print_ast_stmt(AST_STMT *root, int depth)
@@ -43,9 +43,10 @@ void print_ast_stmt(AST_STMT *root, int depth)
 	}
 	if (root->type == DECLARATION)
 	{
-		TOKEN *type = list_get(root->values, 0);
-		printf("declare %s of type %s\n", root->id->lexeme,
-			   type->lexeme);
+		AST_EXPR *type = list_get(root->values, 0);
+		printf("declare %s of type ", root->id->lexeme);
+		print_ast_expr(type);
+		printf("\n");
 	}
 	if (root->type == PRINT_STATEMENT)
 	{

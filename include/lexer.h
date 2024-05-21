@@ -18,6 +18,7 @@ typedef enum
 	WHILE,
 	IF,
 	ELSE,
+	PROC,
 	FUN,
 	BEGIN,
 	END,

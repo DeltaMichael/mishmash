@@ -350,17 +350,17 @@ AST_STMT *declaration(PARSER *parser)
 		parser_match(parser, IDENTIFIER);
 		TOKEN *id = parser_previous(parser);
 		parser_match(parser, COLON);
-		if (parser_match(parser, STATIC_TYPE))
-		{
-			TOKEN *type = parser_previous(parser);
-			LIST *values = init_list(sizeof(TOKEN *));
-			list_push(values, type);
-			AST_STMT *stmt = init_ast_stmt(DECLARATION, values, id);
-			parser_eat(parser, LINE_TERM,
-					   "Expected line terminator at end of line");
-			return stmt;
-		}
-		parser_error(parser, "Invalid static type");
+		parser_match(parser, PROC);
+		AST_EXPR *type = expression(parser);
+		LIST *values = init_list(sizeof(AST_EXPR *));
+		list_push(values, type);
+		AST_STMT *stmt = init_ast_stmt(DECLARATION, values, id);
+		parser_eat(parser, LINE_TERM,
+					"Expected line terminator at end of line");
+		return stmt;
+
+		// TODO: Do this in type checker instead
+		// parser_error(parser, "Invalid static type");
 	}
 	return assignment(parser);
 }
@@ -464,13 +464,19 @@ AST_EXPR *unary(PARSER *parser)
 
 AST_EXPR *primary(PARSER *parser)
 {
-	if (parser_match(parser, INT_LITERAL) || parser_match(parser, IDENTIFIER))
+	if (parser_match(parser, INT_LITERAL) || parser_match(parser, STATIC_TYPE) || parser_match(parser, IDENTIFIER))
 	{
 		return init_ast_expr(parser_previous(parser), PRIMARY, NULL);
 	}
 	if (parser_match(parser, LEFT_PAREN))
 	{
-		AST_EXPR *expr = expression(parser);
+		LIST *children = init_list(sizeof(AST_EXPR *));
+		AST_EXPR *expr = init_ast_expr(parser_previous(parser), PRIMARY, children);
+		do {
+			AST_EXPR *next = expression(parser);
+			list_push(children, next);
+		}
+		while(parser_match(parser, COMMA));
 		parser_eat(parser, RIGHT_PAREN, "Expected closing ')'");
 		return expr;
 	}
