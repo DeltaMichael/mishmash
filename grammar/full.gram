@@ -1,0 +1,32 @@
+
+# lines and blocks
+func_block: ("fun" function_type block) | loop_block
+loop_block: ("while" condition block) | cond_block
+cond_block: ("if" condition block ("else" block)?) | block
+block: ("declr" declaration+)? "begin" (expression_statement | func_block)+ "end" | expression_statement
+declaration: type_definition (":="dentifier)? ";"
+expression_statement: assignment ";"
+
+# expressions
+assignment: IDENTIFIER ":=" expression  | expression
+expression: comparison | condition
+condition: bool_factor | comparison
+
+# boolean arithmetic
+bool_factor: bool_term ("or") bool_factor | bool_term
+bool_term: bool_unary ("and") bool_term | bool_unary
+bool_unary: "!"? primary
+
+# arithmetic
+comparison: factor ( "<" | ">" | "<=" | ">=" | "=" | "!=") factor | factor
+factor: term ("+" | "-") factor | term
+term: unary ("/" | "*") term | unary
+unary: "-"? primary
+
+# building blocks for expressions
+primary: (basic ",")* basic | "(" expression ")"
+basic: type_definition | static_type | LITERAL | IDENTIFIER | number
+type_definition: IDENTIFIER":" (static_type | function_type)
+function_type: "(" (type_definition ",")* (type_definition)? ")" "->" (static_type | function_type)
+function_call: IDENTIFIER "(" primary? ")"
+static_type: STATIC_TYPE

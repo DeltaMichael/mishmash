@@ -1,0 +1,47 @@
+# keywords "fun": FUNCTION
+"if": COND_START
+"else": COND_ALT
+"declr": BLOCK_DECLR
+"begin": BLOCK_START
+"end": BLOCK_END
+
+# binary operators
+":=" : OP_ASSIGN
+"+" : OP_PLUS
+"-" : OP_MINUS
+"*" : OP_MULT
+"/" : OP_DIV
+
+# bool binary operators
+"<" : OP_LT
+">" : OP_GT
+"<=" : OP_LTE
+">=" : OP_GTE
+"=" : OP_EQ
+"!=" : OP_NEQ
+"and" : OP_BOOL_MULT
+"or" : OP_BOOL_PLUS
+
+# bool unary operators
+"!" : OP_BOOL_NOT
+
+# special chars
+";" : LINE_TERM
+"," : DELIMITER
+")" : LEFT_BRACE
+"(" : RIGHT_BRACE
+"->": THIN_ARROW
+"\"": QUOTATION_MARK
+":" : COLON
+
+
+# types
+"s8": STATIC_TYPE
+"s16": STATIC_TYPE
+"s32": STATIC_TYPE
+"s64": STATIC_TYPE
+"u8": STATIC_TYPE
+"u16": STATIC_TYPE
+"u32": STATIC_TYPE
+"u64": STATIC_TYPE
+"bool": STATIC_TYPE
