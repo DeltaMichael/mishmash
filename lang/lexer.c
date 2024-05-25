@@ -36,22 +36,15 @@ char *lexer_get_lexeme(LEXER *lexer)
 {
 	size_t size = advance_word(lexer);
 	char *start = lexer->current - size;
-	return "adfsafs";// strndup(start, size);
+	return strndup(start, size);
 }
 
 LIST *lexer_process(LEXER *lexer)
 {
 	LIST *tokens = init_list(sizeof(TOKEN *));
-	while (*lexer->current != '\0')
-	{
-		char* lexeme = lexer_get_lexeme(lexer);
-		// printf("LEXEME: %s", lexeme);
-		printf("%s", "adsfafasd");
-		// TOKEN *token = get_token(lexer->map, lexeme, lexer->line);
-		// if (token != NULL)
-		// {
-		// 	list_push(tokens, token);
-		// }
+	while(*lexer->current != '\0') {
+		char *lexeme = lexer_get_lexeme(lexer);
+		printf("%s\n", lexeme);
 	}
 	return tokens;
 }
@@ -72,30 +65,22 @@ char advance(LEXER *lexer)
 
 size_t advance_word(LEXER *lexer)
 {
-	// skip_whitespace(lexer);
+	skip_whitespace(lexer);
 	char *start = lexer->current;
 	char cur = *lexer->current;
-	while (isalnum(cur) && cur != ' ' && cur != '\n' && cur != 11 && cur != 12 && cur != 15 && cur != 9)
+	while (isalnum(cur) && !(isspace(cur)) && !is_at_end(lexer))
 	{
 		cur = advance(lexer);
 	}
 	size_t size = (lexer->current - start) * sizeof(char);
 	if (size == 0) {
-		return advance_special(lexer);
+		skip_whitespace(lexer);
+		while (!isspace(cur) && !isalnum(cur) && !is_at_end(lexer))
+		{
+			cur = advance(lexer);
+		}
+		size = (lexer->current - start) * sizeof(char);
 	}
-	return size;
-}
-
-size_t advance_special(LEXER *lexer)
-{
-	skip_whitespace(lexer);
-	char *start = lexer->current;
-	char cur = *lexer->current;
-	while (!isalnum(cur) && cur != ' ' && cur != '\n' && cur != 11 && cur != 12 && cur != 15 && cur != 9)
-	{
-		cur = advance(lexer);
-	}
-	size_t size = (lexer->current - start) * sizeof(char);
 	return size;
 }
 
@@ -107,7 +92,7 @@ char peek(LEXER *lexer)
 void skip_whitespace(LEXER *lexer)
 {
 	char val = *lexer->current;
-	while (val == ' ' || val == '\n' || val == 11 || val == 12 || val == 15 || val == 9)
+	while (isspace(val))
 	{
 		val = advance(lexer);
 	}
@@ -120,5 +105,10 @@ void skip_comment(LEXER *lexer)
 		advance(lexer);
 	}
 	skip_whitespace(lexer);
+}
+
+bool is_at_end(LEXER *lexer)
+{
+	return *lexer->current == '\0';
 }
 

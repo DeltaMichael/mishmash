@@ -1,4 +1,5 @@
 build
+mishmash
 common/obj/*.o
 lang/obj/*.o
 lang/generated/obj/*.o

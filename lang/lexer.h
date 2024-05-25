@@ -24,5 +24,6 @@ size_t advance_special(LEXER *lexer);
 char peek(LEXER *lexer);
 void skip_whitespace(LEXER *lexer);
 void skip_comment(LEXER *lexer);
+bool is_at_end(LEXER *lexer);
 #endif
 
