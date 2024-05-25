@@ -6,6 +6,7 @@
 #include "common/string_builder.h"
 #include "common/hashmap.h"
 #include "lang/lexer.h"
+#include "lang/generated/token.h"
 
 // void output_source_to_file(char *file_path, char *asm_source)
 // {
@@ -54,6 +55,11 @@ int main(int argc, char **argv)
 
 	LEXER *lexer = lexer_init_from_file(file_path);
 	LIST *tokens = lexer_process(lexer);
+	for (int i = 0; i < tokens->size; i++) {
+		TOKEN* token = list_get(tokens, i);
+		printf("LEXEME: %s TYPE: %d\n", token->lexeme, token->type);
+	}
+
 	return 0;
 }
 

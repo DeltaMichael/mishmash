@@ -42,9 +42,16 @@ char *lexer_get_lexeme(LEXER *lexer)
 LIST *lexer_process(LEXER *lexer)
 {
 	LIST *tokens = init_list(sizeof(TOKEN *));
-	while(*lexer->current != '\0') {
-		char *lexeme = lexer_get_lexeme(lexer);
-		printf("%s\n", lexeme);
+	char *lexeme = lexer_get_lexeme(lexer);
+	while(strcmp(lexeme, "\0") != 0) {
+		if (lexeme[0] == '#') {
+			skip_comment(lexer);
+			lexeme = lexer_get_lexeme(lexer);
+			continue;
+		}
+		TOKEN *token = get_token(lexer->map, lexeme, lexer->line);
+		list_push(tokens, token);
+		lexeme = lexer_get_lexeme(lexer);
 	}
 	return tokens;
 }
@@ -82,11 +89,6 @@ size_t advance_word(LEXER *lexer)
 		size = (lexer->current - start) * sizeof(char);
 	}
 	return size;
-}
-
-char peek(LEXER *lexer)
-{
-	return *(lexer->current + sizeof(char));
 }
 
 void skip_whitespace(LEXER *lexer)

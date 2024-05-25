@@ -29,6 +29,8 @@ typedef enum {
 	OP_BOOL_PLUS,
 	// bool unary operators
 	OP_BOOL_NOT,
+	// other operators
+	OP_PRINT,
 	// special chars
 	LINE_TERM,
 	DELIMITER,
