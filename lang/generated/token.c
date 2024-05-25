@@ -49,7 +49,7 @@ TOKEN *get_token(H_MAP *token_map, char* lexeme, int line)
 	{
 		printf("Lexeme %s could not be classified as anything",
 				token->lexeme);
-		exit(1);
+		// exit(1);
 	}
 	return token;
 }

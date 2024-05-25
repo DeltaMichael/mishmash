@@ -36,7 +36,7 @@ char *lexer_get_lexeme(LEXER *lexer)
 {
 	size_t size = advance_word(lexer);
 	char *start = lexer->current - size;
-	return strndup(start, size);
+	return "adfsafs";// strndup(start, size);
 }
 
 LIST *lexer_process(LEXER *lexer)
@@ -45,11 +45,13 @@ LIST *lexer_process(LEXER *lexer)
 	while (*lexer->current != '\0')
 	{
 		char* lexeme = lexer_get_lexeme(lexer);
-		TOKEN *token = get_token(lexer->map, lexeme, lexer->line);
-		if (token != NULL)
-		{
-			list_push(tokens, token);
-		}
+		// printf("LEXEME: %s", lexeme);
+		printf("%s", "adsfafasd");
+		// TOKEN *token = get_token(lexer->map, lexeme, lexer->line);
+		// if (token != NULL)
+		// {
+		// 	list_push(tokens, token);
+		// }
 	}
 	return tokens;
 }
@@ -70,9 +72,26 @@ char advance(LEXER *lexer)
 
 size_t advance_word(LEXER *lexer)
 {
+	// skip_whitespace(lexer);
 	char *start = lexer->current;
 	char cur = *lexer->current;
 	while (isalnum(cur) && cur != ' ' && cur != '\n' && cur != 11 && cur != 12 && cur != 15 && cur != 9)
+	{
+		cur = advance(lexer);
+	}
+	size_t size = (lexer->current - start) * sizeof(char);
+	if (size == 0) {
+		return advance_special(lexer);
+	}
+	return size;
+}
+
+size_t advance_special(LEXER *lexer)
+{
+	skip_whitespace(lexer);
+	char *start = lexer->current;
+	char cur = *lexer->current;
+	while (!isalnum(cur) && cur != ' ' && cur != '\n' && cur != 11 && cur != 12 && cur != 15 && cur != 9)
 	{
 		cur = advance(lexer);
 	}

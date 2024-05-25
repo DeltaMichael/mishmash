@@ -20,6 +20,7 @@ char *lexer_get_lexeme(LEXER *lexer);
 LIST *lexer_process(LEXER *lexer);
 char advance(LEXER *lexer);
 size_t advance_word(LEXER *lexer);
+size_t advance_special(LEXER *lexer);
 char peek(LEXER *lexer);
 void skip_whitespace(LEXER *lexer);
 void skip_comment(LEXER *lexer);
