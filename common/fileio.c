@@ -13,3 +13,9 @@ char *read_file(char *path)
 	return out;
 }
 
+void append_line(char *path, char *line) {
+	FILE *f = fopen(path, "w+");
+	fprintf(f, "%s\n", line);
+	fclose(f);
+}
+
