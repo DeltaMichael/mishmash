@@ -1,6 +1,9 @@
 # Mish-Mash
 
-Mish-mash is a programming languague that will probably never make sense to anyone. The point of this repo is to learn C, assemply and compiler design.
+![Green on Blue Logo-2](https://github.com/DeltaMichael/mishmash/assets/91800778/22099f9e-6bd4-4a88-98a2-7c64c2ef69bf)
+
+
+Mish-mash is a programming languague that shows you all the internals. It started as me trying to learn the basics of interpreter/compiler design but I hope anyone can find it useful in their learning process.
 
 ## Behind the name
 
@@ -341,10 +344,11 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 **Logical blocks implemented so far:**
 - main block
 - conditional
-- while and for loops
+- while loops
 
 **Logical blocks to be implemented:**
 - functions
+- for loops
 - variable scope
 
 **Types implemented:**
@@ -354,6 +358,10 @@ Assignment is done with the walrus (`:=`) operator. `=` does an equality check l
 - bool
 - float
 - string
+
+**Code generation pipeline stages**
+- type checker
+- the notorious "Mish-Mash" error
 
 **Future assembly generation improvements**
 - register management
