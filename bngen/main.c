@@ -61,7 +61,9 @@ void write_token_types_to_h_file(LIST* mappings, FILE *out)
 {
 	for(int i = 0; i < mappings->size; i++) {
 		TOKEN_MAPPING *mapping = list_get(mappings, i);
-		fprintf(out, "\t%s,\n", mapping->type);
+		if (strcmp("STATIC_TYPE", mapping->type) != 0) {
+			fprintf(out, "\t%s,\n", mapping->type);
+		}
 	}
 }
 
@@ -69,7 +71,7 @@ void write_token_mappings_to_c_file(LIST* mappings, FILE *out)
 {
 	for(int i = 0; i < mappings->size; i++) {
 		TOKEN_MAPPING *mapping = list_get(mappings, i);
-		fprintf(out, "\tTOKEN_TYPE *type = malloc(sizeof(TOKEN_TYPE*));\n");
+		fprintf(out, "\ttype = malloc(sizeof(TOKEN_TYPE*));\n");
 		fprintf(out, "\t*type = %s;\n", mapping->type);
 		fprintf(out, "\thashmap_put(map, %s, type);\n",mapping->lexeme);
 		fprintf(out, "\n");
@@ -126,6 +128,7 @@ int main(int argc, char **argv)
 		"",
 		"H_MAP *lexeme_token_map(char* token_file_path) {",
 			"\tH_MAP *map = init_hashmap();",
+			"\tTOKEN_TYPE* type;",
 			"\treturn map;",
 		"}",
 		"",
@@ -195,11 +198,13 @@ int main(int argc, char **argv)
 
 	FILE *token_c_file = fopen("out.c", "w+");
 	for (int i = 0; i < token_c_size; i++) {
-		if (i == 7) {
+		if (i == 8) {
 			write_token_mappings_to_c_file(token_mappings, token_c_file);
 		}
 		fprintf(token_c_file, "%s\n", token_c[i]);
 	}
+	fclose(token_c_file);
+
 	return 0;
 }
 
