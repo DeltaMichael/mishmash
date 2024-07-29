@@ -5,3 +5,4 @@ lang/obj/*.o
 lang/generated/obj/*.o
 obj/*.o
 **/*.o
+.ccls-cache
