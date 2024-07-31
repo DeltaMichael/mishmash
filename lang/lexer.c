@@ -26,6 +26,7 @@ LEXER *lexer_init_from_file(char *path)
 
 void lexer_free(LEXER *lexer)
 {
+	free_hashmap(lexer->map);
 	free(lexer->source);
 	lexer->source = NULL;
 	free(lexer);
@@ -53,6 +54,7 @@ LIST *lexer_process(LEXER *lexer)
 		list_push(tokens, token);
 		lexeme = lexer_get_lexeme(lexer);
 	}
+	free(lexeme);
 	return tokens;
 }
 

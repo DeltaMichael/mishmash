@@ -2,6 +2,7 @@
 
 char *read_file(char *path)
 {
+	printf("Openging path %s\n", path);
 	FILE *f = fopen(path, "rb");
 	fseek(f, 0, SEEK_END);
 	size_t file_size = ftell(f);

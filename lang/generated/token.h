@@ -1,24 +1,18 @@
 #ifndef TOKEN_H
 #define TOKEN_H
-
 #include "../../common/hashmap.h"
 #include "../../common/list.h"
-
 typedef enum {
-	// blocks
 	COND_START,
 	COND_ALT,
 	BLOCK_DECLR,
 	BLOCK_START,
 	BLOCK_END,
-	// arithmetic binary operators
 	OP_ASSIGN,
 	OP_PLUS,
 	OP_MINUS,
 	OP_MULT,
 	OP_DIV,
-
-	// bool binary operators
 	OP_LT,
 	OP_GT,
 	OP_LTE,
@@ -27,11 +21,7 @@ typedef enum {
 	OP_NEQ,
 	OP_BOOL_MULT,
 	OP_BOOL_PLUS,
-	// bool unary operators
 	OP_BOOL_NOT,
-	// other operators
-	OP_PRINT,
-	// special chars
 	LINE_TERM,
 	DELIMITER,
 	LEFT_BRACE,
@@ -39,11 +29,9 @@ typedef enum {
 	THIN_ARROW,
 	QUOTATION_MARK,
 	COLON,
-	// types
-	STATIC_TYPE,
-	// other
 	IDENTIFIER,
-	LITERAL
+	LITERAL,
+	STATIC_TYPE
 } TOKEN_TYPE;
 
 typedef struct {
@@ -58,4 +46,3 @@ void free_token_list(LIST * list);
 TOKEN *get_token(H_MAP *token_map, char* lexeme, int line);
 
 #endif
-

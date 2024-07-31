@@ -55,10 +55,17 @@ int main(int argc, char **argv)
 
 	LEXER *lexer = lexer_init_from_file(file_path);
 	LIST *tokens = lexer_process(lexer);
+
+	// free token lexemes
 	for (int i = 0; i < tokens->size; i++) {
 		TOKEN* token = list_get(tokens, i);
 		printf("LEXEME: %s TYPE: %d\n", token->lexeme, token->type);
+		free(token->lexeme);
 	}
+
+	// free token list
+	free_list(tokens);
+	lexer_free(lexer);
 
 	return 0;
 }

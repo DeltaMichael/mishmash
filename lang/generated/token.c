@@ -5,8 +5,8 @@
 
 H_MAP *lexeme_token_map(char* token_file_path) {
 	H_MAP *map = init_hashmap();
-
-	TOKEN_TYPE *type = malloc(sizeof(TOKEN_TYPE*));
+	TOKEN_TYPE* type;
+	type = malloc(sizeof(TOKEN_TYPE*));
 	*type = COND_START;
 	hashmap_put(map, "if", type);
 
@@ -79,10 +79,6 @@ H_MAP *lexeme_token_map(char* token_file_path) {
 	hashmap_put(map, "or", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
-	*type = OP_PRINT;
-	hashmap_put(map, "print", type);
-
-	type = malloc(sizeof(TOKEN_TYPE*));
 	*type = OP_BOOL_NOT;
 	hashmap_put(map, "!", type);
 
@@ -96,11 +92,11 @@ H_MAP *lexeme_token_map(char* token_file_path) {
 
 	type = malloc(sizeof(TOKEN_TYPE*));
 	*type = LEFT_BRACE;
-	hashmap_put(map, "(", type);
+	hashmap_put(map, ")", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
 	*type = RIGHT_BRACE;
-	hashmap_put(map, ")", type);
+	hashmap_put(map, "(", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
 	*type = THIN_ARROW;
@@ -119,25 +115,36 @@ H_MAP *lexeme_token_map(char* token_file_path) {
 	hashmap_put(map, "s8", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
+	*type = STATIC_TYPE;
 	hashmap_put(map, "s16", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
+	*type = STATIC_TYPE;
 	hashmap_put(map, "s32", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
+	*type = STATIC_TYPE;
 	hashmap_put(map, "s64", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
+	*type = STATIC_TYPE;
 	hashmap_put(map, "u8", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
+	*type = STATIC_TYPE;
 	hashmap_put(map, "u16", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
+	*type = STATIC_TYPE;
 	hashmap_put(map, "u32", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
+	*type = STATIC_TYPE;
 	hashmap_put(map, "u64", type);
+
+	type = malloc(sizeof(TOKEN_TYPE*));
+	*type = STATIC_TYPE;
+	hashmap_put(map, "bool", type);
 
 	return map;
 }
@@ -187,4 +194,3 @@ TOKEN *get_token(H_MAP *token_map, char* lexeme, int line)
 	}
 	return token;
 }
-

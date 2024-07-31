@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 	LIST *token_mappings = fetch_token_mappings(tokens_gram);
 	fclose(tokens_gram);
 
-	FILE *token_h_file = fopen("out.h", "w+");
+	FILE *token_h_file = fopen("../lang/generated/token.h", "w+");
 	for (int i = 0; i < token_h_size; i++) {
 		if (i == 5) {
 			write_token_types_to_h_file(token_mappings, token_h_file);
@@ -196,7 +196,7 @@ int main(int argc, char **argv)
 
 	size_t token_c_size = sizeof(token_c) / sizeof(char*);
 
-	FILE *token_c_file = fopen("out.c", "w+");
+	FILE *token_c_file = fopen("../lang/generated/token.c", "w+");
 	for (int i = 0; i < token_c_size; i++) {
 		if (i == 8) {
 			write_token_mappings_to_c_file(token_mappings, token_c_file);
