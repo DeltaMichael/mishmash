@@ -9,8 +9,8 @@ ODIR=obj
 
 LIBS=-lm
 
-_LDEPS=lexer.h
-_LOBJ=lexer.o
+_LDEPS=lexer.h parser.h
+_LOBJ=lexer.o parser.o
 _GDEPS=token.h
 
 _CDEPS=fileio.h list.h hashmap.h string_builder.h

@@ -6,33 +6,8 @@
 #include "common/string_builder.h"
 #include "common/hashmap.h"
 #include "lang/lexer.h"
+#include "lang/parser.h"
 #include "lang/generated/token.h"
-
-// void output_source_to_file(char *file_path, char *asm_source)
-// {
-// 	int file_name_length = strlen(file_path);
-//
-// 	STRING_BUILDER *out_name_builder = init_sb();
-// 	for (int i = file_name_length - 1; i >= 0; i--)
-// 	{
-// 		if (file_path[i] == '.')
-// 		{
-// 			file_name_length = i;
-// 			break;
-// 		}
-// 	}
-// 	for (int i = 0; i < file_name_length; i++)
-// 	{
-// 		sb_append_char(out_name_builder, file_path[i]);
-// 	}
-// 	sb_append(out_name_builder, ".asm");
-//
-// 	char *out_file_path = sb_build(out_name_builder);
-// 	FILE *f = fopen(out_file_path, "w");
-// 	fprintf(f, "%s", asm_source);
-// 	free_sb(out_name_builder);
-// 	fclose(f);
-// }
 
 void usage()
 {
@@ -55,6 +30,8 @@ int main(int argc, char **argv)
 
 	LEXER *lexer = lexer_init_from_file(file_path);
 	LIST *tokens = lexer_process(lexer);
+	PARSER *parser = parser_init(tokens);
+	parser_parse(parser);
 
 	// free token lexemes
 	for (int i = 0; i < tokens->size; i++) {
