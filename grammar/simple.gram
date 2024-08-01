@@ -10,6 +10,7 @@ term: unary (OP_DIV | OP_MULT) term | unary
 unary: OP_MINUS? primary
 
 # building blocks for expressions
+
 primary: basic | LEFT_BRACE expression RIGHT_BRACE
 func_call: IDENTIFIER LEFT_BRACE (expression ",")* expression? RIGHT_BRACE | type_definitoin
 type_definition: IDENTIFIER COLON STATIC_TYPE | basic

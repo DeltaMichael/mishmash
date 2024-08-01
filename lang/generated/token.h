@@ -31,7 +31,8 @@ typedef enum {
 	COLON,
 	IDENTIFIER,
 	LITERAL,
-	STATIC_TYPE
+	STATIC_TYPE,
+	NOP
 } TOKEN_TYPE;
 
 typedef struct {
