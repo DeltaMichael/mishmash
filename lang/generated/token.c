@@ -92,11 +92,11 @@ H_MAP *lexeme_token_map(char* token_file_path) {
 
 	type = malloc(sizeof(TOKEN_TYPE*));
 	*type = LEFT_BRACE;
-	hashmap_put(map, ")", type);
+	hashmap_put(map, "(", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
 	*type = RIGHT_BRACE;
-	hashmap_put(map, "(", type);
+	hashmap_put(map, ")", type);
 
 	type = malloc(sizeof(TOKEN_TYPE*));
 	*type = THIN_ARROW;
@@ -194,3 +194,4 @@ TOKEN *get_token(H_MAP *token_map, char* lexeme, int line)
 	}
 	return token;
 }
+

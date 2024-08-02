@@ -25,5 +25,6 @@ char peek(LEXER *lexer);
 void skip_whitespace(LEXER *lexer);
 void skip_comment(LEXER *lexer);
 bool is_at_end(LEXER *lexer);
+bool is_token(LEXER *lexer, char* start);
 #endif
 

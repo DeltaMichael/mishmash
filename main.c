@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 	// free token lexemes
 	for (int i = 0; i < tokens->size; i++) {
 		TOKEN* token = list_get(tokens, i);
-		printf("LEXEME: %s TYPE: %d\n", token->lexeme, token->type);
+		// printf("LEXEME: %s TYPE: %d\n", token->lexeme, token->type);
 		free(token->lexeme);
 	}
 

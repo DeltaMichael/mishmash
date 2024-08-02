@@ -28,8 +28,8 @@
 # special chars
 ";" | LINE_TERM
 "," | DELIMITER
-")" | LEFT_BRACE
-"(" | RIGHT_BRACE
+"(" | LEFT_BRACE
+")" | RIGHT_BRACE
 "->"| THIN_ARROW
 "\""| QUOTATION_MARK
 ":" | COLON

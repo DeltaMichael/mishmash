@@ -96,7 +96,7 @@ int hash_int(int key)
 	int lower = (int)pow(10, lower_digs);
 
 	// get the upper middle digit
-	int upper_digit = (key / upper) % 10;
+	int upper_digit = ((int)key / (int)upper) % 10;
 	// get the lower middle digit
 	int lower_digit = (key % upper) / (lower / 10);
 	return upper_digit * 10 + lower_digit;

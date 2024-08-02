@@ -15,8 +15,11 @@ typedef struct {
 typedef enum {
 	TYPE_DEF,
 	BASIC,
+	PRIMARY,
 	UNARY,
 	TERM,
+	FACTOR,
+	COMPARISON
 } AST_EXPR_TYPE;
 
 typedef struct {
@@ -30,7 +33,10 @@ PARSER* parser_init(LIST* tokens);
 void free_parser(PARSER* parser);
 
 TOKEN* parser_advance(PARSER* parser);
-TOKEN* parser_match(PARSER* parser, TOKEN_TYPE);
+bool parser_match(PARSER* parser, TOKEN_TYPE);
+bool parser_match_all(PARSER* parser, int count, ...);
+bool parser_match_one_of(PARSER* parser, int count, ...);
+LIST* parser_get_prev(PARSER* parser, int count);
 void parser_eat(PARSER* parser, TOKEN_TYPE);
 bool parser_is_at_end(PARSER* parser);
 void parser_parse(PARSER* parser);
@@ -40,9 +46,12 @@ void ast_expr_print(AST_EXPR* expr);
 
 void expression_statement(PARSER* parser);
 AST_EXPR* expression(PARSER* parser);
+AST_EXPR* comparison(PARSER* parser);
+AST_EXPR* factor(PARSER* parser);
 AST_EXPR* term(PARSER* parser);
 AST_EXPR* unary(PARSER* parser);
 AST_EXPR* static_type(PARSER* parser);
+AST_EXPR* func_call(PARSER* parser);
 AST_EXPR* basic(PARSER* parser);
 #endif
 

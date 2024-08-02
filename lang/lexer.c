@@ -72,13 +72,24 @@ char advance(LEXER *lexer)
 	return *lexer->current;
 }
 
+bool is_token(LEXER *lexer, char* start) {
+	size_t size = 1 + (lexer->current - start) * sizeof(char);
+	char* lexeme = strndup(start, size);
+	bool is_token = contains_key(lexer->map, lexeme);
+	free(lexeme);
+	return is_token;
+}
+
 size_t advance_word(LEXER *lexer)
 {
 	skip_whitespace(lexer);
 	char *start = lexer->current;
 	char cur = *lexer->current;
-	while (isalnum(cur) && !(isspace(cur)) && !is_at_end(lexer))
+	while (isalnum(cur) && !(isspace(cur)) && !is_at_end(lexer) && !is_token(lexer, start))
 	{
+		cur = advance(lexer);
+	}
+	while(!isspace(cur) && !is_at_end(lexer) && is_token(lexer, start)) {
 		cur = advance(lexer);
 	}
 	size_t size = (lexer->current - start) * sizeof(char);
