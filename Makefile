@@ -9,13 +9,13 @@ ODIR=obj
 
 LIBS=-lm
 
-_LDEPS=lexer.h parser.h
-_LOBJ=lexer.o parser.o
-_GDEPS=token.h
+_LDEPS=lexer.h parser.h ast.h
+_LOBJ=lexer.o parser.o ast.o
+_GDEPS=token.h rule.h
 
 _CDEPS=fileio.h list.h hashmap.h string_builder.h
 _COBJ=fileio.o list.o hashmap.o string_builder.o
-_GOBJ=token.o
+_GOBJ=token.o rule.o
 _MOBJ=main.o
 
 LDEPS=$(patsubst %,$(LDIR)/%,$(_LDEPS))

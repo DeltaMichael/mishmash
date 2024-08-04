@@ -1,15 +1,15 @@
 line: assignment LINE_TERM
-assignment: expression OP_ASSIGN expression
+assignment: expression (OP_ASSIGN expression)?
 expression: comparison
 
 # arithmetic
-comparison: factor (OP_LT | OP_GT | OP_LTE | OP_GTE | OP_EQ | OP_NEQ) factor
-factor: term (OP_PLUS | OP_MINUS) factor | term
-term: unary (OP_DIV | OP_MULT) term | unary
+comparison: factor ((OP_LT | OP_GT | OP_LTE | OP_GTE | OP_EQ | OP_NEQ) factor)?
+factor: term ((OP_PLUS | OP_MINUS) factor)?
+term: unary ((OP_DIV | OP_MULT) term)?
 unary: OP_MINUS? primary
 
 # building blocks for expressions
 
-basic: LITERAL | IDENTIFIER | LEFT_BRACE expression RIGHT_BRACE | func_call
 func_call: IDENTIFIER LEFT_BRACE (expression ",")* RIGHT_BRACE
+basic: LEFT_BRACE expression RIGHT_BRACE | func_call | IDENTIFIER | LITERAL
 type_definition: IDENTIFIER COLON STATIC_TYPE | basic
