@@ -1,5 +1,5 @@
-expression_statement: assignment LINE_TERM
-assignment: IDENTIFIER OP_ASSIGN expression
+line: assignment LINE_TERM
+assignment: expression OP_ASSIGN expression
 expression: comparison
 
 # arithmetic

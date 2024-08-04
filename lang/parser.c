@@ -108,7 +108,8 @@ bool parser_is_at_end(PARSER* parser) {
 
 void parser_parse(PARSER* parser) {
 	while(!parser_is_at_end(parser)) {
-		expression_statement(parser);
+		ast_expr_print(line(parser));
+		printf("\n");
 	}
 }
 
@@ -118,6 +119,7 @@ AST_EXPR* ast_expr_init(AST_EXPR_TYPE type, TOKEN_TYPE op, LIST* tokens, LIST* c
 	expr->tokens = tokens;
 	expr->children = children;
 	expr->op = op;
+	expr->is_terminated = false;
 	return expr;
 }
 
@@ -134,11 +136,28 @@ void ast_expr_print(AST_EXPR* expr) {
 	printf("]");
 }
 
-void expression_statement(PARSER* parser) {
-	AST_EXPR* expr = expression(parser);
+AST_EXPR* line(PARSER* parser) {
+	AST_EXPR* expr = assignment(parser);
+	expr->is_terminated = true;
 	parser_eat(parser, LINE_TERM);
-	ast_expr_print(expr);
-	printf("\n");
+	return expr;
+}
+
+AST_EXPR* assignment(PARSER* parser) {
+	AST_EXPR* expr = expression(parser);
+	if (expr->type == BASIC && parser_match(parser, OP_ASSIGN)) {
+		LIST *tokens = init_list(sizeof(TOKEN *));
+		list_push(tokens, parser->prev);
+
+		LIST* children = init_list(sizeof(AST_EXPR*));
+		AST_EXPR* asignee = expression(parser);
+		list_push(children, expr);
+		list_push(children, asignee);
+
+		AST_EXPR *expr = ast_expr_init(ASSIGNMENT, OP_ASSIGN, tokens, children);
+		return expr;
+	}
+	return expr;
 }
 
 AST_EXPR* expression(PARSER* parser) {
@@ -255,6 +274,16 @@ AST_EXPR* func_call(PARSER* parser) {
 	return NULL;
 }
 
+AST_EXPR* identifier(PARSER* parser) {
+	if(parser_match(parser, IDENTIFIER)) {
+		LIST* tokens = init_list(sizeof(TOKEN*));
+		// printf("Matched identifier\n");
+		list_push(tokens, parser->prev);
+		return ast_expr_init(BASIC, NOP, tokens, NULL);
+	}
+	return NULL;
+}
+
 AST_EXPR* basic(PARSER* parser) {
 
 	if(parser_match(parser, LEFT_BRACE)) {
@@ -272,21 +301,16 @@ AST_EXPR* basic(PARSER* parser) {
 		return expr;
 	}
 
-	if(parser_match(parser, IDENTIFIER)) {
-		LIST* tokens = init_list(sizeof(TOKEN*));
-		// printf("Matched identifier\n");
-		list_push(tokens, parser->prev);
-		return ast_expr_init(BASIC, NOP, tokens, NULL);
+	expr = identifier(parser);
+	if(expr != NULL) {
+		return expr;
 	}
 
 	if(parser_match(parser, LITERAL)) {
 		LIST* tokens = init_list(sizeof(TOKEN*));
-		// printf("Matched literal\n");
 		list_push(tokens, parser->prev);
 		return ast_expr_init(BASIC, NOP, tokens, NULL);
 	}
-
-	// printf("Matched %s which has no cathegory!\n", parser->current->lexeme);
 
 	// TODO: Handle this when we do error handling
 	return NULL;
