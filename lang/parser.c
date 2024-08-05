@@ -89,7 +89,7 @@ LIST* parser_get_prev(PARSER* parser, int count) {
 	if (parser->index + 1 < count) {
 		token_count = parser->index + 1;
 	}
-	for (int i = token_count; i >= 0; i--) {
+	for (int i = token_count; i > 0; i--) {
 		list_push(tokens, list_get(parser->tokens, parser->index - i));
 	}
 	return tokens;
