@@ -1,6 +1,7 @@
 #include "token.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 H_MAP *lexeme_token_map(char* token_file_path) {
@@ -194,4 +195,16 @@ TOKEN *get_token(H_MAP *token_map, char* lexeme, int line)
 	}
 	return token;
 }
+char* concat_lexemes(LIST* tokens) {
+	int size = 0;
+	for (int i = 0; i < tokens->size; i++) {
+		size += strlen(((TOKEN*)(list_get(tokens, i)))->lexeme);
+	}
+	char *op = malloc(size * sizeof(char) + 1);
 
+	strcpy(op, ((TOKEN*)(list_get(tokens, 0)))->lexeme);
+	for (int i = 1; i < tokens->size; i++) {
+		strcat(op, ((TOKEN*)(list_get(tokens, i)))->lexeme);
+	}
+	return op;
+}

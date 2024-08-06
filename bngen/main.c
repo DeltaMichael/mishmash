@@ -117,6 +117,7 @@ int main(int argc, char **argv)
 		"void free_token(TOKEN *token);",
 		"void free_token_list(LIST * list);",
 		"TOKEN *get_token(H_MAP *token_map, char* lexeme, int line);",
+		"char* concat_lexemes(LIST* tokens);",
 		"",
 		"#endif"
 	};
@@ -125,6 +126,7 @@ int main(int argc, char **argv)
 		"#include \"token.h\"",
 		"#include <stdlib.h>",
 		"#include <stdio.h>",
+		"#include <string.h>",
 		"#include <ctype.h>",
 		"",
 		"H_MAP *lexeme_token_map(char* token_file_path) {",
@@ -177,6 +179,19 @@ int main(int argc, char **argv)
 		"\t\t// exit(1);",
 		"\t}",
 		"\treturn token;",
+		"}",
+		"char* concat_lexemes(LIST* tokens) {",
+		"\tint size = 0;",
+		"\tfor (int i = 0; i < tokens->size; i++) {",
+		"\t\tsize += strlen(((TOKEN*)(list_get(tokens, i)))->lexeme);",
+		"\t}",
+		"\tchar *op = malloc(size * sizeof(char) + 1);",
+		"",
+		"\tstrcpy(op, ((TOKEN*)(list_get(tokens, 0)))->lexeme);",
+		"\tfor (int i = 1; i < tokens->size; i++) {",
+		"\t\tstrcat(op, ((TOKEN*)(list_get(tokens, i)))->lexeme);",
+		"\t}",
+		"\treturn op;",
 		"}"
 	};
 
@@ -199,7 +214,7 @@ int main(int argc, char **argv)
 
 	FILE *token_c_file = fopen("../lang/generated/token.c", "w+");
 	for (int i = 0; i < token_c_size; i++) {
-		if (i == 8) {
+		if (i == 9) {
 			write_token_mappings_to_c_file(token_mappings, token_c_file);
 		}
 		fprintf(token_c_file, "%s\n", token_c[i]);

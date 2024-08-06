@@ -1,4 +1,5 @@
 #include "rule.h"
+#include "token.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -104,20 +105,6 @@ AST_EXPR* static_type(PARSER* parser) {
 		return ast_expr_init(TYPE_DEF, op_type, op, NULL);
 	}
 	return basic(parser);
-}
-
-char* concat_lexemes(LIST* tokens) {
-	int size = 0;
-	for (int i = 0; i < tokens->size; i++) {
-		size += strlen(((TOKEN*)(list_get(tokens, i)))->lexeme);
-	}
-	char *op = malloc(size * sizeof(char) + 1);
-
-	strcpy(op, ((TOKEN*)(list_get(tokens, 0)))->lexeme);
-	for (int i = 1; i < tokens->size; i++) {
-		strcat(op, ((TOKEN*)(list_get(tokens, i)))->lexeme);
-	}
-	return op;
 }
 
 AST_EXPR* func_call(PARSER* parser) {
