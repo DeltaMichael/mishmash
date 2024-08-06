@@ -9,6 +9,30 @@ typedef struct {
 	char type[256];
 } TOKEN_MAPPING;
 
+typedef struct {
+	char name[256];
+	LIST* productions;
+} RULE;
+
+typedef enum {
+	ONE,
+	ALL,
+	ONE_OF,
+	ONE_OR_MORE,
+	ZERO_OR_MORE,
+	ZERO_OR_ONE,
+} PROD_TYPE;
+
+typedef struct {
+	LIST* terms;
+	PROD_TYPE type;
+} PRODUCTION;
+
+typedef struct {
+	char* id;
+	int is_terminator;
+} TERM;
+
 int is_string_whitespace(char *input)
 {
 	while(*input != '\0') {
@@ -93,7 +117,7 @@ LIST* fetch_token_mappings(FILE *in) {
 	return out;
 }
 
-int main(int argc, char **argv)
+void generate_token_defs()
 {
 	const char* token_h[] = {
 		"#ifndef TOKEN_H",
@@ -220,7 +244,118 @@ int main(int argc, char **argv)
 		fprintf(token_c_file, "%s\n", token_c[i]);
 	}
 	fclose(token_c_file);
+}
 
-	return 0;
+void print_rule(RULE* rule) {
+	printf("%s: ", rule->name);
+	for (int i = 0; i < rule->productions->size; i++) {
+		PRODUCTION* production = list_get(rule->productions, i);
+		for(int j = 0; j < production->terms->size; j++) {
+			TERM* term = list_get(production->terms, j);
+			printf("%s ", term->id);
+		}
+		printf("\n");
+	}
+
+}
+
+int is_special_char(char c) {
+	switch(c) {
+		case '(':
+		case ')':
+		case '*':
+		case '?':
+		case '+':
+		case '|': {
+			return 1;
+		}
+		default:
+			return 0;
+	}
+}
+
+LIST* split(char* in, int index) {
+	LIST* out = init_list(sizeof(TERM));
+	while(isspace(in[index])) {
+		index++;
+	}
+	while(in[index] != '\0') {
+
+		while(is_special_char(in[index])) {
+			char* token = malloc(2 * sizeof(char));
+			token[0] = in[index];
+			token[1] = '\0';
+			index++;
+			list_push(out, token);
+			while(isspace(in[index])) {
+				index++;
+			}
+		}
+
+		char* token = malloc(64 * sizeof(char));
+		int token_index = 0;
+		while(!isspace(in[index]) && !is_special_char(in[index])) {
+				token[token_index] = in[index];
+				token_index++;
+				index++;
+		}
+		token[token_index] = '\0';
+		index++;
+		list_push(out, token);
+	}
+	return out;
+}
+
+PRODUCTION* init_production(LIST* terms) {
+	PRODUCTION* production = malloc(sizeof(PRODUCTION));
+	if(terms->size > 1) {
+		production->type = ALL;
+	} else {
+		production->type = ONE;
+	}
+	production->terms = terms;
+	return production;
+}
+
+int main(int argc, char **argv)
+{
+	FILE *simple_gram = fopen("../grammar/simple.gram", "r");
+	char buf[256];
+	while(fgets(buf, sizeof(buf), simple_gram) != NULL) {
+		if (buf[0] == '#' || is_string_whitespace(buf)) {
+			continue; }
+
+		RULE* rule = malloc(sizeof(RULE));
+		rule->productions = init_list(sizeof(PRODUCTION));
+
+		int i = 0;
+		for (i = 0; i < 256; i++) {
+			if(buf[i] == ':') {
+				buf[i] = '\0';
+				break;
+			}
+			rule->name[i] = buf[i];
+		}
+
+		LIST* tokens = split(buf, i + 1);
+		LIST* terms = init_list(sizeof(TERM));
+		for(int i = 0; i < tokens->size; i++) {
+			char* token = list_get(tokens, i);
+			if(is_special_char(token[0])) {
+				PRODUCTION* production = init_production(terms);
+				list_push(rule->productions, production);
+				terms = init_list(sizeof(TERM));
+			} else {
+				TERM* term = malloc(sizeof(TERM));
+				term->id = token;
+				term->is_terminator = isupper(token[0]);
+				list_push(terms, term);
+			}
+		}
+		PRODUCTION* production = init_production(terms);
+		list_push(rule->productions, production);
+		print_rule(rule);
+	}
+	fclose(simple_gram);
 }
 

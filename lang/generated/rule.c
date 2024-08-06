@@ -94,15 +94,15 @@ AST_EXPR* unary(PARSER *parser) {
 		AST_EXPR *expr = ast_expr_init(UNARY, op->type, op->lexeme, children);
 		return expr;
 	 }
-	 return static_type(parser);
+	 return var_declr(parser);
 }
 
-AST_EXPR* static_type(PARSER* parser) {
+AST_EXPR* var_declr(PARSER* parser) {
 	if (parser_match_all(parser, 3, IDENTIFIER, COLON, STATIC_TYPE)) {
 		TOKEN_TYPE op_type = parser->prev->type;
 		LIST* tokens = parser_get_prev(parser, 3);
 		char* op = concat_lexemes(tokens);
-		return ast_expr_init(TYPE_DEF, op_type, op, NULL);
+		return ast_expr_init(VAR_DECLR, op_type, op, NULL);
 	}
 	return basic(parser);
 }
@@ -128,14 +128,6 @@ AST_EXPR* func_call(PARSER* parser) {
 	return NULL;
 }
 
-AST_EXPR* identifier(PARSER* parser) {
-	if(parser_match(parser, IDENTIFIER)) {
-		TOKEN* op = parser->prev;
-		return ast_expr_init(BASIC, op->type, op->lexeme, NULL);
-	}
-	return NULL;
-}
-
 AST_EXPR* basic(PARSER* parser) {
 
 	if(parser_match(parser, LEFT_BRACE)) {
@@ -153,9 +145,9 @@ AST_EXPR* basic(PARSER* parser) {
 		return expr;
 	}
 
-	expr = identifier(parser);
-	if(expr != NULL) {
-		return expr;
+	if(parser_match(parser, IDENTIFIER)) {
+		TOKEN* op = parser->prev;
+		return ast_expr_init(BASIC, op->type, op->lexeme, NULL);
 	}
 
 	if(parser_match(parser, LITERAL)) {
