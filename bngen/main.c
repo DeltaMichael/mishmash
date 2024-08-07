@@ -280,28 +280,26 @@ LIST* split(char* in, int index) {
 		index++;
 	}
 	while(in[index] != '\0') {
-
-		while(is_special_char(in[index])) {
+		if(is_special_char(in[index])) {
 			char* token = malloc(2 * sizeof(char));
 			token[0] = in[index];
 			token[1] = '\0';
 			index++;
 			list_push(out, token);
-			while(isspace(in[index])) {
-				index++;
+		}
+		else if(isspace(in[index])) {
+			index++;
+		} else {
+			char* token = malloc(64 * sizeof(char));
+			int token_index = 0;
+			while(!isspace(in[index]) && !is_special_char(in[index])) {
+					token[token_index] = in[index];
+					token_index++;
+					index++;
 			}
+			token[token_index] = '\0';
+			list_push(out, token);
 		}
-
-		char* token = malloc(64 * sizeof(char));
-		int token_index = 0;
-		while(!isspace(in[index]) && !is_special_char(in[index])) {
-				token[token_index] = in[index];
-				token_index++;
-				index++;
-		}
-		token[token_index] = '\0';
-		index++;
-		list_push(out, token);
 	}
 	return out;
 }
@@ -318,12 +316,53 @@ PRODUCTION* init_production(LIST* terms, char op) {
 					break;
 				  }
 		case '?': production->type = ZERO_OR_ONE; break;
+		case '*': production->type = ZERO_OR_MORE; break;
 	}
 	production->terms = terms;
 	return production;
 }
 
-RULE* create_rule(char* buf) {
+void buffer_from_braces(int* i, char* new_buffer, LIST* tokens) {
+	int j = *i;
+	char* local_token = list_get(tokens, j);
+	while(local_token[0] != '*' && local_token[0] != '|' && j < tokens->size) {
+		local_token = list_get(tokens, j);
+		j++;
+	}
+	while(local_token != NULL && local_token[0] != ')') {
+		local_token = list_get(tokens, j);
+		j--;
+	}
+	printf("END AT: %s\n", local_token);
+	for(int i = 0; i < tokens->size; i++) {
+		char* token = list_get(tokens, i);
+		printf("INDEX: %d TOKEN: %s\n", i, token);
+	}
+	printf("--------------------------\n");
+	int start = *i + 1;
+	int end = j;
+
+	new_buffer[0] = 'a';
+	new_buffer[1] = ':';
+	new_buffer[2] = ' ';
+	int new_buffer_index = 3;
+	for(int i = start; i <= end; i++) {
+		char* token = list_get(tokens, i);
+		int j = 0;
+		while(token[j] != '\0') {
+			new_buffer[new_buffer_index] = token[j];
+			j++;
+			new_buffer_index++;
+		}
+		new_buffer[new_buffer_index] = ' ';
+		new_buffer_index++;
+	}
+	new_buffer[new_buffer_index] = '\0';
+	*i = end;
+	// printf("NEWBUF: %s\n", new_buffer);
+}
+
+RULE* create_rule(char* buf, LIST* rules) {
 	RULE* rule = malloc(sizeof(RULE));
 	rule->productions = init_list(sizeof(PRODUCTION));
 
@@ -340,10 +379,32 @@ RULE* create_rule(char* buf) {
 	LIST* terms = init_list(sizeof(TERM));
 	for(int i = 0; i < tokens->size; i++) {
 		char* token = list_get(tokens, i);
+		// printf("TOKEN: %s\n", token);
 		if(is_special_char(token[0])) {
-			PRODUCTION* production = init_production(terms, token[0]);
-			list_push(rule->productions, production);
-			terms = init_list(sizeof(TERM));
+			if (token[0] == '(') {
+				char* new_buf = malloc(256 * sizeof(char));
+				buffer_from_braces(&i, new_buf, tokens);
+				RULE* rule = create_rule(new_buf, rules);
+				TERM* term = malloc(sizeof(TERM));
+				term->id = rule->name;
+				term->is_terminator = 0;
+				list_push(terms, term);
+			}
+			if (token[0] == '*') {
+				PRODUCTION* production = init_production(terms, '*');
+				list_push(rule->productions, production);
+				terms = init_list(sizeof(TERM));
+			}
+			if (token[0] == '|') {
+				PRODUCTION* production = init_production(terms, '|');
+				list_push(rule->productions, production);
+				terms = init_list(sizeof(TERM));
+			}
+			if (token[0] == '?') {
+				PRODUCTION* production = init_production(terms, '?');
+				list_push(rule->productions, production);
+				terms = init_list(sizeof(TERM));
+			}
 		} else {
 			TERM* term = malloc(sizeof(TERM));
 			term->id = token;
@@ -353,6 +414,7 @@ RULE* create_rule(char* buf) {
 	}
 	PRODUCTION* production = init_production(terms, '|');
 	list_push(rule->productions, production);
+	list_push(rules, rule);
 	return rule;
 }
 
@@ -360,10 +422,14 @@ int main(int argc, char **argv)
 {
 	FILE *simple_gram = fopen("../grammar/simple.gram", "r");
 	char buf[256];
+	LIST* rules = init_list(sizeof(RULE));
 	while(fgets(buf, sizeof(buf), simple_gram) != NULL) {
 		if (buf[0] == '#' || is_string_whitespace(buf)) {
 			continue; }
-		RULE* rule = create_rule(buf);
+		create_rule(buf, rules);
+	}
+	for(int i = 0; i < rules->size; i++) {
+		RULE* rule = list_get(rules, i);
 		print_rule(rule);
 	}
 	fclose(simple_gram);
