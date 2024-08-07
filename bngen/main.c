@@ -323,24 +323,20 @@ PRODUCTION* init_production(LIST* terms, char op) {
 }
 
 void buffer_from_braces(int* i, char* new_buffer, LIST* tokens) {
-	int j = *i;
-	char* local_token = list_get(tokens, j);
-	while(local_token[0] != '*' && local_token[0] != '|' && j < tokens->size) {
-		local_token = list_get(tokens, j);
+	int j = *i + 1;
+	int count = 1;
+	while (count > 0) {
+		char *local_token = list_get(tokens, j);
+		if(local_token[0] == '(') {
+			count++;
+		}
+		if(local_token[0] == ')') {
+			count--;
+		}
 		j++;
 	}
-	while(local_token != NULL && local_token[0] != ')') {
-		local_token = list_get(tokens, j);
-		j--;
-	}
-	printf("END AT: %s\n", local_token);
-	for(int i = 0; i < tokens->size; i++) {
-		char* token = list_get(tokens, i);
-		printf("INDEX: %d TOKEN: %s\n", i, token);
-	}
-	printf("--------------------------\n");
 	int start = *i + 1;
-	int end = j;
+	int end = j - 1;
 
 	new_buffer[0] = 'a';
 	new_buffer[1] = ':';
@@ -359,7 +355,7 @@ void buffer_from_braces(int* i, char* new_buffer, LIST* tokens) {
 	}
 	new_buffer[new_buffer_index] = '\0';
 	*i = end;
-	// printf("NEWBUF: %s\n", new_buffer);
+	printf("NEWBUF: %s\n", new_buffer);
 }
 
 RULE* create_rule(char* buf, LIST* rules) {
