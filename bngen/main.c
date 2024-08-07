@@ -254,9 +254,9 @@ void print_rule(RULE* rule) {
 			TERM* term = list_get(production->terms, j);
 			printf("%s ", term->id);
 		}
-		printf("\n");
+		printf("%d ", production->type);
 	}
-
+	printf("\n");
 }
 
 int is_special_char(char c) {
@@ -306,15 +306,54 @@ LIST* split(char* in, int index) {
 	return out;
 }
 
-PRODUCTION* init_production(LIST* terms) {
+PRODUCTION* init_production(LIST* terms, char op) {
 	PRODUCTION* production = malloc(sizeof(PRODUCTION));
-	if(terms->size > 1) {
-		production->type = ALL;
-	} else {
-		production->type = ONE;
+	switch (op) {
+		case '|': {
+					if(terms->size > 1) {
+						production->type = ALL;
+					} else {
+						production->type = ONE;
+					}
+					break;
+				  }
+		case '?': production->type = ZERO_OR_ONE; break;
 	}
 	production->terms = terms;
 	return production;
+}
+
+RULE* create_rule(char* buf) {
+	RULE* rule = malloc(sizeof(RULE));
+	rule->productions = init_list(sizeof(PRODUCTION));
+
+	int i = 0;
+	for (i = 0; i < 256; i++) {
+		if(buf[i] == ':') {
+			buf[i] = '\0';
+			break;
+		}
+		rule->name[i] = buf[i];
+	}
+
+	LIST* tokens = split(buf, i + 1);
+	LIST* terms = init_list(sizeof(TERM));
+	for(int i = 0; i < tokens->size; i++) {
+		char* token = list_get(tokens, i);
+		if(is_special_char(token[0])) {
+			PRODUCTION* production = init_production(terms, token[0]);
+			list_push(rule->productions, production);
+			terms = init_list(sizeof(TERM));
+		} else {
+			TERM* term = malloc(sizeof(TERM));
+			term->id = token;
+			term->is_terminator = isupper(token[0]);
+			list_push(terms, term);
+		}
+	}
+	PRODUCTION* production = init_production(terms, '|');
+	list_push(rule->productions, production);
+	return rule;
 }
 
 int main(int argc, char **argv)
@@ -324,36 +363,7 @@ int main(int argc, char **argv)
 	while(fgets(buf, sizeof(buf), simple_gram) != NULL) {
 		if (buf[0] == '#' || is_string_whitespace(buf)) {
 			continue; }
-
-		RULE* rule = malloc(sizeof(RULE));
-		rule->productions = init_list(sizeof(PRODUCTION));
-
-		int i = 0;
-		for (i = 0; i < 256; i++) {
-			if(buf[i] == ':') {
-				buf[i] = '\0';
-				break;
-			}
-			rule->name[i] = buf[i];
-		}
-
-		LIST* tokens = split(buf, i + 1);
-		LIST* terms = init_list(sizeof(TERM));
-		for(int i = 0; i < tokens->size; i++) {
-			char* token = list_get(tokens, i);
-			if(is_special_char(token[0])) {
-				PRODUCTION* production = init_production(terms);
-				list_push(rule->productions, production);
-				terms = init_list(sizeof(TERM));
-			} else {
-				TERM* term = malloc(sizeof(TERM));
-				term->id = token;
-				term->is_terminator = isupper(token[0]);
-				list_push(terms, term);
-			}
-		}
-		PRODUCTION* production = init_production(terms);
-		list_push(rule->productions, production);
+		RULE* rule = create_rule(buf);
 		print_rule(rule);
 	}
 	fclose(simple_gram);
