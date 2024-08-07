@@ -15,9 +15,8 @@ typedef struct {
 } RULE;
 
 typedef enum {
-	ONE,
 	ALL,
-	ONE_OF,
+	MATCH_TERM,
 	ONE_OR_MORE,
 	ZERO_OR_MORE,
 	ZERO_OR_ONE,
@@ -32,6 +31,8 @@ typedef struct {
 	char* id;
 	int is_terminator;
 } TERM;
+
+int letter = 'a';
 
 int is_string_whitespace(char *input)
 {
@@ -266,6 +267,7 @@ int is_special_char(char c) {
 		case '*':
 		case '?':
 		case '+':
+		case '$':
 		case '|': {
 			return 1;
 		}
@@ -307,16 +309,11 @@ LIST* split(char* in, int index) {
 PRODUCTION* init_production(LIST* terms, char op) {
 	PRODUCTION* production = malloc(sizeof(PRODUCTION));
 	switch (op) {
-		case '|': {
-					if(terms->size > 1) {
-						production->type = ALL;
-					} else {
-						production->type = ONE;
-					}
-					break;
-				  }
+		case '$': production->type = MATCH_TERM; break;
 		case '?': production->type = ZERO_OR_ONE; break;
+		case '+': production->type = ONE_OR_MORE; break;
 		case '*': production->type = ZERO_OR_MORE; break;
+		default: production->type = ALL; break;
 	}
 	production->terms = terms;
 	return production;
@@ -337,8 +334,8 @@ void buffer_from_braces(int* i, char* new_buffer, LIST* tokens) {
 	}
 	int start = *i + 1;
 	int end = j - 1;
-
-	new_buffer[0] = 'a';
+	new_buffer[0] = letter;
+	letter++;
 	new_buffer[1] = ':';
 	new_buffer[2] = ' ';
 	int new_buffer_index = 3;
@@ -355,7 +352,6 @@ void buffer_from_braces(int* i, char* new_buffer, LIST* tokens) {
 	}
 	new_buffer[new_buffer_index] = '\0';
 	*i = end;
-	printf("NEWBUF: %s\n", new_buffer);
 }
 
 RULE* create_rule(char* buf, LIST* rules) {
@@ -365,7 +361,7 @@ RULE* create_rule(char* buf, LIST* rules) {
 	int i = 0;
 	for (i = 0; i < 256; i++) {
 		if(buf[i] == ':') {
-			buf[i] = '\0';
+			rule->name[i] = '\0';
 			break;
 		}
 		rule->name[i] = buf[i];
@@ -378,6 +374,11 @@ RULE* create_rule(char* buf, LIST* rules) {
 		// printf("TOKEN: %s\n", token);
 		if(is_special_char(token[0])) {
 			if (token[0] == '(') {
+				if(terms->size > 0) {
+					PRODUCTION* production = init_production(terms, ' ');
+					list_push(rule->productions, production);
+					terms = init_list(sizeof(TERM));
+				}
 				char* new_buf = malloc(256 * sizeof(char));
 				buffer_from_braces(&i, new_buf, tokens);
 				RULE* rule = create_rule(new_buf, rules);
@@ -385,21 +386,12 @@ RULE* create_rule(char* buf, LIST* rules) {
 				term->id = rule->name;
 				term->is_terminator = 0;
 				list_push(terms, term);
-			}
-			if (token[0] == '*') {
-				PRODUCTION* production = init_production(terms, '*');
-				list_push(rule->productions, production);
-				terms = init_list(sizeof(TERM));
-			}
-			if (token[0] == '|') {
-				PRODUCTION* production = init_production(terms, '|');
-				list_push(rule->productions, production);
-				terms = init_list(sizeof(TERM));
-			}
-			if (token[0] == '?') {
-				PRODUCTION* production = init_production(terms, '?');
-				list_push(rule->productions, production);
-				terms = init_list(sizeof(TERM));
+			} else {
+				if(!is_string_whitespace(token) && terms->size > 0) {
+					PRODUCTION* production = init_production(terms, token[0]);
+					list_push(rule->productions, production);
+					terms = init_list(sizeof(TERM));
+				}
 			}
 		} else {
 			TERM* term = malloc(sizeof(TERM));
@@ -408,8 +400,10 @@ RULE* create_rule(char* buf, LIST* rules) {
 			list_push(terms, term);
 		}
 	}
-	PRODUCTION* production = init_production(terms, '|');
-	list_push(rule->productions, production);
+	if(terms->size > 0) {
+		PRODUCTION* production = init_production(terms, ' ');
+		list_push(rule->productions, production);
+	}
 	list_push(rules, rule);
 	return rule;
 }
