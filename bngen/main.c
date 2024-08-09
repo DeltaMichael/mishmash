@@ -11,6 +11,7 @@ typedef struct {
 
 typedef struct {
 	char name[256];
+	char uppercase[256];
 	LIST* productions;
 } RULE;
 
@@ -362,9 +363,11 @@ RULE* create_rule(char* buf, LIST* rules) {
 	for (i = 0; i < 256; i++) {
 		if(buf[i] == ':') {
 			rule->name[i] = '\0';
+			rule->uppercase[i] = '\0';
 			break;
 		}
 		rule->name[i] = buf[i];
+		rule->uppercase[i] = toupper(buf[i]);
 	}
 
 	LIST* tokens = split(buf, i + 1);
@@ -408,9 +411,8 @@ RULE* create_rule(char* buf, LIST* rules) {
 	return rule;
 }
 
-int main(int argc, char **argv)
-{
-	FILE *simple_gram = fopen("../grammar/simple.gram", "r");
+LIST* create_rules_from_file(char* path) {
+	FILE *simple_gram = fopen(path, "r");
 	char buf[256];
 	LIST* rules = init_list(sizeof(RULE));
 	while(fgets(buf, sizeof(buf), simple_gram) != NULL) {
@@ -423,5 +425,116 @@ int main(int argc, char **argv)
 		print_rule(rule);
 	}
 	fclose(simple_gram);
+	return rules;
+}
+
+void output_rule_function_defs(LIST* rules, FILE* out) {
+	for(int i = 0; i < rules->size; i++) {
+		RULE* rule = list_get(rules, i);
+		fprintf(out, "AST_EXPR* %s(PARSER* parser);\n", rule->name);
+	}
+}
+
+void output_rule_typedefs(LIST* rules, FILE* out) {
+	for(int i = 0; i < rules->size; i++) {
+		RULE* rule = list_get(rules, i);
+		fprintf(out, "\t%s,\n", rule->uppercase);
+	}
+}
+
+int main(int argc, char **argv)
+{
+	LIST* rules = create_rules_from_file("../grammar/simple.gram");
+	FILE *rule_h = fopen("out.h", "w");
+	char* rule_h_template[] = {
+		"#ifndef RULE_H",
+		"#define RULE_H",
+		"",
+		"#include \"../parser.h\"",
+		"#include \"../ast.h\"",
+		"",
+		"typedef enum {",
+		"",
+		"} AST_EXPR_TYPE;",
+		"#endif",
+	};
+	for (int i = 0; i < 10; i++) {
+		if(i == 7) {
+			output_rule_typedefs(rules, rule_h);
+		} else if (i == 9) {
+			output_rule_function_defs(rules, rule_h);
+		}
+		fprintf(rule_h, "%s\n", rule_h_template[i]);
+	}
+
+	FILE *rule_c = fopen("out.c", "w");
+
+	char* rule_c_template[] = {
+		"#include \"out.h\"",
+		"#include \"../lang/generated/token.h\"",
+		"#include <stdio.h>",
+		"#include <string.h>",
+		"#include <stdlib.h>",
+		"",
+	};
+
+	char* match_single_term_production =
+	"	if(parser_match(parser, %s)) {\n"
+	"		TOKEN* op = parser->prev;\n"
+	"		return ast_expr_init(%s, op->type, op->lexeme, NULL);\n"
+	"	}\n";
+
+	char* match_single_nonterm_production =
+	"	AST_EXPR* expr = %s(parser);\n"
+	"	if(expr != NULL) {\n"
+	"		return expr;\n"
+	"	}\n";
+
+	for (int i = 0; i < 6; i++) {
+		fprintf(rule_c, "%s\n", rule_c_template[i]);
+	}
+
+	for (int i = 0; i < rules->size; i++) {
+		RULE* rule = list_get(rules, i);
+		fprintf(rule_c, "AST_EXPR* %s(PARSER* parser) {\n", rule->name);
+		for (int j = 0; j < rule->productions->size; j++) {
+			PRODUCTION* prod = list_get(rule->productions, j);
+
+			if(prod->type == MATCH_TERM && prod->terms->size == 1) {
+				TERM* match_term = list_get(prod->terms, 0);
+				if(match_term->is_terminator) {
+					fprintf(rule_c, match_single_term_production, match_term->id, rule->uppercase);
+				} else {
+					fprintf(rule_c, match_single_nonterm_production, match_term->id);
+				}
+			}
+
+			if(prod->type == ALL && prod->terms->size > 1) {
+				int tcount = 0;
+				TERM* term = list_get(prod->terms, tcount);
+				while (term != NULL && term->is_terminator && tcount < prod->terms->size) {
+					tcount++;
+					term = list_get(prod->terms, tcount);
+				}
+				fprintf(rule_c, "\tif(parser_match_all(parser, %d", tcount);
+				for(int k = 0; k < tcount; k++) {
+					term = list_get(prod->terms, k);
+					fprintf(rule_c, ", %s", term->id);
+				}
+				char* match_all_template = "\t\tTOKEN_TYPE op_type = parser->prev->type;\n"
+											"\t\tLIST* tokens = parser_get_prev(parser, %d);\n"
+											"\t\tchar* op = concat_lexemes(tokens);\n"
+											"\t\treturn ast_expr_init(VAR_DECLR, op_type, op, NULL);\n";
+				fprintf(rule_c, ")) {\n");
+				fprintf(rule_c, match_all_template, tcount);
+				fprintf(rule_c, "\t}\n");
+			}
+
+		}
+		fprintf(rule_c, "\n}\n\n");
+	}
+
+	fclose(rule_h);
+	fclose(rule_c);
 }
 
