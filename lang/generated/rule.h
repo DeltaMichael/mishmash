@@ -4,19 +4,6 @@
 #include "../parser.h"
 #include "../ast.h"
 
-typedef enum {
-	LINE,
-	ASSIGNMENT,
-	EXPRESSION,
-	COMPARISON,
-	FACTOR,
-	TERM,
-	UNARY,
-	VAR_DECLR,
-	FUNC_CALL,
-	BASIC
-} AST_EXPR_TYPE;
-
 AST_EXPR* line(PARSER* parser);
 AST_EXPR* assignment(PARSER* parser);
 AST_EXPR* expression(PARSER* parser);

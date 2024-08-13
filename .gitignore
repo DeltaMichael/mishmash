@@ -1,3 +1,4 @@
+bngen/bngen
 build
 mishmash
 common/obj/*.o

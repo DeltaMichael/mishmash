@@ -4,8 +4,8 @@ LIBS=-lm
 ODIR=obj
 CDIR=../common
 
-$(ODIR)/%.o: %.c $(CDIR)/$(ODIR)/list.o
+$(ODIR)/%.o: %.c %.h $(CDIR)/$(ODIR)/list.o
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-bngen: main.o $(CDIR)/$(ODIR)/list.o
+bngen: main.o $(ODIR)/token_mapper.o $(CDIR)/$(ODIR)/list.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)

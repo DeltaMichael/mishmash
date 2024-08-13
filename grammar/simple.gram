@@ -1,18 +1,18 @@
 # func_def: func_sig block
 # func_sig: FUNC IDENFITIFER LEFT_BRACE (type_definition DELIMITER)* RIGHT_BRACE (COLON STATIC_TYPE)?
 # block: (DECLR (type_definition LINE_TERM)+)? BEGIN (line)+ END
-# line: assignment LINE_TERM
-# assignment: expression (OP_ASSIGN expression)?
-# expression: comparison
+line: assignment LINE_TERM
+assignment: IDENTIFIER OP_ASSIGN expression | expression
+expression: comparison
 #
 # # arithmetic
-# 1comparison: factor ((OP_LT$ OP_GT$ OP_LTE$ OP_GTE$ OP_EQ$ OP_NEQ$) factor)?
-# 1factor: term ((OP_PLUS$ OP_MINUS$) factor)?
-# 1term: unary ((OP_DIV$ OP_MULT$) term)?
+comparison: factor (OP_LT | OP_GT | OP_LTE | OP_GTE | OP_EQ | OP_NEQ) factor | factor
+factor: term (OP_PLUS | OP_MINUS) factor | term
+term: unary (OP_DIV | OP_MULT) term | unary
 #
 # # building blocks for expressions
 #
-# func_call: IDENTIFIER LEFT_BRACE (((expression COMMA)*)$ expression$)? RIGHT_BRACE
-# unary: OP_MINUS? basic
+func_call: (IDENTIFIER LEFT_BRACE (expression COMMA)* RIGHT_BRACE) | unary
+unary: OP_MINUS basic | basic
 var_declr: IDENTIFIER COLON STATIC_TYPE
-basic: (LEFT_BRACE expression RIGHT_BRACE)$ func_call$ IDENTIFIER$ LITERAL$
+basic: (LEFT_BRACE expression RIGHT_BRACE) | func_call | IDENTIFIER | LITERAL

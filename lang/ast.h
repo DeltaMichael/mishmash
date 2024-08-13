@@ -3,7 +3,19 @@
 
 #include "../common/list.h"
 #include "generated/token.h"
-#include "generated/rule.h"
+
+typedef enum {
+	LINE,
+	ASSIGNMENT,
+	EXPRESSION,
+	COMPARISON,
+	FACTOR,
+	TERM,
+	UNARY,
+	VAR_DECLR,
+	FUNC_CALL,
+	BASIC
+} AST_EXPR_TYPE;
 
 typedef struct {
 	AST_EXPR_TYPE type;
