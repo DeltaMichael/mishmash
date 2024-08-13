@@ -4,14 +4,13 @@
 line: assignment LINE_TERM
 assignment: IDENTIFIER OP_ASSIGN expression | expression
 expression: comparison
-#
-# # arithmetic
+
+# arithmetic
 comparison: factor (OP_LT | OP_GT | OP_LTE | OP_GTE | OP_EQ | OP_NEQ) factor | factor
 factor: term (OP_PLUS | OP_MINUS) factor | term
 term: unary (OP_DIV | OP_MULT) term | unary
-#
-# # building blocks for expressions
-#
+
+# building blocks for expressions
 func_call: (IDENTIFIER LEFT_BRACE (expression COMMA)* RIGHT_BRACE) | unary
 unary: OP_MINUS basic | basic
 var_declr: IDENTIFIER COLON STATIC_TYPE
