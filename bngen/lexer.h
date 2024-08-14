@@ -22,7 +22,8 @@ typedef enum {
 	T_PLUS,
 	T_QMARK,
 	T_LEFT_BRACE,
-	T_RIGHT_BRACE
+	T_RIGHT_BRACE,
+	T_LINE_TERM
 } TOKEN_TYPE;
 
 typedef struct {
