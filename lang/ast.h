@@ -25,7 +25,7 @@ typedef struct {
 	bool is_terminated;
 } AST_EXPR;
 
-AST_EXPR* ast_expr_init(AST_EXPR_TYPE type, TOKEN_TYPE op_type, char* op, LIST* children);
+AST_EXPR* ast_expr_init(AST_EXPR_TYPE type, TOKEN_TYPE op_type, char* op);
 void ast_expr_print(AST_EXPR* expr);
 
 #endif

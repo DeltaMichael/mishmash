@@ -133,6 +133,23 @@ void print_rule(RULE* rule) {
 	printf(")");
 }
 
+void gen_code(RULE* rule) {
+	if(rule->token && rule->token->type == T_RULE_NAME) {
+		printf("AST_EXPR* %s(PARSER* parser) {\n", rule->token->lexeme);
+	}
+	if(rule->children != NULL) {
+		switch(rule->op) {
+			case R_OR:
+				break;
+			case R_AND:
+				break;
+			case R_ZERO_OR_MORE:
+				break;
+		}
+	}
+	printf("}\n");
+}
+
 RULE* line(PARSER* parser) {
 	if(parser_match(parser, T_RULE_NAME)) {
 		TOKEN* name = parser->prev;

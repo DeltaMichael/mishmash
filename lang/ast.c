@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-AST_EXPR* ast_expr_init(AST_EXPR_TYPE type, TOKEN_TYPE op_type, char* op, LIST* children) {
+AST_EXPR* ast_expr_init(AST_EXPR_TYPE type, TOKEN_TYPE op_type, char* op) {
 	AST_EXPR* expr = malloc(sizeof(AST_EXPR));
 	expr->type = type;
-	expr->children = children;
+	expr->children = init_list(sizeof(AST_EXPR));
 	expr->op_type = op_type;
 	expr->op = op;
 	expr->is_terminated = false;

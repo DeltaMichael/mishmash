@@ -3,9 +3,11 @@
 
 #include "../common/list.h"
 #include "generated/token.h"
+#include "ast.h"
 
 typedef struct {
 	LIST* tokens;
+	AST_EXPR* prev_expr;
 	TOKEN* current;
 	TOKEN* prev;
 	TOKEN* next;

@@ -12,89 +12,79 @@ AST_EXPR* line(PARSER* parser) {
 }
 
 AST_EXPR* assignment(PARSER* parser) {
-	AST_EXPR* expr = expression(parser);
-
-	if (parser_match(parser, OP_ASSIGN)) {
+	if (expression(parser) && parser_match(parser, OP_ASSIGN)) {
 		TOKEN* op = parser->prev;
-
-		LIST* children = init_list(sizeof(AST_EXPR*));
-		AST_EXPR* asignee = expression(parser);
-		list_push(children, expr);
-		list_push(children, asignee);
-
-		AST_EXPR *expr = ast_expr_init(ASSIGNMENT, op->type, op->lexeme, children);
-		return expr;
+		AST_EXPR *expr = ast_expr_init(ASSIGNMENT, op->type, op->lexeme);
+		list_push(expr->children, parser->prev_expr);
+		expression(parser);
+		list_push(expr->children, parser->prev_expr);
 	}
-	return expr;
+	return parser->prev_expr;
 }
 
 AST_EXPR* expression(PARSER* parser) {
-	return comparison(parser);
+	comparison(parser);
+	return parser->prev_expr;
 }
 
 AST_EXPR* comparison(PARSER* parser) {
-	AST_EXPR* left = factor(parser);
-
-	if (parser_match_one_of(parser, 6, OP_LT, OP_GT, OP_LTE, OP_GTE, OP_EQ, OP_NEQ)) {
+	if (factor(parser) && parser_match_one_of(parser, 6, OP_LT, OP_GT, OP_LTE, OP_GTE, OP_EQ, OP_NEQ)) {
 		TOKEN* op = parser->prev;
-		AST_EXPR* right = factor(parser);
+		AST_EXPR *expr = ast_expr_init(COMPARISON, op->type, op->lexeme);
+		list_push(expr->children, parser->prev_expr);
 
-		LIST* children = init_list(sizeof(AST_EXPR*));
-		list_push(children, left);
-		list_push(children, right);
+		factor(parser);
+		list_push(expr->children, parser->prev_expr);
 
-		AST_EXPR *expr = ast_expr_init(COMPARISON, op->type, op->lexeme, children);
-		return expr;
+		parser->prev_expr = expr;
 	}
 
-	return left;
+	return parser->prev_expr;
 }
 
 AST_EXPR* factor(PARSER* parser) {
-	AST_EXPR* left = term(parser);
-
-	if (parser_match_one_of(parser, 2, OP_PLUS, OP_MINUS)) {
+	if (term(parser) && parser_match_one_of(parser, 2, OP_PLUS, OP_MINUS)) {
 		TOKEN* op = parser->prev;
-		AST_EXPR* right = factor(parser);
+		AST_EXPR *expr = ast_expr_init(FACTOR, op->type, op->lexeme);
+		list_push(expr->children, parser->prev_expr);
 
-		LIST* children = init_list(sizeof(AST_EXPR*));
-		list_push(children, left);
-		list_push(children, right);
+		term(parser);
+		list_push(expr->children, parser->prev_expr);
 
-		AST_EXPR *expr = ast_expr_init(FACTOR, op->type, op->lexeme, children);
-		return expr;
+		parser->prev_expr = expr;
 	}
-	return left;
+
+	return parser->prev_expr;
+
 }
 
 AST_EXPR* term(PARSER* parser) {
-	AST_EXPR* left = unary(parser);
-
-	if (parser_match_one_of(parser, 2, OP_MULT, OP_DIV)) {
+	if (unary(parser) && parser_match_one_of(parser, 2, OP_MULT, OP_DIV)) {
 		TOKEN* op = parser->prev;
-		AST_EXPR* right = term(parser);
+		AST_EXPR *expr = ast_expr_init(TERM, op->type, op->lexeme);
+		list_push(expr->children, parser->prev_expr);
 
-		LIST* children = init_list(sizeof(AST_EXPR*));
-		list_push(children, left);
-		list_push(children, right);
+		term(parser);
+		list_push(expr->children, parser->prev_expr);
 
-		AST_EXPR *expr = ast_expr_init(TERM, op->type, op->lexeme, children);
-		return expr;
+		parser->prev_expr = expr;
 	}
 
-	return left;
+	return parser->prev_expr;
 }
 
 AST_EXPR* unary(PARSER *parser) {
 	 if (parser_match(parser, OP_MINUS)) {
 		TOKEN *op = parser->prev;
 
-		LIST *children = init_list(sizeof(AST_EXPR *));
-		list_push(children, basic(parser));
-		AST_EXPR *expr = ast_expr_init(UNARY, op->type, op->lexeme, children);
-		return expr;
+		AST_EXPR* expr = ast_expr_init(UNARY, op->type, op->lexeme);
+		basic(parser);
+		list_push(expr->children, parser->prev_expr);
+		parser->prev_expr = expr;
+	 } else {
+	 	var_declr(parser);
 	 }
-	 return var_declr(parser);
+	 return parser->prev_expr;
 }
 
 AST_EXPR* var_declr(PARSER* parser) {
@@ -102,60 +92,48 @@ AST_EXPR* var_declr(PARSER* parser) {
 		TOKEN_TYPE op_type = parser->prev->type;
 		LIST* tokens = parser_get_prev(parser, 3);
 		char* op = concat_lexemes(tokens);
-		return ast_expr_init(VAR_DECLR, op_type, op, NULL);
+		parser->prev_expr = ast_expr_init(VAR_DECLR, op_type, op);
+	} else {
+		basic(parser);
 	}
-	return basic(parser);
+	return NULL;
 }
 
 AST_EXPR* func_call(PARSER* parser) {
 	if(parser_match_all(parser, 2, IDENTIFIER, LEFT_BRACE)) {
-		LIST* children = init_list(sizeof(AST_EXPR*));
 		LIST* tokens = parser_get_prev(parser, 2);
+		char *op = concat_lexemes(tokens);
+		AST_EXPR* expr = ast_expr_init(BASIC, IDENTIFIER, op);
 
-		AST_EXPR* expr = NULL;
-		do {
-			expr = expression(parser);
-			if (expr != NULL) list_push(children, expr);
-		} while(expr != NULL && parser_match(parser, DELIMITER));
+		while(expression(parser) && parser_match(parser, DELIMITER)) {
+			list_push(expr->children, parser->prev_expr);
+		}
 
 		parser_eat(parser, RIGHT_BRACE);
-
-		list_push(tokens, parser->prev);
-		char *op = concat_lexemes(tokens);
-
-		return ast_expr_init(BASIC, IDENTIFIER, op, children);
+		parser->prev_expr = expr;
 	}
 	return NULL;
 }
 
 AST_EXPR* basic(PARSER* parser) {
-
 	if(parser_match(parser, LEFT_BRACE)) {
 		TOKEN* op = parser->prev;
 		AST_EXPR* expr = expression(parser);
 		parser_eat(parser, RIGHT_BRACE);
 
-		LIST *children = init_list(sizeof(AST_EXPR *));
-		list_push(children, expr);
-		return ast_expr_init(BASIC, op->type, op->lexeme, children);
-	}
+		parser->prev_expr = ast_expr_init(BASIC, op->type, op->lexeme);
+		list_push(parser->prev_expr->children, expr);
+	} else if(func_call(parser)) {
 
-	AST_EXPR* expr = func_call(parser);
-	if(expr != NULL) {
-		return expr;
-	}
-
-	if(parser_match(parser, IDENTIFIER)) {
+	} else if(parser_match(parser, IDENTIFIER)) {
 		TOKEN* op = parser->prev;
-		return ast_expr_init(BASIC, op->type, op->lexeme, NULL);
-	}
-
-	if(parser_match(parser, LITERAL)) {
+		parser->prev_expr = ast_expr_init(BASIC, op->type, op->lexeme);
+	} else if(parser_match(parser, LITERAL)) {
 		TOKEN* op = parser->prev;
-		return ast_expr_init(BASIC, op->type, op->lexeme, NULL);
+		parser->prev_expr = ast_expr_init(BASIC, op->type, op->lexeme);
 	}
 
 	// TODO: Handle this when we do error handling
-	return NULL;
+	return parser->prev_expr;
 }
 
