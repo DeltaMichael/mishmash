@@ -95,12 +95,13 @@ LIST* parser_get_prev(PARSER* parser, int count) {
 	return tokens;
 }
 
-void parser_eat(PARSER* parser, TOKEN_TYPE type) {
+bool parser_eat(PARSER* parser, TOKEN_TYPE type) {
 	if(!parser_match(parser, type)) {
 		// TODO: Fix this when we introduce error handling
 		printf("Expected LINE_TERM\n");
 		exit(1);
 	}
+	return true;
 }
 
 bool parser_is_at_end(PARSER* parser) {

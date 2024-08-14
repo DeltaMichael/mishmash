@@ -116,13 +116,11 @@ AST_EXPR* func_call(PARSER* parser) {
 }
 
 AST_EXPR* basic(PARSER* parser) {
-	if(parser_match(parser, LEFT_BRACE)) {
+	if(parser_match(parser, LEFT_BRACE) && expression(parser) && parser_eat(parser, RIGHT_BRACE)) {
 		TOKEN* op = parser->prev;
-		AST_EXPR* expr = expression(parser);
-		parser_eat(parser, RIGHT_BRACE);
-
-		parser->prev_expr = ast_expr_init(BASIC, op->type, op->lexeme);
-		list_push(parser->prev_expr->children, expr);
+		AST_EXPR* expr = ast_expr_init(BASIC, op->type, op->lexeme);
+		list_push(expr->children, parser->prev_expr);
+		parser->prev_expr = expr;
 	} else if(func_call(parser)) {
 
 	} else if(parser_match(parser, IDENTIFIER)) {
