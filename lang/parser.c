@@ -98,7 +98,7 @@ LIST* parser_get_prev(PARSER* parser, int count) {
 bool parser_eat(PARSER* parser, TOKEN_TYPE type) {
 	if(!parser_match(parser, type)) {
 		// TODO: Fix this when we introduce error handling
-		printf("Expected LINE_TERM\n");
+		printf("Expected token of type %d but found \"%s\"\n", type, parser->current->lexeme);
 		exit(1);
 	}
 	return true;
@@ -110,7 +110,7 @@ bool parser_is_at_end(PARSER* parser) {
 
 void parser_parse(PARSER* parser) {
 	while(!parser_is_at_end(parser)) {
-		ast_expr_print(line(parser));
+		ast_expr_print(block(parser));
 		printf("\n");
 	}
 }

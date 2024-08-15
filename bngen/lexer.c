@@ -45,6 +45,10 @@ LEXER *lexer_init(char *source)
 	*type = T_LINE_TERM;
 	hashmap_put(lexer->map, ";", type);
 
+	type = malloc(sizeof(TOKEN_TYPE*));
+	*type = T_DOLLAR_SIGN;
+	hashmap_put(lexer->map, "$", type);
+
 	return lexer;
 }
 

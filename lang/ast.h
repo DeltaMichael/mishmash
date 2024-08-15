@@ -5,6 +5,7 @@
 #include "generated/token.h"
 
 typedef enum {
+	BLOCK,
 	LINE,
 	ASSIGNMENT,
 	EXPRESSION,

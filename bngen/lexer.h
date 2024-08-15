@@ -23,6 +23,7 @@ typedef enum {
 	T_QMARK,
 	T_LEFT_BRACE,
 	T_RIGHT_BRACE,
+	T_DOLLAR_SIGN,
 	T_LINE_TERM
 } TOKEN_TYPE;
 

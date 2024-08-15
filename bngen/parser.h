@@ -18,6 +18,7 @@ typedef enum {
 	R_ZERO_OR_MORE,
 	R_ONE_OR_MORE,
 	R_ZERO_OR_ONE,
+	R_ONE_OF,
 	R_LEAF
 } RULE_OP;
 

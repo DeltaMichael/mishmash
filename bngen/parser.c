@@ -136,83 +136,25 @@ void print_rule(RULE* rule) {
 
 void gen_code(RULE* rule) {
 	if(rule->token && rule->token->type == T_RULE_NAME) {
-		printf("AST_EXPR* %s(PARSER* parser) {\n", rule->token->lexeme);
-	}
-	if(rule->children != NULL) {
+		printf("\nAST_EXPR* %s(PARSER* parser) {\n", rule->token->lexeme);
+		printf("if(");
+		// handle first child
+		printf(") {\n");
+		// boilerplate
+		printf("} ");
 		switch(rule->op) {
-			case R_OR:
-				for (int i = 0; i < rule->children->size; i++) {
-					RULE* child = list_get(rule->children, i);
-					if(i > 0) {
-						printf("else ");
-					}
-					gen_code(child);
+			case R_OR: {
+				for(int i = 1; i < rule->children->size; i++) {
+					printf("else if(");
+					// handle subsequent children
+					printf(") {\n");
+					printf("} ");
 				}
-				break;
-			case R_AND: {
-				LIST* splits = split_children(rule);
-				for(int i = 0; i < splits->size; i++) {
-					LIST* split = list_get(splits, i);
-					RULE* child = list_get(split, 0);
-					if(child->op == R_LEAF && child->token->type == T_TERMINAL) {
-						if(i == 0) {
-							printf("if(parser_match(parser, %d", (int)split->size);
-						} else {
-							printf(" && parser_match(parser, %d", (int)split->size);
-						}
-						for(int j = 0; j < split->size; j++) {
-							RULE* child = list_get(split, j);
-							printf(", %s", child->token->lexeme);
-						}
-						printf(")");
-					}
-					else if(child->op == R_LEAF && child->token->type == T_NONTERMINAL) {
-						int j = 0;
-						if(i == 0) {
-							printf("if(%s(parser)", child->token->lexeme);
-							j++;
-						}
-						while(j < split->size) {
-							RULE* child = list_get(split, j);
-							printf(" && %s(parser)", child->token->lexeme);
-							j++;
-						}
-					} else {
-						for(int j = 0; j < split->size; j++) {
-							RULE* child = list_get(split, j);
-							gen_code(child);
-						}
-					}
-				}
-				printf(") {\n");
-				printf("\tTOKEN* op = parser->prev;\n"
-				"\tAST_EXPR* expr = ast_expr_init(%s, op->type, op->lexeme);\n"
-				"\tlist_push(expr->children, parser->prev_expr);\n"
-				"\tparser->prev_expr = expr;\n", "PLACEHOLDER");
-				printf("}\n");
 			}
-			case R_ZERO_OR_MORE:
-				break;
-			case R_ZERO_OR_ONE:
-				break;
-			case R_LEAF:
-				break;
-			case R_ONE_OR_MORE:
-				break;
-			default:
-				break;
 		}
-	} else if (rule->op == R_LEAF) {
-		if(rule->token->type == T_TERMINAL) {
-			printf("if(parser_match(parser, %s)) {\n", rule->token->lexeme);
-			printf("TOKEN* op = parser->prev;\n"
-			"parser->prev_expr = ast_expr_init(%s, op->type, op->lexeme);\n", rule->token->lexeme);
-			printf("}\n");
-		}
-		if(rule->token->type == T_NONTERMINAL) {
-			printf("if(%s(parser)) {\n", rule->token->lexeme);
-			printf("}\n");
-		}
+		printf("\n");
+		printf("return parser->prev_expr;\n");
+		printf("}\n");
 	}
 }
 
@@ -278,10 +220,11 @@ RULE* basic(PARSER* parser) {
 			RULE* rule = add(parser);
 			parser_eat(parser, T_RIGHT_BRACE);
 			if(parser_match(parser, T_STAR)) {
-				LIST* new_children = init_list(sizeof(RULE));
-				list_push(new_children, rule);
-				RULE* new_rule = init_rule(R_ZERO_OR_MORE, new_children, NULL);
-				list_push(children, new_rule);
+				rule->op = R_ZERO_OR_MORE;
+				list_push(children, rule);
+			} else if(parser_match(parser, T_DOLLAR_SIGN)) {
+				rule->op = R_ONE_OF;
+				list_push(children, rule);
 			} else {
 				list_push(children, rule);
 			}
