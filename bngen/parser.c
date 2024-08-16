@@ -111,6 +111,8 @@ void parser_parse(PARSER* parser) {
 		RULE* rule = line(parser);
 		print_rule(rule);
 		gen_code(rule);
+		printf("\n\treturn parser->prev_expr;\n");
+		printf("}\n");
 		printf("\n");
 	}
 }
@@ -137,24 +139,64 @@ void print_rule(RULE* rule) {
 void gen_code(RULE* rule) {
 	if(rule->token && rule->token->type == T_RULE_NAME) {
 		printf("\nAST_EXPR* %s(PARSER* parser) {\n", rule->token->lexeme);
-		printf("if(");
-		// handle first child
-		printf(") {\n");
-		// boilerplate
-		printf("} ");
-		switch(rule->op) {
-			case R_OR: {
-				for(int i = 1; i < rule->children->size; i++) {
-					printf("else if(");
-					// handle subsequent children
-					printf(") {\n");
-					printf("} ");
+		printf("\n");
+	}
+	switch(rule->op) {
+		case R_AND: {
+			LIST* splits = split_children(rule);
+			for(int i = 0; i < splits->size; i++) {
+				if(i > 0) {
+					printf(" && ");
+				}
+				LIST* split = list_get(splits, i);
+				RULE* rule = list_get(split, 0);
+				if(rule->op == R_LEAF && rule->token->type == T_TERMINAL) {
+					printf("parser_match_all(parser, %d", (int)split->size);
+					for(int j = 0; j < split->size; j++) {
+						RULE* rule = list_get(split, j);
+						printf(", ");
+						gen_code(rule);
+					}
+					printf(")");
+				}
+				else if(rule->op == R_LEAF && rule->token && rule->token->type == T_NONTERMINAL) {
+					gen_code(rule);
+					printf("(parser)");
+				} else {
+					gen_code(rule);
 				}
 			}
+			break;
 		}
-		printf("\n");
-		printf("return parser->prev_expr;\n");
-		printf("}\n");
+		case R_OR: {
+			for(int i = 0; i < rule->children->size; i++) {
+				if(i > 0) {
+					printf("else if(");
+				} else {
+					printf("\tif(");
+				}
+				RULE* child = list_get(rule->children, i);
+				if(child->op == R_LEAF && child->token->type == T_TERMINAL) {
+					printf("parser_match(parser, ");
+					gen_code(child);
+					printf(")");
+				}
+				else if(child->op == R_LEAF && child->token->type == T_NONTERMINAL) {
+					gen_code(child);
+					printf("(parser)");
+				} else {
+					gen_code(child);
+				}
+				// handle subsequent children
+				printf(") {\n");
+				printf("\t} ");
+			}
+			break;
+		}
+		case R_LEAF: {
+			printf("%s", rule->token->lexeme);
+			break;
+		}
 	}
 }
 

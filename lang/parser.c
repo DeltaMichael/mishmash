@@ -110,7 +110,7 @@ bool parser_is_at_end(PARSER* parser) {
 
 void parser_parse(PARSER* parser) {
 	while(!parser_is_at_end(parser)) {
-		ast_expr_print(block(parser));
+		ast_expr_print(line(parser));
 		printf("\n");
 	}
 }
