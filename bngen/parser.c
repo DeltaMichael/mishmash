@@ -210,7 +210,7 @@ RULE* gen_code(RULE* rule) {
 
 				if(rule->token && rule->token->type == T_RULE_NAME) {
 					printf("\t\tTOKEN* op = parser->prev;\n");
-					printf("\t\tparser->prev_expr = ast_expr_init(BASIC, op->type, op->lexeme);\n");
+					printf("\t\tparser->prev_expr = ast_expr_init(%s, op->type, op->lexeme);\n", rule->token->lexeme);
 				}
 				printf("\t} ");
 			}
