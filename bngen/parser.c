@@ -136,7 +136,7 @@ void print_rule(RULE* rule) {
 	printf(")");
 }
 
-void gen_code(RULE* rule) {
+RULE* gen_code(RULE* rule) {
 	if(rule->token && rule->token->type == T_RULE_NAME) {
 		printf("\nAST_EXPR* %s(PARSER* parser) {\n", rule->token->lexeme);
 		printf("\n");
@@ -145,17 +145,18 @@ void gen_code(RULE* rule) {
 		case R_AND: {
 			LIST* splits = split_children(rule);
 			for(int i = 0; i < splits->size; i++) {
-				if(i > 0) {
-					printf(" && ");
-				}
 				LIST* split = list_get(splits, i);
 				RULE* rule = list_get(split, 0);
 				if(rule->op == R_LEAF && split->size == 1 && rule->token->type == T_TERMINAL) {
+					if(i == splits->size - 1 && splits->size > 1) {
+						RULE* out = init_rule(R_AND, split, NULL);
+						return out;
+					}
 					printf("parser_match(parser, ");
 					RULE* rule = list_get(split, 0);
 					gen_code(rule);
 					printf(")");
-
+					printf(" && ");
 				}
 				else if(rule->op == R_LEAF && rule->token->type == T_TERMINAL) {
 					printf("parser_match_all(parser, %d", (int)split->size);
@@ -165,14 +166,18 @@ void gen_code(RULE* rule) {
 						gen_code(rule);
 					}
 					printf(")");
+					printf(" && ");
 				}
 				else if(rule->op == R_LEAF && rule->token && rule->token->type == T_NONTERMINAL) {
 					gen_code(rule);
 					printf("(parser)");
+					printf(" && ");
 				} else {
 					gen_code(rule);
+					printf(" && ");
 				}
 			}
+
 			break;
 		}
 		case R_OR: {
@@ -183,19 +188,30 @@ void gen_code(RULE* rule) {
 					printf("\tif(");
 				}
 				RULE* child = list_get(rule->children, i);
+				RULE* boilerplate;
 				if(child->op == R_LEAF && child->token->type == T_TERMINAL) {
 					// printf("parser_match(parser, ");
-					gen_code(child);
+					boilerplate = gen_code(child);
 					// printf(")");
 				}
 				else if(child->op == R_LEAF && child->token->type == T_NONTERMINAL) {
-					gen_code(child);
+					boilerplate = gen_code(child);
 					printf("(parser)");
 				} else {
-					gen_code(child);
+					boilerplate = gen_code(child);
 				}
 				printf(") {\n");
-				printf("\t// INSERT BOILERPLATE HERE\n");
+				if(boilerplate) {
+					printf("\t// Found boilerplate\n");
+					gen_boilerplate(boilerplate);
+				} else {
+					printf("\t// INSERT BOILERPLATE HERE\n");
+				}
+
+				if(rule->token && rule->token->type == T_RULE_NAME) {
+					printf("\t\tTOKEN* op = parser->prev;\n");
+					printf("\t\tparser->prev_expr = ast_expr_init(BASIC, op->type, op->lexeme);\n");
+				}
 				printf("\t} ");
 			}
 			break;
@@ -232,13 +248,32 @@ void gen_code(RULE* rule) {
 				}
 			}
 			break;
-
-			break;
 		}
 		case R_LEAF: {
 			printf("%s", rule->token->lexeme);
 			break;
 		}
+	}
+	return NULL;
+}
+
+void gen_boilerplate(RULE* rule) {
+	switch(rule->op) {
+		case R_AND: {
+			for(int i = 0; i < rule->children->size; i++) {
+				RULE* child = list_get(rule->children, i);
+					if(child->token->type == T_TERMINAL) {
+					printf("\t\tparser_eat(parser, ");
+					gen_boilerplate(child);
+					printf(");\n");
+				}
+			}
+			break;
+		}
+		case R_LEAF: {
+			printf("%s", rule->token->lexeme);
+			break;
+					 }
 	}
 }
 

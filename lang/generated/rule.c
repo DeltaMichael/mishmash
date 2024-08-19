@@ -103,7 +103,7 @@ AST_EXPR* func_call(PARSER* parser) {
 	if(parser_match_all(parser, 2, IDENTIFIER, LEFT_BRACE)) {
 		LIST* tokens = parser_get_prev(parser, 2);
 		char *op = concat_lexemes(tokens);
-		AST_EXPR* expr = ast_expr_init(BASIC, IDENTIFIER, op);
+		AST_EXPR* expr = ast_expr_init(FUNC_CALL, IDENTIFIER, op);
 
 		while(expression(parser) && parser_match(parser, DELIMITER)) {
 			list_push(expr->children, parser->prev_expr);

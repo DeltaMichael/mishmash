@@ -46,7 +46,8 @@ RULE* add(PARSER* parser);
 
 RULE* init_rule(RULE_OP op, LIST* children, TOKEN* token);
 void print_rule(RULE* rule);
-void gen_code(RULE* rule);
+RULE* gen_code(RULE* rule);
+void gen_boilerplate(RULE* rule);
 LIST* split_children(RULE* rule);
 #endif
 
