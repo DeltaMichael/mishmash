@@ -49,5 +49,6 @@ bool is_token(LEXER *lexer, char* start);
 TOKEN *get_token(H_MAP *token_map, char* lexeme, int line);
 bool is_terminal(char* in);
 bool is_name(char* in);
+TOKEN* clone_token(TOKEN* token);
 #endif
 

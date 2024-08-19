@@ -150,7 +150,14 @@ void gen_code(RULE* rule) {
 				}
 				LIST* split = list_get(splits, i);
 				RULE* rule = list_get(split, 0);
-				if(rule->op == R_LEAF && rule->token->type == T_TERMINAL) {
+				if(rule->op == R_LEAF && split->size == 1 && rule->token->type == T_TERMINAL) {
+					printf("parser_match(parser, ");
+					RULE* rule = list_get(split, 0);
+					gen_code(rule);
+					printf(")");
+
+				}
+				else if(rule->op == R_LEAF && rule->token->type == T_TERMINAL) {
 					printf("parser_match_all(parser, %d", (int)split->size);
 					for(int j = 0; j < split->size; j++) {
 						RULE* rule = list_get(split, j);
@@ -177,9 +184,9 @@ void gen_code(RULE* rule) {
 				}
 				RULE* child = list_get(rule->children, i);
 				if(child->op == R_LEAF && child->token->type == T_TERMINAL) {
-					printf("parser_match(parser, ");
+					// printf("parser_match(parser, ");
 					gen_code(child);
-					printf(")");
+					// printf(")");
 				}
 				else if(child->op == R_LEAF && child->token->type == T_NONTERMINAL) {
 					gen_code(child);
@@ -187,10 +194,45 @@ void gen_code(RULE* rule) {
 				} else {
 					gen_code(child);
 				}
-				// handle subsequent children
 				printf(") {\n");
+				printf("\t// INSERT BOILERPLATE HERE\n");
 				printf("\t} ");
 			}
+			break;
+		}
+		case R_ONE_OF: {
+			LIST* splits = split_children(rule);
+			for(int i = 0; i < splits->size; i++) {
+				if(i > 0) {
+					printf(" || ");
+				}
+				LIST* split = list_get(splits, i);
+				RULE* rule = list_get(split, 0);
+				if(rule->op == R_LEAF && split->size == 1 && rule->token->type == T_TERMINAL) {
+					printf("parser_match(parser, ");
+					RULE* rule = list_get(split, 0);
+					gen_code(rule);
+					printf(")");
+
+				}
+				else if(rule->op == R_LEAF && rule->token->type == T_TERMINAL) {
+					printf("parser_match_one_of(parser, %d", (int)split->size);
+					for(int j = 0; j < split->size; j++) {
+						RULE* rule = list_get(split, j);
+						printf(", ");
+						gen_code(rule);
+					}
+					printf(")");
+				}
+				else if(rule->op == R_LEAF && rule->token && rule->token->type == T_NONTERMINAL) {
+					gen_code(rule);
+					printf("(parser)");
+				} else {
+					gen_code(rule);
+				}
+			}
+			break;
+
 			break;
 		}
 		case R_LEAF: {
@@ -235,6 +277,13 @@ RULE* line(PARSER* parser) {
 		RULE* rule = add(parser);
 		rule->token = name;
 		parser_eat(parser, T_LINE_TERM);
+		if(rule->op != R_OR) {
+			LIST* children = init_list(sizeof(RULE*));
+			RULE* new_rule = init_rule(R_OR, children, rule->token);
+			list_push(children, rule);
+			rule->token = NULL;
+			return new_rule;
+		}
 		return rule;
 	}
 	return NULL;
@@ -274,9 +323,6 @@ RULE* basic(PARSER* parser) {
 			RULE* rule = init_rule(R_LEAF, NULL, parser->prev);
 			list_push(children, rule);
 		}
-	}
-	if(children->size == 1 && ((RULE*)list_get(children, 0))->op == R_LEAF) {
-		return list_get(children, 0);
 	}
 	return init_rule(R_AND, children, NULL);
 }

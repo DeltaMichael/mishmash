@@ -203,3 +203,12 @@ TOKEN *get_token(H_MAP *token_map, char* lexeme, int line)
 	return token;
 }
 
+
+TOKEN* clone_token(TOKEN* token) {
+	TOKEN* clone = malloc(sizeof(TOKEN));
+	clone->line = token->line;
+	clone->lexeme = token->lexeme;
+	clone->type = token->type;
+	return clone;
+}
+
